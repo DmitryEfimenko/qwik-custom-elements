@@ -1,4 +1,5 @@
-import { QwikAppRoot, generatedComponentTags } from './generated';
+import { generatedComponentTags } from './generated';
+import { DemoPrimaryWrapperTag, isKnownGeneratedTag } from './manual';
 
 export interface DemoWiringSnapshot {
   primaryWrapperTag: string;
@@ -8,8 +9,12 @@ export interface DemoWiringSnapshot {
 
 export function createDemoWiringSnapshot(): DemoWiringSnapshot {
   return {
-    primaryWrapperTag: QwikAppRoot,
+    primaryWrapperTag: DemoPrimaryWrapperTag,
     tagCount: generatedComponentTags.length,
     tags: generatedComponentTags,
   };
+}
+
+export function isDemoPrimaryWrapperKnown(): boolean {
+  return isKnownGeneratedTag(DemoPrimaryWrapperTag);
 }

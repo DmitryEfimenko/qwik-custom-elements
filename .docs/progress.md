@@ -341,3 +341,36 @@
 
 ### Blockers / notes for next iteration
 - Child #6 remains open; manual extension boundary documentation/example in demo context is still pending.
+
+## 2026-04-05 - PRD #1 / Child #6 - Demo app integration (task slice: manual extension boundary documentation/example)
+
+### Task completed
+- Added an explicit manual extension layer under `apps/qwik-demo/src/manual` that composes generated wrappers without editing generated files.
+- Updated demo wiring to consume the manual extension layer.
+- Added demo-level documentation clarifying generated-vs-manual responsibilities and regeneration workflow.
+
+### Key decisions
+- Kept this as a documentation + wiring slice only, without expanding runtime wrapper behavior.
+- Used `src/manual` as the canonical manual extension boundary sibling to generated output in `src/generated`.
+- Demonstrated the pattern in code (`manual/custom-wrappers.ts`) and in docs (`apps/qwik-demo/README.md`).
+
+### Key findings
+- Existing generated file headers already warned against direct edits; this slice adds concrete demo usage and location guidance.
+- PowerShell-safe multiline issue-comment pattern should be used to avoid literal `\n` output in GitHub comments.
+
+### Validation loops run
+- `npm run typecheck` (missing script at repo root)
+- `npm run test` (missing script at repo root)
+- `pnpm --filter qwik-demo run check-types` (passed)
+- `pnpm turbo run check-types` (passed)
+- `pnpm -r --if-present run test` (passed)
+
+### Files changed
+- `apps/qwik-demo/src/demo-wiring.ts`
+- `apps/qwik-demo/src/manual/custom-wrappers.ts`
+- `apps/qwik-demo/src/manual/index.ts`
+- `apps/qwik-demo/README.md`
+- `.docs/progress.md`
+
+### Blockers / notes for next iteration
+- Child #6 acceptance criteria are now satisfied by completed slices (demo wiring path, deterministic re-run stability proof, and manual extension boundary documentation/example).

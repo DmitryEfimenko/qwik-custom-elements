@@ -173,14 +173,21 @@ describe('generateFromConfig', () => {
       );
       const firstAppRootWrite = firstRun.projects[0].plannedWrites.find(
         (plannedWrite) =>
-          plannedWrite.path.endsWith(path.join('src', 'generated', 'app-root.ts')),
+          plannedWrite.path.endsWith(
+            path.join('src', 'generated', 'app-root.ts'),
+          ),
       );
       const firstCardPanelWrite = firstRun.projects[0].plannedWrites.find(
         (plannedWrite) =>
-          plannedWrite.path.endsWith(path.join('src', 'generated', 'card-panel.ts')),
+          plannedWrite.path.endsWith(
+            path.join('src', 'generated', 'card-panel.ts'),
+          ),
       );
 
-      const firstIndexDiskContent = await readFile(firstIndexWrite!.path, 'utf8');
+      const firstIndexDiskContent = await readFile(
+        firstIndexWrite!.path,
+        'utf8',
+      );
       const firstAppRootDiskContent = await readFile(
         firstAppRootWrite!.path,
         'utf8',
@@ -197,14 +204,21 @@ describe('generateFromConfig', () => {
       );
       const secondAppRootWrite = secondRun.projects[0].plannedWrites.find(
         (plannedWrite) =>
-          plannedWrite.path.endsWith(path.join('src', 'generated', 'app-root.ts')),
+          plannedWrite.path.endsWith(
+            path.join('src', 'generated', 'app-root.ts'),
+          ),
       );
       const secondCardPanelWrite = secondRun.projects[0].plannedWrites.find(
         (plannedWrite) =>
-          plannedWrite.path.endsWith(path.join('src', 'generated', 'card-panel.ts')),
+          plannedWrite.path.endsWith(
+            path.join('src', 'generated', 'card-panel.ts'),
+          ),
       );
 
-      const secondIndexDiskContent = await readFile(secondIndexWrite!.path, 'utf8');
+      const secondIndexDiskContent = await readFile(
+        secondIndexWrite!.path,
+        'utf8',
+      );
       const secondAppRootDiskContent = await readFile(
         secondAppRootWrite!.path,
         'utf8',
@@ -214,9 +228,9 @@ describe('generateFromConfig', () => {
         'utf8',
       );
 
-      expect(secondRun.projects[0].plannedWrites.map((write) => write.path)).toEqual(
-        firstRun.projects[0].plannedWrites.map((write) => write.path),
-      );
+      expect(
+        secondRun.projects[0].plannedWrites.map((write) => write.path),
+      ).toEqual(firstRun.projects[0].plannedWrites.map((write) => write.path));
       expect(secondIndexWrite!.content).toBe(firstIndexWrite!.content);
       expect(secondAppRootWrite!.content).toBe(firstAppRootWrite!.content);
       expect(secondCardPanelWrite!.content).toBe(firstCardPanelWrite!.content);
