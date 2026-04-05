@@ -18,6 +18,7 @@ export interface GeneratorConfig {
 
 export interface CliArgs {
   configPath?: string;
+  projectIds: string[];
   help: boolean;
 }
 
@@ -52,4 +53,5 @@ export interface GenerationResult {
 
 export interface GenerateOptions {
   cwd?: string;
+  targetProjectIds?: string[];
 }

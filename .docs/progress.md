@@ -374,3 +374,42 @@
 
 ### Blockers / notes for next iteration
 - Child #6 acceptance criteria are now satisfied by completed slices (demo wiring path, deterministic re-run stability proof, and manual extension boundary documentation/example).
+
+## 2026-04-05 - PRD #1 / Child #7 - Safe planning and project targeting guards (task slice: unknown project targeting hard-fail)
+
+### Task completed
+- Added explicit CLI project targeting support via repeated `--project <id>` and `--project=<id>` flags in core CLI parsing.
+- Wired targeted project ids into generation execution options.
+- Added deterministic hard-fail behavior when a requested project id does not exist in config.
+- Added focused tests for both CLI parsing and unknown-target failure diagnostics.
+
+### Key decisions
+- Kept scope to one smallest tracer-bullet slice from child #7: unknown project id targeting semantics only.
+- Preserved current single-project guardrail behavior and did not broaden into output-boundary or collision checks in this iteration.
+- Used deterministic error code/message contract for missing target ids: `QCE_PROJECT_TARGET_UNKNOWN`.
+
+### Key findings
+- Child issue selection for `next` resolved to #7 as the lowest-number open child unblocked by closed issue #5.
+- Existing generator pipeline could accept target filtering with minimal surface-area changes by extending `GenerateOptions`.
+- Root `npm run typecheck`, `npm run test`, and `npm run format` remain unavailable in this repository; pnpm workspace equivalents are still required.
+
+### Validation loops run
+- `pnpm --filter @qwik-custom-elements/core run test` (RED expected failure first, then GREEN pass)
+- `pnpm --filter @qwik-custom-elements/core run check-types` (passed)
+- `npm run typecheck` (missing script at repo root)
+- `npm run test` (missing script at repo root)
+- `pnpm turbo run check-types` (workspace equivalent; passed)
+- `pnpm -r --if-present run test` (workspace equivalent; passed)
+- `npm run format` (missing script at repo root)
+- `pnpm -r --if-present run format` (no format scripts present in workspace packages)
+
+### Files changed
+- `packages/core/src/types.ts`
+- `packages/core/src/cli.ts`
+- `packages/core/src/generator.ts`
+- `packages/core/src/__tests__/config.test.ts`
+- `packages/core/src/__tests__/generator.test.ts`
+- `.docs/progress.md`
+
+### Blockers / notes for next iteration
+- Child #7 remains open; remaining slices include workspace-boundary output path rejection and cross-project output-collision guards.

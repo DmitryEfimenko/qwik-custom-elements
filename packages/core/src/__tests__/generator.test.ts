@@ -332,4 +332,29 @@ describe('generateFromConfig', () => {
       });
     });
   });
+
+  it('fails with deterministic diagnostics when targeted project id does not exist', async () => {
+    await withTempDir(async (tempDir) => {
+      await writeFile(
+        path.join(tempDir, 'custom-elements.json'),
+        JSON.stringify({
+          modules: [{ declarations: [{ tagName: 'app-root' }] }],
+        }),
+        'utf8',
+      );
+
+      const config = createSingleProjectConfig(tempDir, true);
+
+      await expect(
+        generateFromConfig(config, {
+          cwd: tempDir,
+          targetProjectIds: ['unknown-project'],
+        }),
+      ).rejects.toMatchObject({
+        code: 'QCE_PROJECT_TARGET_UNKNOWN',
+        message:
+          'Unknown project id "unknown-project" requested via CLI targeting.',
+      });
+    });
+  });
 });

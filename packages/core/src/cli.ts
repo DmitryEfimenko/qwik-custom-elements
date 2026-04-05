@@ -6,6 +6,7 @@ import type { CliArgs } from './types.js';
 
 export function parseCliArgs(argv: string[]): CliArgs {
   let configPath: string | undefined;
+  const projectIds: string[] = [];
   let help = false;
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -43,13 +44,40 @@ export function parseCliArgs(argv: string[]): CliArgs {
       continue;
     }
 
+    if (arg === '--project') {
+      const nextValue = argv[index + 1];
+      if (!nextValue || nextValue.startsWith('-')) {
+        throw new ConfigValidationError(
+          'QCE_CLI_INVALID_ARG',
+          'Flag "--project" requires a project id value.',
+        );
+      }
+
+      projectIds.push(nextValue);
+      index += 1;
+      continue;
+    }
+
+    if (arg.startsWith('--project=')) {
+      const candidate = arg.slice('--project='.length);
+      if (!candidate) {
+        throw new ConfigValidationError(
+          'QCE_CLI_INVALID_ARG',
+          'Flag "--project" requires a project id value.',
+        );
+      }
+
+      projectIds.push(candidate);
+      continue;
+    }
+
     throw new ConfigValidationError(
       'QCE_CLI_INVALID_ARG',
       `Unknown CLI argument "${arg}".`,
     );
   }
 
-  return { configPath, help };
+  return { configPath, projectIds, help };
 }
 
 export async function runCli(argv: string[]): Promise<number> {
@@ -58,9 +86,10 @@ export async function runCli(argv: string[]): Promise<number> {
 
     if (args.help) {
       process.stdout.write(
-        'Usage: qwik-custom-elements [--config <path>] [--help]\n' +
+        'Usage: qwik-custom-elements [--config <path>] [--project <id>] [--help]\n' +
           'Default config path: ./qwik-custom-elements.config.json\n' +
-          'Optional JS config path: ./qwik-custom-elements.config.js\n',
+          'Optional JS config path: ./qwik-custom-elements.config.js\n' +
+          'Project targeting: repeat --project to run a subset by id.\n',
       );
       return 0;
     }
@@ -68,7 +97,9 @@ export async function runCli(argv: string[]): Promise<number> {
     const { configPath, config } = await loadGeneratorConfig({
       configPath: args.configPath,
     });
-    const generationResult = await generateFromConfig(config);
+    const generationResult = await generateFromConfig(config, {
+      targetProjectIds: args.projectIds,
+    });
     const mode = generationResult.dryRun ? 'dry-run' : 'write';
     const totalWrites = generationResult.projects.reduce(
       (sum, project) => sum + project.plannedWrites.length,

@@ -120,7 +120,24 @@ describe('parseCliArgs', () => {
   it('parses --config and --help', () => {
     expect(parseCliArgs(['--config', './some.config.js', '--help'])).toEqual({
       configPath: './some.config.js',
+      projectIds: [],
       help: true,
+    });
+  });
+
+  it('parses repeated --project flags in deterministic order', () => {
+    expect(
+      parseCliArgs([
+        '--project',
+        'demo',
+        '--project=stencil',
+        '--project',
+        'lit',
+      ]),
+    ).toEqual({
+      configPath: undefined,
+      projectIds: ['demo', 'stencil', 'lit'],
+      help: false,
     });
   });
 
