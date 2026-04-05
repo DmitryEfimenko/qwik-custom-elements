@@ -1,8 +1,8 @@
 ---
-name: "PRD Task Runner"
-description: "Complete exactly one GitHub child issue under a PRD parent issue, while updating local progress.md."
+name: 'PRD Task Runner'
+description: 'Complete exactly one GitHub child issue under a PRD parent issue, while updating local progress.md.'
 argument-hint: 'Path to progress.md, parent PRD issue number/URL, child issue number (or "next"), and constraints'
-agent: "agent"
+agent: 'agent'
 ---
 
 You are working on a repository where PRD implementation work is tracked in GitHub issues.
