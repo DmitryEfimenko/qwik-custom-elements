@@ -307,3 +307,37 @@
 ### Blockers / notes for next iteration
 - Child #6 remains open; this slice only proves generated-wrapper consumption wiring.
 - Next logical child #6 slices are deterministic re-run/no-diff verification and documenting/manual extension boundary in demo context.
+
+## 2026-04-05 - PRD #1 / Child #6 - Demo app integration (task slice: deterministic re-run/no-diff proof)
+
+### Task completed
+- Added deterministic re-run coverage for generated wrapper artifacts in core generator tests.
+- New test executes non-dry-run generation twice for the same input and verifies byte-stable outputs for:
+	- planned write path ordering
+	- planned write content
+	- generated files on disk (`index.ts`, `app-root.ts`, `card-panel.ts`)
+
+### Key decisions
+- Kept this as a single narrow tracer-bullet task focused only on commit-stability proof.
+- Used integration-style testing through the public `generateFromConfig(...)` API rather than implementation-level helpers.
+- Did not expand runtime wrapper shape or adapter behavior in this slice to preserve issue #6 scope discipline.
+
+### Key findings
+- Existing generator behavior was already deterministic; this slice adds explicit regression protection for repeat-run stability.
+- Root `npm run typecheck` and `npm run test` remain unavailable and continue to require pnpm workspace equivalents.
+
+### Validation loops run
+- `pnpm --filter @qwik-custom-elements/core run test` (passed)
+- `pnpm --filter @qwik-custom-elements/core run check-types` (passed)
+- `npm run typecheck` (missing script at repo root)
+- `npm run test` (missing script at repo root)
+- `pnpm --filter qwik-demo run check-types` (passed)
+- `pnpm turbo run check-types` (passed)
+- `pnpm -r --if-present run test` (passed)
+
+### Files changed
+- `packages/core/src/__tests__/generator.test.ts`
+- `.docs/progress.md`
+
+### Blockers / notes for next iteration
+- Child #6 remains open; manual extension boundary documentation/example in demo context is still pending.

@@ -134,6 +134,23 @@ If the task is complete, close the original GitHub issue.
 
 If the task is not complete, leave a comment on the GitHub issue with what was done.
 
+When posting multiline comments from PowerShell, do not embed `\n` inside a normal quoted string because it is sent literally.
+Use a here-string (or `--body-file`) so GitHub receives actual newlines.
+
+PowerShell-safe pattern:
+
+```powershell
+$body = @"
+Completed task slice for child issue #X.
+
+Delivered:
+- Item 1
+- Item 2
+"@
+
+gh issue comment 6 --repo DmitryEfimenko/qwik-custom-elements --body "$body"
+```
+
 # FINAL RULES
 
 ONLY WORK ON A SINGLE TASK.

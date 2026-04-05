@@ -143,6 +143,89 @@ describe('generateFromConfig', () => {
     });
   });
 
+  it('keeps generated files byte-stable across repeated write runs', async () => {
+    await withTempDir(async (tempDir) => {
+      await writeFile(
+        path.join(tempDir, 'custom-elements.json'),
+        JSON.stringify(
+          {
+            modules: [
+              {
+                declarations: [
+                  { tagName: 'card-panel' },
+                  { tagName: 'app-root' },
+                ],
+              },
+            ],
+          },
+          null,
+          2,
+        ),
+        'utf8',
+      );
+
+      const config = createSingleProjectConfig(tempDir);
+      const firstRun = await generateFromConfig(config, { cwd: tempDir });
+
+      const firstIndexWrite = firstRun.projects[0].plannedWrites.find(
+        (plannedWrite) =>
+          plannedWrite.path.endsWith(path.join('src', 'generated', 'index.ts')),
+      );
+      const firstAppRootWrite = firstRun.projects[0].plannedWrites.find(
+        (plannedWrite) =>
+          plannedWrite.path.endsWith(path.join('src', 'generated', 'app-root.ts')),
+      );
+      const firstCardPanelWrite = firstRun.projects[0].plannedWrites.find(
+        (plannedWrite) =>
+          plannedWrite.path.endsWith(path.join('src', 'generated', 'card-panel.ts')),
+      );
+
+      const firstIndexDiskContent = await readFile(firstIndexWrite!.path, 'utf8');
+      const firstAppRootDiskContent = await readFile(
+        firstAppRootWrite!.path,
+        'utf8',
+      );
+      const firstCardPanelDiskContent = await readFile(
+        firstCardPanelWrite!.path,
+        'utf8',
+      );
+
+      const secondRun = await generateFromConfig(config, { cwd: tempDir });
+      const secondIndexWrite = secondRun.projects[0].plannedWrites.find(
+        (plannedWrite) =>
+          plannedWrite.path.endsWith(path.join('src', 'generated', 'index.ts')),
+      );
+      const secondAppRootWrite = secondRun.projects[0].plannedWrites.find(
+        (plannedWrite) =>
+          plannedWrite.path.endsWith(path.join('src', 'generated', 'app-root.ts')),
+      );
+      const secondCardPanelWrite = secondRun.projects[0].plannedWrites.find(
+        (plannedWrite) =>
+          plannedWrite.path.endsWith(path.join('src', 'generated', 'card-panel.ts')),
+      );
+
+      const secondIndexDiskContent = await readFile(secondIndexWrite!.path, 'utf8');
+      const secondAppRootDiskContent = await readFile(
+        secondAppRootWrite!.path,
+        'utf8',
+      );
+      const secondCardPanelDiskContent = await readFile(
+        secondCardPanelWrite!.path,
+        'utf8',
+      );
+
+      expect(secondRun.projects[0].plannedWrites.map((write) => write.path)).toEqual(
+        firstRun.projects[0].plannedWrites.map((write) => write.path),
+      );
+      expect(secondIndexWrite!.content).toBe(firstIndexWrite!.content);
+      expect(secondAppRootWrite!.content).toBe(firstAppRootWrite!.content);
+      expect(secondCardPanelWrite!.content).toBe(firstCardPanelWrite!.content);
+      expect(secondIndexDiskContent).toBe(firstIndexDiskContent);
+      expect(secondAppRootDiskContent).toBe(firstAppRootDiskContent);
+      expect(secondCardPanelDiskContent).toBe(firstCardPanelDiskContent);
+    });
+  });
+
   it('fails with deterministic code when CEM source cannot be read', async () => {
     await withTempDir(async (tempDir) => {
       const config = createSingleProjectConfig(tempDir, true);
