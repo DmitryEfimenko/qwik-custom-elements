@@ -482,3 +482,38 @@
 
 ### Blockers / notes for next iteration
 - Child #7 acceptance criteria are now satisfied by completed slices: unknown target id hard-fail, outside-workspace output path rejection, and resolved output collision detection.
+
+## 2026-04-05 - PRD #1 / Child #8 - Multi-project sequential execution path (task slice: remove single-project guardrail and execute all selected projects)
+
+### Task completed
+- Enabled multi-project generation execution in core by removing the single-project restriction and allowing all selected projects to run through the existing sequential loop.
+- Added focused coverage proving two projects execute in deterministic id order in a single generation run.
+
+### Key decisions
+- Kept this as one smallest tracer-bullet slice for child #8: execution enablement + deterministic ordering proof only.
+- Preserved existing planning-time safety checks (workspace-boundary and output-collision validation) and existing project-target filtering behavior.
+- Deferred issue #8 remaining acceptance criteria decomposition to subsequent slices if needed (for example explicit CLI non-zero assertion coverage).
+
+### Key findings
+- Existing implementation already sorted selected projects by id and executed sequentially; the primary blocker was the explicit `QCE_GENERATION_UNSUPPORTED` guard.
+- Removing the guard was sufficient to unlock multi-project sequential behavior while preserving deterministic output ordering.
+- Root `npm run typecheck`, `npm run test`, and `npm run format` remain unavailable; pnpm workspace equivalents are required.
+
+### Validation loops run
+- `pnpm --filter @qwik-custom-elements/core run test` (RED expected failure first, then GREEN pass)
+- `pnpm --filter @qwik-custom-elements/core run check-types` (passed)
+- `npm run typecheck` (missing script at repo root)
+- `npm run test` (missing script at repo root)
+- `pnpm turbo run check-types` (workspace equivalent; passed)
+- `pnpm -r --if-present run test` (workspace equivalent; passed)
+- `npm run format` (missing script at repo root)
+- `pnpm -r --if-present run format` (no format scripts present in workspace packages)
+
+### Files changed
+- `packages/core/src/generator.ts`
+- `packages/core/src/__tests__/generator.test.ts`
+- `.docs/progress.md`
+
+### Blockers / notes for next iteration
+- Child #8 remains open; this slice completed deterministic multi-project sequential execution enablement.
+- Next logical child #8 slice is explicit CLI-level non-zero semantics coverage for mixed multi-project success/failure scenarios.

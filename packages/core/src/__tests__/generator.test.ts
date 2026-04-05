@@ -358,6 +358,54 @@ describe('generateFromConfig', () => {
     });
   });
 
+  it('executes multiple projects sequentially in deterministic id order', async () => {
+    await withTempDir(async (tempDir) => {
+      await writeFile(
+        path.join(tempDir, 'custom-elements-a.json'),
+        JSON.stringify({
+          modules: [{ declarations: [{ tagName: 'alpha-card' }] }],
+        }),
+        'utf8',
+      );
+      await writeFile(
+        path.join(tempDir, 'custom-elements-z.json'),
+        JSON.stringify({
+          modules: [{ declarations: [{ tagName: 'zeta-card' }] }],
+        }),
+        'utf8',
+      );
+
+      const config: GeneratorConfig = {
+        dryRun: true,
+        projects: [
+          {
+            id: 'z-project',
+            adapter: 'stencil',
+            adapterPackage: '@qwik-custom-elements/adapter-stencil',
+            source: './custom-elements-z.json',
+            outDir: './src/generated/z',
+          },
+          {
+            id: 'a-project',
+            adapter: 'stencil',
+            adapterPackage: '@qwik-custom-elements/adapter-stencil',
+            source: './custom-elements-a.json',
+            outDir: './src/generated/a',
+          },
+        ],
+      };
+
+      const result = await generateFromConfig(config, { cwd: tempDir });
+
+      expect(result.projects.map((project) => project.projectId)).toEqual([
+        'a-project',
+        'z-project',
+      ]);
+      expect(result.projects[0].componentTags).toEqual(['alpha-card']);
+      expect(result.projects[1].componentTags).toEqual(['zeta-card']);
+    });
+  });
+
   it('rejects output paths that resolve outside the workspace root', async () => {
     await withTempDir(async (tempDir) => {
       await writeFile(

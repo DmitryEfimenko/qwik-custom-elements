@@ -48,13 +48,6 @@ export async function generateFromConfig(
 
   validateProjectOutputSafety(sortedProjects, cwd);
 
-  if (sortedProjects.length !== 1) {
-    throw new GenerationError(
-      'QCE_GENERATION_UNSUPPORTED',
-      'Current generator slice supports exactly one project.',
-    );
-  }
-
   const projectResults: GenerationProjectResult[] = [];
 
   for (const project of sortedProjects) {
