@@ -30,3 +30,26 @@ export interface LoadedConfig {
   configPath: string;
   config: GeneratorConfig;
 }
+
+export interface PlannedWrite {
+  path: string;
+  content: string;
+}
+
+export interface GenerationProjectResult {
+  projectId: string;
+  sourcePath: string;
+  outDirPath: string;
+  componentTags: string[];
+  plannedWrites: PlannedWrite[];
+  wroteFiles: boolean;
+}
+
+export interface GenerationResult {
+  dryRun: boolean;
+  projects: GenerationProjectResult[];
+}
+
+export interface GenerateOptions {
+  cwd?: string;
+}

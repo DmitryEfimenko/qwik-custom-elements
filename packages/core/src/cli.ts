@@ -1,6 +1,7 @@
 import { pathToFileURL } from 'node:url';
 
 import { ConfigValidationError, loadGeneratorConfig } from './config.js';
+import { GenerationError, generateFromConfig } from './generator.js';
 import type { CliArgs } from './types.js';
 
 export function parseCliArgs(argv: string[]): CliArgs {
@@ -67,13 +68,20 @@ export async function runCli(argv: string[]): Promise<number> {
     const { configPath, config } = await loadGeneratorConfig({
       configPath: args.configPath,
     });
+    const generationResult = await generateFromConfig(config);
+    const mode = generationResult.dryRun ? 'dry-run' : 'write';
+    const totalWrites = generationResult.projects.reduce(
+      (sum, project) => sum + project.plannedWrites.length,
+      0,
+    );
+
     process.stdout.write(
-      `Config loaded from ${configPath}. Projects: ${config.projects.length}.\n`,
+      `Generation completed (${mode}) from ${configPath}. Projects: ${generationResult.projects.length}. Planned writes: ${totalWrites}.\n`,
     );
 
     return 0;
   } catch (error) {
-    if (error instanceof ConfigValidationError) {
+    if (error instanceof ConfigValidationError || error instanceof GenerationError) {
       process.stderr.write(`${error.code}: ${error.message}\n`);
       return 1;
     }

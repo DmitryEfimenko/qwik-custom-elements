@@ -122,3 +122,47 @@
 ### Blockers / notes for next iteration
 - No blocker for child issue #4 acceptance criteria after this task.
 - Next logical iteration is child issue #5 (single-project CEM generation engine) building on this CLI/config foundation.
+
+## 2026-04-05 - PRD #1 / Child #5 - Core single-project CEM generation engine (task slice: deterministic dry-run planning + single-file emit)
+
+### Task completed
+- Implemented a first end-to-end single-project CEM generation slice in `packages/core`:
+	- Parses CEM source and extracts deduplicated component tags.
+	- Produces deterministic planned writes (sorted tags, stable file content).
+	- Supports dry-run mode that reports writes without mutating the filesystem.
+	- Writes a generated `index.ts` file for non-dry-run execution.
+- Wired CLI to invoke generation after config validation and report deterministic run output.
+- Added focused tests for dry-run non-mutation behavior, deterministic output content, write mode emission, and deterministic read-failure error coding.
+
+### Key decisions
+- Kept scope to one smallest tracer-bullet task for child #5: single-project generation path with one generated output file (`index.ts`).
+- Deferred broader wrapper-shape generation, per-component file fan-out, and deeper adapter integration to follow-up tasks.
+- Enforced strict current slice guardrail: generator rejects multi-project configs for now with explicit unsupported error code.
+
+### Key findings
+- Root `npm run typecheck` and `npm run test` remain unavailable; package/workspace pnpm equivalents are required for feedback loops.
+- Existing core test patterns (`withTempDir`) were sufficient to validate both dry-run and write-mode behavior with deterministic assertions.
+- Stable provenance headers without timestamps are now present in generated content for this slice.
+
+### Validation loops run
+- `npm run typecheck` (missing script at repo root)
+- `npm run test` (missing script at repo root)
+- `pnpm --filter @qwik-custom-elements/core run check-types` (closest equivalent; passed)
+- `pnpm --filter @qwik-custom-elements/core run test` (closest equivalent; passed)
+- `pnpm turbo run check-types` (workspace equivalent; passed)
+- `pnpm -r --if-present run test` (workspace equivalent; passed)
+
+### Files changed
+- `packages/core/src/types.ts`
+- `packages/core/src/generator.ts`
+- `packages/core/src/index.ts`
+- `packages/core/src/cli.ts`
+- `packages/core/src/__tests__/generator.test.ts`
+- `.docs/progress.md`
+
+### Blockers / notes for next iteration
+- Child #5 is not fully complete yet; this iteration implemented one foundational task only.
+- Next logical tasks in child #5 are:
+	- expand generated output beyond a single tag index into wrapper artifacts,
+	- tighten CEM schema/shape diagnostics,
+	- evaluate safe transition from single-project-only guardrail to broader planning path.
