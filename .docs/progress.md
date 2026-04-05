@@ -200,3 +200,34 @@
 
 ### Blockers / notes for next iteration
 - Child #5 is still open; remaining high-value scope is stronger CEM shape diagnostics and possibly broadening wrapper output details.
+
+## 2026-04-05 - PRD #1 / Child #5 - Core single-project CEM generation engine (task slice: deterministic malformed CEM diagnostics)
+
+### Task completed
+- Added deterministic CEM shape validation for the generation input contract.
+- Generator now fails fast with `QCE_CEM_INVALID_SHAPE` when the manifest does not include a required `modules` array.
+- Added focused test coverage for malformed CEM shape diagnostics.
+
+### Key decisions
+- Kept this slice intentionally narrow to one concrete invalid-shape contract (`modules` must be an array) instead of introducing broad schema validation in one step.
+- Preserved existing behavior for valid manifests and all previous deterministic dry-run/write semantics.
+
+### Key findings
+- Prior behavior silently accepted malformed CEM files and generated an empty wrapper index, which hides input issues.
+- A deterministic validation error improves fail-fast behavior and keeps diagnostics CI-friendly.
+
+### Validation loops run
+- `pnpm --filter @qwik-custom-elements/core run test` (RED expected failure first, then GREEN pass)
+- `pnpm --filter @qwik-custom-elements/core run check-types` (passed)
+- `npm run typecheck` (missing script at repo root)
+- `npm run test` (missing script at repo root)
+- `pnpm turbo run check-types` (workspace equivalent; passed)
+- `pnpm -r --if-present run test` (workspace equivalent; passed)
+
+### Files changed
+- `packages/core/src/generator.ts`
+- `packages/core/src/__tests__/generator.test.ts`
+- `.docs/progress.md`
+
+### Blockers / notes for next iteration
+- Child #5 remains open; next smallest diagnostics step is validating component declaration shape beyond the top-level `modules` guard.

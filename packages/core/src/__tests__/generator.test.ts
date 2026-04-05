@@ -18,7 +18,10 @@ async function withTempDir(
   }
 }
 
-function createSingleProjectConfig(tempDir: string, dryRun = false): GeneratorConfig {
+function createSingleProjectConfig(
+  tempDir: string,
+  dryRun = false,
+): GeneratorConfig {
   return {
     dryRun,
     projects: [
@@ -70,8 +73,11 @@ describe('generateFromConfig', () => {
       const indexWrite = result.projects[0].plannedWrites.find((plannedWrite) =>
         plannedWrite.path.endsWith(path.join('src', 'generated', 'index.ts')),
       );
-      const buttonWrite = result.projects[0].plannedWrites.find((plannedWrite) =>
-        plannedWrite.path.endsWith(path.join('src', 'generated', 'a-button.ts')),
+      const buttonWrite = result.projects[0].plannedWrites.find(
+        (plannedWrite) =>
+          plannedWrite.path.endsWith(
+            path.join('src', 'generated', 'a-button.ts'),
+          ),
       );
       const cardWrite = result.projects[0].plannedWrites.find((plannedWrite) =>
         plannedWrite.path.endsWith(path.join('src', 'generated', 'z-card.ts')),
@@ -83,10 +89,18 @@ describe('generateFromConfig', () => {
       expect(indexWrite?.content).toContain(
         'export const generatedComponentTags = ["a-button","z-card"] as const;',
       );
-      expect(indexWrite?.content).toContain("export { QwikAButton } from './a-button';");
-      expect(indexWrite?.content).toContain("export { QwikZCard } from './z-card';");
-      expect(buttonWrite?.content).toContain('export const QwikAButton = "a-button" as const;');
-      expect(cardWrite?.content).toContain('export const QwikZCard = "z-card" as const;');
+      expect(indexWrite?.content).toContain(
+        "export { QwikAButton } from './a-button';",
+      );
+      expect(indexWrite?.content).toContain(
+        "export { QwikZCard } from './z-card';",
+      );
+      expect(buttonWrite?.content).toContain(
+        'export const QwikAButton = "a-button" as const;',
+      );
+      expect(cardWrite?.content).toContain(
+        'export const QwikZCard = "z-card" as const;',
+      );
 
       await expect(readFile(indexWrite!.path, 'utf8')).rejects.toThrow();
       await expect(readFile(buttonWrite!.path, 'utf8')).rejects.toThrow();
@@ -98,18 +112,26 @@ describe('generateFromConfig', () => {
     await withTempDir(async (tempDir) => {
       await writeFile(
         path.join(tempDir, 'custom-elements.json'),
-        JSON.stringify({ modules: [{ declarations: [{ tagName: 'app-root' }] }] }),
+        JSON.stringify({
+          modules: [{ declarations: [{ tagName: 'app-root' }] }],
+        }),
         'utf8',
       );
 
-      const result = await generateFromConfig(createSingleProjectConfig(tempDir), {
-        cwd: tempDir,
-      });
+      const result = await generateFromConfig(
+        createSingleProjectConfig(tempDir),
+        {
+          cwd: tempDir,
+        },
+      );
       const indexWrite = result.projects[0].plannedWrites.find((plannedWrite) =>
         plannedWrite.path.endsWith(path.join('src', 'generated', 'index.ts')),
       );
-      const wrapperWrite = result.projects[0].plannedWrites.find((plannedWrite) =>
-        plannedWrite.path.endsWith(path.join('src', 'generated', 'app-root.ts')),
+      const wrapperWrite = result.projects[0].plannedWrites.find(
+        (plannedWrite) =>
+          plannedWrite.path.endsWith(
+            path.join('src', 'generated', 'app-root.ts'),
+          ),
       );
       const indexDiskContent = await readFile(indexWrite!.path, 'utf8');
       const wrapperDiskContent = await readFile(wrapperWrite!.path, 'utf8');
@@ -125,14 +147,36 @@ describe('generateFromConfig', () => {
     await withTempDir(async (tempDir) => {
       const config = createSingleProjectConfig(tempDir, true);
 
-      await expect(generateFromConfig(config, { cwd: tempDir })).rejects.toMatchObject(
-        {
-          code: 'QCE_CEM_READ_FAILED',
-        },
+      await expect(
+        generateFromConfig(config, { cwd: tempDir }),
+      ).rejects.toMatchObject({
+        code: 'QCE_CEM_READ_FAILED',
+      });
+      await expect(
+        generateFromConfig(config, { cwd: tempDir }),
+      ).rejects.toBeInstanceOf(GenerationError);
+    });
+  });
+
+  it('fails with deterministic code when CEM shape is invalid', async () => {
+    await withTempDir(async (tempDir) => {
+      await writeFile(
+        path.join(tempDir, 'custom-elements.json'),
+        JSON.stringify({ schemaVersion: '1.0.0' }),
+        'utf8',
       );
-      await expect(generateFromConfig(config, { cwd: tempDir })).rejects.toBeInstanceOf(
-        GenerationError,
-      );
+
+      const config = createSingleProjectConfig(tempDir, true);
+
+      await expect(
+        generateFromConfig(config, { cwd: tempDir }),
+      ).rejects.toMatchObject({
+        code: 'QCE_CEM_INVALID_SHAPE',
+        message:
+          'CEM at ' +
+          path.join(tempDir, 'custom-elements.json') +
+          ' must include a "modules" array.',
+      });
     });
   });
 });
