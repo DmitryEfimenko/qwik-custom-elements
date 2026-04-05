@@ -166,3 +166,37 @@
 	- expand generated output beyond a single tag index into wrapper artifacts,
 	- tighten CEM schema/shape diagnostics,
 	- evaluate safe transition from single-project-only guardrail to broader planning path.
+
+## 2026-04-05 - PRD #1 / Child #5 - Core single-project CEM generation engine (task slice: deterministic wrapper artifact emission)
+
+### Task completed
+- Expanded single-project generation output from index-only planning to wrapper artifacts per component tag.
+- Generator now plans and emits:
+	- `index.ts` with deterministic tag list plus stable re-exports for generated wrappers.
+	- one wrapper file per normalized component tag (`<tag>.ts`) with stable provenance header and deterministic symbol naming.
+- Preserved dry-run contract: planned writes are fully reported while no files are written to disk.
+- Added/updated tests to validate deterministic multi-file plans, dry-run non-mutation for all planned files, and non-dry-run file emission for both index and wrapper outputs.
+
+### Key decisions
+- Kept wrapper artifact shape intentionally minimal for this slice (const exports) to focus on acceptance criteria around end-to-end generation, determinism, and dry-run behavior.
+- Kept existing single-project guardrail unchanged to avoid broadening into multi-project execution scope in child #5.
+
+### Key findings
+- TDD loop caught the exact gap immediately: prior implementation only generated one planned file, while issue intent required wrapper artifacts.
+- Deterministic wrapper naming (`Qwik` + PascalCase tag) gives a stable scaffold for later adapter/runtime integration without introducing adapter coupling yet.
+
+### Validation loops run
+- `pnpm --filter @qwik-custom-elements/core run test` (RED expected failure first, then GREEN pass)
+- `pnpm --filter @qwik-custom-elements/core run check-types` (passed)
+- `npm run typecheck` (missing script at repo root)
+- `npm run test` (missing script at repo root)
+- `pnpm turbo run check-types` (workspace equivalent; passed)
+- `pnpm -r --if-present run test` (workspace equivalent; passed)
+
+### Files changed
+- `packages/core/src/generator.ts`
+- `packages/core/src/__tests__/generator.test.ts`
+- `.docs/progress.md`
+
+### Blockers / notes for next iteration
+- Child #5 is still open; remaining high-value scope is stronger CEM shape diagnostics and possibly broadening wrapper output details.
