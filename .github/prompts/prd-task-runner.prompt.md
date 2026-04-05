@@ -1,8 +1,8 @@
 ---
-name: 'PRD Task Runner'
-description: 'Complete exactly one GitHub child issue under a PRD parent issue, while updating local progress.md.'
+name: "PRD Task Runner"
+description: "Complete exactly one GitHub child issue under a PRD parent issue, while updating local progress.md."
 argument-hint: 'Path to progress.md, parent PRD issue number/URL, child issue number (or "next"), and constraints'
-agent: 'agent'
+agent: "agent"
 ---
 
 You are working on a repository where PRD implementation work is tracked in GitHub issues.
@@ -102,6 +102,14 @@ Before considering the task complete, run the feedback loops:
 - `npm run test` to run the tests
 
 This repository may use `pnpm`. If `npm run typecheck` / `npm run test` do not exist, run the closest equivalents (for example `pnpm build.types` for typechecking).
+
+# FORMATTING
+
+Before committing, format all changed files.
+
+- First try the repo-standard formatter command (for example `npm run format` or `pnpm format`) if it exists.
+- If no project-wide formatter script exists, run a file-targeted formatter for only the changed files.
+- Re-check git diff after formatting and include those formatting changes in the same commit.
 
 # PROGRESS
 
