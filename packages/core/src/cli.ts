@@ -81,7 +81,10 @@ export async function runCli(argv: string[]): Promise<number> {
 
     return 0;
   } catch (error) {
-    if (error instanceof ConfigValidationError || error instanceof GenerationError) {
+    if (
+      error instanceof ConfigValidationError ||
+      error instanceof GenerationError
+    ) {
       process.stderr.write(`${error.code}: ${error.message}\n`);
       return 1;
     }
