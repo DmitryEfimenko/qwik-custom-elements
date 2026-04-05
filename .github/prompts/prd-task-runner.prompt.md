@@ -116,7 +116,9 @@ After completing, update `progress.md`:
 
 # COMMIT
 
-Ask the user if they are ready to commit the changes for this issue. If they say yes, create a commit with a clear message.
+Ask the user if they are ready to commit the changes for this issue. If they say yes, create a commit with a clear message referencing the issue.
+
+Consider the task complete ONLY once the commit is made.
 
 # THE ISSUE
 
