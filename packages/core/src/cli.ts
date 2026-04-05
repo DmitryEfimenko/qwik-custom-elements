@@ -118,6 +118,14 @@ export async function runCli(argv: string[]): Promise<number> {
       0,
     );
 
+    if (config.parallel === true) {
+      for (const project of generationResult.projects) {
+        process.stdout.write(
+          `[project:${project.projectId}] mode=${mode} plannedWrites=${project.plannedWrites.length}\n`,
+        );
+      }
+    }
+
     process.stdout.write(
       `Generation completed (${mode}) from ${configPath}. Projects: ${generationResult.projects.length}. Planned writes: ${totalWrites}.\n`,
     );

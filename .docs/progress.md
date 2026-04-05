@@ -627,3 +627,42 @@
 
 ### Blockers / notes for next iteration
 - Child #9 remains open; buffered per-project logs printed after completion in deterministic order are still pending.
+
+## 2026-04-05 - PRD #1 / Child #9 - Multi-project parallel execution path (task slice: buffered deterministic per-project log output)
+
+### Task completed
+- Added CLI output behavior for parallel runs that prints per-project buffered log lines after generation completes.
+- Ensured log emission order is deterministic by using generation results already sorted by project id.
+- Added focused CLI-level regression coverage that validates:
+	- per-project log lines are emitted for parallel mode,
+	- `a-project` logs print before `z-project` logs,
+	- the final run summary prints after per-project lines.
+
+### Key decisions
+- Kept this slice narrowly scoped to output behavior in `runCli(...)` without broad generator refactors.
+- Emitted per-project logs only for parallel mode to align with issue #9 buffered-log acceptance criteria.
+- Used stable one-line per-project summaries (`[project:<id>] mode=<mode> plannedWrites=<n>`) for deterministic CI-friendly output.
+
+### Key findings
+- Existing deterministic project ordering from generation orchestration made this slice straightforward to verify at CLI output level.
+- Root `npm run typecheck`, `npm run test`, and `npm run format` remain unavailable; pnpm workspace equivalents continue to be required.
+
+### Validation loops run
+- `pnpm --filter @qwik-custom-elements/core run test` (RED expected failure first, then GREEN pass)
+- `npm run typecheck` (missing script at repo root)
+- `npm run test` (missing script at repo root)
+- `pnpm --filter @qwik-custom-elements/core run check-types` (closest equivalent; passed)
+- `pnpm --filter @qwik-custom-elements/core run test` (closest equivalent; passed)
+- `pnpm turbo run check-types` (workspace equivalent; passed)
+- `pnpm -r --if-present run test` (workspace equivalent; passed)
+- `npm run format` (missing script at repo root)
+- `pnpm -r --if-present run format` (no format scripts present in workspace packages)
+
+### Files changed
+- `packages/core/src/cli.ts`
+- `packages/core/src/__tests__/config.test.ts`
+- `.docs/progress.md`
+
+### Blockers / notes for next iteration
+- Child #9 acceptance criteria appear satisfied by completed slices (explicit parallel mode, deterministic buffered per-project logs, aggregate failure reporting with non-zero semantics).
+- Next step is verifying and closing child issue #9 if no additional scope is required.

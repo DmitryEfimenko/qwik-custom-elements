@@ -229,4 +229,89 @@ describe('runCli', () => {
       }
     });
   });
+
+  it('prints buffered per-project logs in deterministic id order for parallel runs', async () => {
+    await withTempDir(async (tempDir) => {
+      const previousCwd = process.cwd();
+      process.chdir(tempDir);
+
+      try {
+        const configPath = path.join(
+          tempDir,
+          'qwik-custom-elements.config.json',
+        );
+
+        await writeFile(
+          './custom-elements-a.json',
+          JSON.stringify({
+            modules: [{ declarations: [{ tagName: 'alpha-card' }] }],
+          }),
+          'utf8',
+        );
+        await writeFile(
+          './custom-elements-z.json',
+          JSON.stringify({
+            modules: [{ declarations: [{ tagName: 'zeta-card' }] }],
+          }),
+          'utf8',
+        );
+
+        await writeFile(
+          configPath,
+          JSON.stringify(
+            {
+              parallel: true,
+              dryRun: true,
+              projects: [
+                {
+                  id: 'z-project',
+                  adapter: 'stencil',
+                  adapterPackage: '@qwik-custom-elements/adapter-stencil',
+                  source: './custom-elements-z.json',
+                  outDir: './generated/z',
+                },
+                {
+                  id: 'a-project',
+                  adapter: 'stencil',
+                  adapterPackage: '@qwik-custom-elements/adapter-stencil',
+                  source: './custom-elements-a.json',
+                  outDir: './generated/a',
+                },
+              ],
+            },
+            null,
+            2,
+          ),
+          'utf8',
+        );
+
+        const stdoutSpy = vi
+          .spyOn(process.stdout, 'write')
+          .mockImplementation(() => true);
+        vi.spyOn(process.stderr, 'write').mockImplementation(() => true);
+
+        const exitCode = await runCli(['--config', configPath]);
+
+        expect(exitCode).toBe(0);
+
+        const output = stdoutSpy.mock.calls.map(([chunk]) => String(chunk));
+        const aProjectLineIndex = output.findIndex((line) =>
+          line.includes('[project:a-project]'),
+        );
+        const zProjectLineIndex = output.findIndex((line) =>
+          line.includes('[project:z-project]'),
+        );
+        const summaryLineIndex = output.findIndex((line) =>
+          line.includes('Generation completed (dry-run)'),
+        );
+
+        expect(aProjectLineIndex).toBeGreaterThanOrEqual(0);
+        expect(zProjectLineIndex).toBeGreaterThanOrEqual(0);
+        expect(aProjectLineIndex).toBeLessThan(zProjectLineIndex);
+        expect(summaryLineIndex).toBeGreaterThan(zProjectLineIndex);
+      } finally {
+        process.chdir(previousCwd);
+      }
+    });
+  });
 });
