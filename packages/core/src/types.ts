@@ -19,6 +19,7 @@ export interface GeneratorConfig {
 export interface CliArgs {
   configPath?: string;
   projectIds: string[];
+  parallel: boolean;
   help: boolean;
 }
 

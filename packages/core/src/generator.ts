@@ -48,17 +48,38 @@ export async function generateFromConfig(
 
   validateProjectOutputSafety(sortedProjects, cwd);
 
-  const projectResults: GenerationProjectResult[] = [];
-
-  for (const project of sortedProjects) {
-    const result = await generateProject(project, cwd, config.dryRun === true);
-    projectResults.push(result);
-  }
+  const projectResults =
+    config.parallel === true
+      ? await Promise.all(
+          sortedProjects.map((project) =>
+            generateProject(project, cwd, config.dryRun === true),
+          ),
+        )
+      : await generateProjectsSequentially(
+          sortedProjects,
+          cwd,
+          config.dryRun === true,
+        );
 
   return {
     dryRun: config.dryRun === true,
     projects: projectResults,
   };
+}
+
+async function generateProjectsSequentially(
+  projects: GeneratorProject[],
+  cwd: string,
+  dryRun: boolean,
+): Promise<GenerationProjectResult[]> {
+  const projectResults: GenerationProjectResult[] = [];
+
+  for (const project of projects) {
+    const result = await generateProject(project, cwd, dryRun);
+    projectResults.push(result);
+  }
+
+  return projectResults;
 }
 
 async function generateProject(

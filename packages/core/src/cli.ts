@@ -7,6 +7,7 @@ import type { CliArgs } from './types.js';
 export function parseCliArgs(argv: string[]): CliArgs {
   let configPath: string | undefined;
   const projectIds: string[] = [];
+  let parallel = false;
   let help = false;
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -71,13 +72,18 @@ export function parseCliArgs(argv: string[]): CliArgs {
       continue;
     }
 
+    if (arg === '--parallel') {
+      parallel = true;
+      continue;
+    }
+
     throw new ConfigValidationError(
       'QCE_CLI_INVALID_ARG',
       `Unknown CLI argument "${arg}".`,
     );
   }
 
-  return { configPath, projectIds, help };
+  return { configPath, projectIds, parallel, help };
 }
 
 export async function runCli(argv: string[]): Promise<number> {
@@ -86,9 +92,10 @@ export async function runCli(argv: string[]): Promise<number> {
 
     if (args.help) {
       process.stdout.write(
-        'Usage: qwik-custom-elements [--config <path>] [--project <id>] [--help]\n' +
+        'Usage: qwik-custom-elements [--config <path>] [--project <id>] [--parallel] [--help]\n' +
           'Default config path: ./qwik-custom-elements.config.json\n' +
           'Optional JS config path: ./qwik-custom-elements.config.js\n' +
+          'Parallel mode: add --parallel to run selected projects concurrently.\n' +
           'Project targeting: repeat --project to run a subset by id.\n',
       );
       return 0;
@@ -97,6 +104,11 @@ export async function runCli(argv: string[]): Promise<number> {
     const { configPath, config } = await loadGeneratorConfig({
       configPath: args.configPath,
     });
+
+    if (args.parallel) {
+      config.parallel = true;
+    }
+
     const generationResult = await generateFromConfig(config, {
       targetProjectIds: args.projectIds,
     });

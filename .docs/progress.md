@@ -553,3 +553,41 @@
 ### Blockers / notes for next iteration
 - Child #8 may now be complete against stated acceptance criteria (sequential multi-project execution, deterministic order, and non-zero on project failure).
 - Next logical step is either close child #8 after verification or continue to child #9.
+
+## 2026-04-05 - PRD #1 / Child #9 - Multi-project parallel execution path (task slice: explicit parallel mode enablement + execution branch)
+
+### Task completed
+- Added explicit CLI support for parallel mode via `--parallel`.
+- Wired CLI parallel mode into generation config for execution.
+- Added parallel execution branch in core generation orchestrator while preserving deterministic project result ordering by sorted id.
+- Added focused test coverage for CLI `--parallel` parsing and parallel-mode generation path behavior.
+
+### Key decisions
+- Kept scope to one smallest tracer-bullet slice for child #9: explicit mode enablement and execution-path wiring only.
+- Preserved deterministic project ordering by continuing to sort selected projects before execution and collecting parallel results in sorted input order.
+- Deferred buffered per-project log emission and aggregate-all-failures reporting details to subsequent child #9 slices.
+
+### Key findings
+- `parallel` config support already existed in config schema; the main gap was CLI flag plumbing and generation orchestration branching.
+- Root `npm run typecheck`, `npm run test`, and `npm run format` remain unavailable; pnpm workspace equivalents continue to be required.
+
+### Validation loops run
+- `npm run typecheck` (missing script at repo root)
+- `npm run test` (missing script at repo root)
+- `pnpm --filter @qwik-custom-elements/core run check-types` (closest equivalent; passed)
+- `pnpm --filter @qwik-custom-elements/core run test` (closest equivalent; passed)
+- `pnpm turbo run check-types` (workspace equivalent; passed)
+- `pnpm -r --if-present run test` (workspace equivalent; passed)
+- `npm run format` (missing script at repo root)
+- `pnpm -r --if-present run format` (no format scripts present in workspace packages)
+
+### Files changed
+- `packages/core/src/types.ts`
+- `packages/core/src/cli.ts`
+- `packages/core/src/generator.ts`
+- `packages/core/src/__tests__/config.test.ts`
+- `packages/core/src/__tests__/generator.test.ts`
+- `.docs/progress.md`
+
+### Blockers / notes for next iteration
+- Child #9 remains open; remaining acceptance-criteria slices include buffered deterministic post-run log printing and aggregate failure reporting that includes all failed projects.

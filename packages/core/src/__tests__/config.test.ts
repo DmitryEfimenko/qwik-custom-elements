@@ -121,6 +121,7 @@ describe('parseCliArgs', () => {
     expect(parseCliArgs(['--config', './some.config.js', '--help'])).toEqual({
       configPath: './some.config.js',
       projectIds: [],
+      parallel: false,
       help: true,
     });
   });
@@ -137,6 +138,16 @@ describe('parseCliArgs', () => {
     ).toEqual({
       configPath: undefined,
       projectIds: ['demo', 'stencil', 'lit'],
+      parallel: false,
+      help: false,
+    });
+  });
+
+  it('parses --parallel as an explicit mode flag', () => {
+    expect(parseCliArgs(['--project', 'demo', '--parallel'])).toEqual({
+      configPath: undefined,
+      projectIds: ['demo'],
+      parallel: true,
       help: false,
     });
   });
