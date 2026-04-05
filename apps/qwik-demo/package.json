@@ -4,8 +4,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "node -e \"console.log('qwik-demo build noop')\"",
-    "check-types": "node -e \"console.log('qwik-demo check-types noop')\"",
+    "build": "pnpm run check-types",
+    "check-types": "tsc -p tsconfig.json --noEmit",
     "dev": "node -e \"console.log('qwik-demo dev noop')\""
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
   }
 }

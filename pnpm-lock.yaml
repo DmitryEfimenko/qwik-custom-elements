@@ -12,7 +12,11 @@ importers:
         specifier: ^2.9.3
         version: 2.9.3
 
-  apps/qwik-demo: {}
+  apps/qwik-demo:
+    devDependencies:
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
 
   packages/adapter-lit: {}
 

@@ -264,3 +264,46 @@
 
 ### Blockers / notes for next iteration
 - Child #5 remains open; a natural next slice is deciding whether empty component extraction (no tags after validation) should hard-fail with a dedicated code.
+
+## 2026-04-05 - PRD #1 / Child #6 - Demo app wiring (task slice: generated wrapper consumption path)
+
+### Task completed
+- Added the first verifiable demo-wiring path where the demo app consumes generated wrappers from `src/generated`.
+- Added a root generation config and a small CEM fixture source so wrapper generation can target the demo app deterministically.
+- Generated and committed demo wrapper artifacts (`index.ts` + per-tag wrapper files) from core CLI output.
+
+### Key decisions
+- Kept this as the smallest tracer-bullet task for child #6: prove wiring, not full app/runtime integration.
+- Used TypeScript typecheck in `apps/qwik-demo` as the verification surface for importability of generated wrappers.
+- Introduced a minimal demo-facing module (`demo-wiring.ts`) that imports generated exports and exposes a stable snapshot function.
+
+### Key findings
+- Demo app previously had only no-op scripts and no source tree, so a minimal TS scaffold was required to make wiring verifiable.
+- Existing core generation output shape (`index.ts` re-exports + per-tag wrappers) is sufficient for direct demo imports.
+- Root `npm run typecheck` and `npm run test` remain unavailable; pnpm workspace equivalents are still required.
+
+### Validation loops run
+- `pnpm install`
+- `pnpm --filter @qwik-custom-elements/core run build`
+- `node packages/core/dist/cli.js`
+- `npm run typecheck` (missing script at repo root)
+- `npm run test` (missing script at repo root)
+- `pnpm --filter qwik-demo run check-types` (passed)
+- `pnpm turbo run check-types` (passed)
+- `pnpm -r --if-present run test` (passed)
+
+### Files changed
+- `apps/qwik-demo/package.json`
+- `apps/qwik-demo/tsconfig.json`
+- `apps/qwik-demo/src/demo-wiring.ts`
+- `apps/qwik-demo/src/generated/index.ts`
+- `apps/qwik-demo/src/generated/app-root.ts`
+- `apps/qwik-demo/src/generated/card-panel.ts`
+- `packages/test-stencil-lib/custom-elements.json`
+- `qwik-custom-elements.config.json`
+- `pnpm-lock.yaml`
+- `.docs/progress.md`
+
+### Blockers / notes for next iteration
+- Child #6 remains open; this slice only proves generated-wrapper consumption wiring.
+- Next logical child #6 slices are deterministic re-run/no-diff verification and documenting/manual extension boundary in demo context.

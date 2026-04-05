@@ -1,0 +1,12 @@
+{
+  "projects": [
+    {
+      "id": "demo",
+      "adapter": "stencil",
+      "adapterPackage": "@qwik-custom-elements/adapter-stencil",
+      "source": "./packages/test-stencil-lib/custom-elements.json",
+      "outDir": "./apps/qwik-demo/src/generated",
+      "cleanOutput": true
+    }
+  ]
+}
