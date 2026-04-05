@@ -1,0 +1,10 @@
+{
+  "name": "@qwik-custom-elements/core",
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "node -e \"console.log('core build noop')\"",
+    "check-types": "node -e \"console.log('core check-types noop')\"",
+    "dev": "node -e \"console.log('core dev noop')\""
+  }
+}

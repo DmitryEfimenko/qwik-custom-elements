@@ -1,0 +1,11 @@
+{
+  "name": "qwik-demo",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node -e \"console.log('qwik-demo build noop')\"",
+    "check-types": "node -e \"console.log('qwik-demo check-types noop')\"",
+    "dev": "node -e \"console.log('qwik-demo dev noop')\""
+  }
+}
