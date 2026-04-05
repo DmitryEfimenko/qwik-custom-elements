@@ -50,10 +50,10 @@ export async function generateFromConfig(
 
   const projectResults =
     config.parallel === true
-      ? await Promise.all(
-          sortedProjects.map((project) =>
-            generateProject(project, cwd, config.dryRun === true),
-          ),
+      ? await generateProjectsInParallel(
+          sortedProjects,
+          cwd,
+          config.dryRun === true,
         )
       : await generateProjectsSequentially(
           sortedProjects,
@@ -77,6 +77,53 @@ async function generateProjectsSequentially(
   for (const project of projects) {
     const result = await generateProject(project, cwd, dryRun);
     projectResults.push(result);
+  }
+
+  return projectResults;
+}
+
+async function generateProjectsInParallel(
+  projects: GeneratorProject[],
+  cwd: string,
+  dryRun: boolean,
+): Promise<GenerationProjectResult[]> {
+  const settledResults = await Promise.allSettled(
+    projects.map((project) => generateProject(project, cwd, dryRun)),
+  );
+
+  const projectResults: GenerationProjectResult[] = [];
+  const failures: Array<{ projectId: string; error: unknown }> = [];
+
+  for (let index = 0; index < settledResults.length; index += 1) {
+    const settledResult = settledResults[index];
+    const project = projects[index];
+
+    if (settledResult.status === 'fulfilled') {
+      projectResults.push(settledResult.value);
+      continue;
+    }
+
+    failures.push({
+      projectId: project.id,
+      error: settledResult.reason,
+    });
+  }
+
+  if (failures.length > 0) {
+    const details = failures
+      .map(({ projectId, error }) => {
+        const errorCode =
+          error instanceof GenerationError ? error.code : 'QCE_UNEXPECTED';
+        const errorMessage = toErrorMessage(error);
+
+        return `${projectId} (${errorCode}): ${errorMessage}`;
+      })
+      .join(' | ');
+
+    throw new GenerationError(
+      'QCE_PARALLEL_PROJECT_FAILURES',
+      `Parallel generation failed for ${failures.length} project(s): ${details}`,
+    );
   }
 
   return projectResults;

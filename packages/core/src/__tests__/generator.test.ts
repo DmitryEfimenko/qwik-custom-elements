@@ -455,6 +455,63 @@ describe('generateFromConfig', () => {
     });
   });
 
+  it('aggregates all project failures in parallel mode', async () => {
+    await withTempDir(async (tempDir) => {
+      await writeFile(
+        path.join(tempDir, 'custom-elements-valid.json'),
+        JSON.stringify({
+          modules: [{ declarations: [{ tagName: 'alpha-card' }] }],
+        }),
+        'utf8',
+      );
+
+      const config: GeneratorConfig = {
+        dryRun: true,
+        parallel: true,
+        projects: [
+          {
+            id: 'b-missing-project',
+            adapter: 'stencil',
+            adapterPackage: '@qwik-custom-elements/adapter-stencil',
+            source: './custom-elements-missing-b.json',
+            outDir: './src/generated/b',
+          },
+          {
+            id: 'a-valid-project',
+            adapter: 'stencil',
+            adapterPackage: '@qwik-custom-elements/adapter-stencil',
+            source: './custom-elements-valid.json',
+            outDir: './src/generated/a',
+          },
+          {
+            id: 'c-missing-project',
+            adapter: 'stencil',
+            adapterPackage: '@qwik-custom-elements/adapter-stencil',
+            source: './custom-elements-missing-c.json',
+            outDir: './src/generated/c',
+          },
+        ],
+      };
+
+      await expect(
+        generateFromConfig(config, { cwd: tempDir }),
+      ).rejects.toMatchObject({
+        code: 'QCE_PARALLEL_PROJECT_FAILURES',
+        message: expect.stringContaining('b-missing-project'),
+      });
+      await expect(
+        generateFromConfig(config, { cwd: tempDir }),
+      ).rejects.toMatchObject({
+        message: expect.stringContaining('c-missing-project'),
+      });
+      await expect(
+        generateFromConfig(config, { cwd: tempDir }),
+      ).rejects.toMatchObject({
+        message: expect.stringContaining('QCE_CEM_READ_FAILED'),
+      });
+    });
+  });
+
   it('rejects output paths that resolve outside the workspace root', async () => {
     await withTempDir(async (tempDir) => {
       await writeFile(

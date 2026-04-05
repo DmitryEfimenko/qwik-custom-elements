@@ -591,3 +591,39 @@
 
 ### Blockers / notes for next iteration
 - Child #9 remains open; remaining acceptance-criteria slices include buffered deterministic post-run log printing and aggregate failure reporting that includes all failed projects.
+
+## 2026-04-05 - PRD #1 / Child #9 - Multi-project parallel execution path (task slice: aggregate failure reporting across parallel projects)
+
+### Task completed
+- Switched parallel project execution from fail-fast `Promise.all(...)` behavior to aggregate `Promise.allSettled(...)` handling.
+- Added deterministic aggregated failure reporting when one or more parallel projects fail.
+- Added focused regression coverage proving multiple parallel project failures are reported together with stable project-id diagnostics.
+
+### Key decisions
+- Kept this slice narrow to one acceptance-criteria concern: aggregate failure reporting in parallel mode.
+- Preserved deterministic ordering by iterating settled results using already sorted project-id input order.
+- Used a dedicated deterministic aggregate error code (`QCE_PARALLEL_PROJECT_FAILURES`) while retaining per-project underlying error codes in the message payload.
+
+### Key findings
+- Previous parallel implementation masked additional failures by surfacing only the first rejected project.
+- `Promise.allSettled(...)` enabled full-failure visibility without changing sequential execution behavior.
+- Root `npm run typecheck`, `npm run test`, and `npm run format` remain unavailable; pnpm workspace equivalents continue to be required.
+
+### Validation loops run
+- `pnpm --filter @qwik-custom-elements/core run test` (RED expected failure first, then GREEN pass)
+- `npm run typecheck` (missing script at repo root)
+- `npm run test` (missing script at repo root)
+- `pnpm --filter @qwik-custom-elements/core run check-types` (closest equivalent; passed)
+- `pnpm --filter @qwik-custom-elements/core run test` (closest equivalent; passed)
+- `pnpm turbo run check-types` (workspace equivalent; passed)
+- `pnpm -r --if-present run test` (workspace equivalent; passed)
+- `npm run format` (missing script at repo root)
+- `pnpm -r --if-present run format` (no format scripts present in workspace packages)
+
+### Files changed
+- `packages/core/src/generator.ts`
+- `packages/core/src/__tests__/generator.test.ts`
+- `.docs/progress.md`
+
+### Blockers / notes for next iteration
+- Child #9 remains open; buffered per-project logs printed after completion in deterministic order are still pending.
