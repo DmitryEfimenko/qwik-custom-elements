@@ -517,3 +517,39 @@
 ### Blockers / notes for next iteration
 - Child #8 remains open; this slice completed deterministic multi-project sequential execution enablement.
 - Next logical child #8 slice is explicit CLI-level non-zero semantics coverage for mixed multi-project success/failure scenarios.
+
+## 2026-04-05 - PRD #1 / Child #8 - Multi-project sequential execution path (task slice: CLI non-zero semantics coverage for mixed multi-project outcomes)
+
+### Task completed
+- Added CLI-level regression coverage proving non-zero exit semantics when any project fails during a multi-project run.
+- Added a focused `runCli` test that executes with two projects where one source is intentionally missing and asserts:
+	- exit code is `1`
+	- deterministic error reporting includes `QCE_CEM_READ_FAILED`
+
+### Key decisions
+- Kept this slice test-focused to validate issue #8 acceptance criteria without expanding runtime behavior scope.
+- Used `process.chdir(tempDir)` in the test harness so CLI relative-path resolution matches real invocation behavior.
+- Preserved existing generation/orchestration behavior and only added coverage for documented non-zero semantics.
+
+### Key findings
+- CLI path resolution is anchored to process cwd; test harness must control cwd for deterministic fixture execution.
+- Existing implementation already satisfies non-zero behavior when any sequential project fails; this slice adds explicit contract protection.
+- Root `npm run typecheck`, `npm run test`, and `npm run format` remain unavailable; pnpm workspace equivalents are required.
+
+### Validation loops run
+- `pnpm --filter @qwik-custom-elements/core run test` (RED expected failure first due to test harness cwd assumption, then GREEN pass)
+- `pnpm --filter @qwik-custom-elements/core run check-types` (passed)
+- `npm run typecheck` (missing script at repo root)
+- `npm run test` (missing script at repo root)
+- `pnpm turbo run check-types` (workspace equivalent; passed)
+- `pnpm -r --if-present run test` (workspace equivalent; passed)
+- `npm run format` (missing script at repo root)
+- `pnpm -r --if-present run format` (no format scripts present in workspace packages)
+
+### Files changed
+- `packages/core/src/__tests__/config.test.ts`
+- `.docs/progress.md`
+
+### Blockers / notes for next iteration
+- Child #8 may now be complete against stated acceptance criteria (sequential multi-project execution, deterministic order, and non-zero on project failure).
+- Next logical step is either close child #8 after verification or continue to child #9.

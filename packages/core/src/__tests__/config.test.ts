@@ -2,9 +2,9 @@ import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { parseCliArgs } from '../cli.js';
+import { parseCliArgs, runCli } from '../cli.js';
 import { ConfigValidationError, loadGeneratorConfig } from '../config.js';
 
 async function withTempDir(
@@ -146,5 +146,76 @@ describe('parseCliArgs', () => {
     expect(() => parseCliArgs(['--wat'])).toThrowError(
       'Unknown CLI argument "--wat".',
     );
+  });
+});
+
+describe('runCli', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('returns non-zero when one project fails in a multi-project run', async () => {
+    await withTempDir(async (tempDir) => {
+      const previousCwd = process.cwd();
+      process.chdir(tempDir);
+
+      try {
+        const validSourcePath = './custom-elements-valid.json';
+        const missingSourcePath = './custom-elements-missing.json';
+        const configPath = path.join(
+          tempDir,
+          'qwik-custom-elements.config.json',
+        );
+
+        await writeFile(
+          validSourcePath,
+          JSON.stringify({
+            modules: [{ declarations: [{ tagName: 'app-root' }] }],
+          }),
+          'utf8',
+        );
+
+        await writeFile(
+          configPath,
+          JSON.stringify(
+            {
+              projects: [
+                {
+                  id: 'a-project',
+                  adapter: 'stencil',
+                  adapterPackage: '@qwik-custom-elements/adapter-stencil',
+                  source: validSourcePath,
+                  outDir: './generated-a',
+                },
+                {
+                  id: 'b-project',
+                  adapter: 'stencil',
+                  adapterPackage: '@qwik-custom-elements/adapter-stencil',
+                  source: missingSourcePath,
+                  outDir: './generated-b',
+                },
+              ],
+            },
+            null,
+            2,
+          ),
+          'utf8',
+        );
+
+        const stderrSpy = vi
+          .spyOn(process.stderr, 'write')
+          .mockImplementation(() => true);
+        vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+
+        const exitCode = await runCli(['--config', configPath]);
+
+        expect(exitCode).toBe(1);
+        expect(stderrSpy).toHaveBeenCalledWith(
+          expect.stringContaining('QCE_CEM_READ_FAILED'),
+        );
+      } finally {
+        process.chdir(previousCwd);
+      }
+    });
   });
 });
