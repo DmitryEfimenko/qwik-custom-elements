@@ -413,3 +413,37 @@
 
 ### Blockers / notes for next iteration
 - Child #7 remains open; remaining slices include workspace-boundary output path rejection and cross-project output-collision guards.
+
+## 2026-04-05 - PRD #1 / Child #7 - Safe planning and project targeting guards (task slice: workspace-boundary output path rejection)
+
+### Task completed
+- Added deterministic planning-time guard that rejects project output paths resolving outside the workspace root.
+- Added focused generator test coverage proving outside-workspace `outDir` fails before generation proceeds.
+
+### Key decisions
+- Kept this slice to one acceptance-criteria task only: output workspace-boundary safety.
+- Implemented the guard in generation orchestration path (before source read/write operations) to preserve fail-fast safety behavior.
+- Used dedicated deterministic error code/message contract: `QCE_OUTPUT_OUTSIDE_WORKSPACE`.
+
+### Key findings
+- Existing flow allowed `outDir` values like `../outside-generated` to escape the workspace and plan writes in parent directories.
+- Relative-path boundary checks via `path.relative(workspaceRoot, resolvedOutDir)` were sufficient for this slice and kept implementation small.
+- Root `npm run typecheck`, `npm run test`, and `npm run format` remain unavailable; pnpm workspace equivalents continue to be required.
+
+### Validation loops run
+- `pnpm --filter @qwik-custom-elements/core run test` (RED expected failure first, then GREEN pass)
+- `pnpm --filter @qwik-custom-elements/core run check-types` (passed)
+- `npm run typecheck` (missing script at repo root)
+- `npm run test` (missing script at repo root)
+- `pnpm turbo run check-types` (workspace equivalent; passed)
+- `pnpm -r --if-present run test` (workspace equivalent; passed)
+- `npm run format` (missing script at repo root)
+- `pnpm -r --if-present run format` (no format scripts present in workspace packages)
+
+### Files changed
+- `packages/core/src/generator.ts`
+- `packages/core/src/__tests__/generator.test.ts`
+- `.docs/progress.md`
+
+### Blockers / notes for next iteration
+- Child #7 remains open; unresolved acceptance criterion is planning-time resolved output collision detection across projects.

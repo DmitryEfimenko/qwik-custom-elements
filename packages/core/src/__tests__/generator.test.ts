@@ -357,4 +357,27 @@ describe('generateFromConfig', () => {
       });
     });
   });
+
+  it('rejects output paths that resolve outside the workspace root', async () => {
+    await withTempDir(async (tempDir) => {
+      await writeFile(
+        path.join(tempDir, 'custom-elements.json'),
+        JSON.stringify({
+          modules: [{ declarations: [{ tagName: 'app-root' }] }],
+        }),
+        'utf8',
+      );
+
+      const config = createSingleProjectConfig(tempDir, true);
+      config.projects[0].outDir = '../outside-generated';
+
+      await expect(
+        generateFromConfig(config, { cwd: tempDir }),
+      ).rejects.toMatchObject({
+        code: 'QCE_OUTPUT_OUTSIDE_WORKSPACE',
+        message:
+          'Project "demo" output path resolves outside workspace root: ../outside-generated',
+      });
+    });
+  });
 });

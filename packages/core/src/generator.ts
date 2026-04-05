@@ -71,6 +71,8 @@ async function generateProject(
   cwd: string,
   dryRun: boolean,
 ): Promise<GenerationProjectResult> {
+  validateProjectOutDirWithinWorkspace(project, cwd);
+
   const sourcePath = path.resolve(cwd, project.source);
   const outDirPath = path.resolve(cwd, project.outDir);
   const componentTags = await readComponentTagsFromCem(sourcePath);
@@ -95,6 +97,26 @@ async function generateProject(
     plannedWrites,
     wroteFiles: !dryRun,
   };
+}
+
+function validateProjectOutDirWithinWorkspace(
+  project: GeneratorProject,
+  workspaceRoot: string,
+): void {
+  const resolvedOutDir = path.resolve(workspaceRoot, project.outDir);
+  const relativeToWorkspace = path.relative(workspaceRoot, resolvedOutDir);
+
+  const resolvesOutsideWorkspace =
+    relativeToWorkspace === '..' ||
+    relativeToWorkspace.startsWith(`..${path.sep}`) ||
+    path.isAbsolute(relativeToWorkspace);
+
+  if (resolvesOutsideWorkspace) {
+    throw new GenerationError(
+      'QCE_OUTPUT_OUTSIDE_WORKSPACE',
+      `Project "${project.id}" output path resolves outside workspace root: ${project.outDir}`,
+    );
+  }
 }
 
 function createPlannedWrites(
