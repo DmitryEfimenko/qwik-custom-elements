@@ -46,6 +46,8 @@ export async function generateFromConfig(
     a.id.localeCompare(b.id),
   );
 
+  validateProjectOutputSafety(sortedProjects, cwd);
+
   if (sortedProjects.length !== 1) {
     throw new GenerationError(
       'QCE_GENERATION_UNSUPPORTED',
@@ -71,8 +73,6 @@ async function generateProject(
   cwd: string,
   dryRun: boolean,
 ): Promise<GenerationProjectResult> {
-  validateProjectOutDirWithinWorkspace(project, cwd);
-
   const sourcePath = path.resolve(cwd, project.source);
   const outDirPath = path.resolve(cwd, project.outDir);
   const componentTags = await readComponentTagsFromCem(sourcePath);
@@ -99,11 +99,38 @@ async function generateProject(
   };
 }
 
-function validateProjectOutDirWithinWorkspace(
-  project: GeneratorProject,
+function validateProjectOutputSafety(
+  projects: GeneratorProject[],
   workspaceRoot: string,
 ): void {
-  const resolvedOutDir = path.resolve(workspaceRoot, project.outDir);
+  const outputDirOwners = new Map<string, string>();
+
+  for (const project of projects) {
+    const resolvedOutDir = path.resolve(workspaceRoot, project.outDir);
+
+    validateResolvedOutDirWithinWorkspace(
+      project,
+      workspaceRoot,
+      resolvedOutDir,
+    );
+
+    const existingOwner = outputDirOwners.get(resolvedOutDir);
+    if (existingOwner != null) {
+      throw new GenerationError(
+        'QCE_OUTPUT_PATH_COLLISION',
+        `Projects "${existingOwner}" and "${project.id}" resolve to the same output directory: ${resolvedOutDir}`,
+      );
+    }
+
+    outputDirOwners.set(resolvedOutDir, project.id);
+  }
+}
+
+function validateResolvedOutDirWithinWorkspace(
+  project: GeneratorProject,
+  workspaceRoot: string,
+  resolvedOutDir: string,
+): void {
   const relativeToWorkspace = path.relative(workspaceRoot, resolvedOutDir);
 
   const resolvesOutsideWorkspace =

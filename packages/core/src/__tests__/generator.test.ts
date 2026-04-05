@@ -380,4 +380,45 @@ describe('generateFromConfig', () => {
       });
     });
   });
+
+  it('fails when multiple projects resolve to the same output directory', async () => {
+    await withTempDir(async (tempDir) => {
+      await writeFile(
+        path.join(tempDir, 'custom-elements.json'),
+        JSON.stringify({
+          modules: [{ declarations: [{ tagName: 'app-root' }] }],
+        }),
+        'utf8',
+      );
+
+      const config: GeneratorConfig = {
+        dryRun: true,
+        projects: [
+          {
+            id: 'a-project',
+            adapter: 'stencil',
+            adapterPackage: '@qwik-custom-elements/adapter-stencil',
+            source: './custom-elements.json',
+            outDir: './src/generated',
+          },
+          {
+            id: 'b-project',
+            adapter: 'stencil',
+            adapterPackage: '@qwik-custom-elements/adapter-stencil',
+            source: './custom-elements.json',
+            outDir: './src/../src/generated',
+          },
+        ],
+      };
+
+      await expect(
+        generateFromConfig(config, { cwd: tempDir }),
+      ).rejects.toMatchObject({
+        code: 'QCE_OUTPUT_PATH_COLLISION',
+        message:
+          'Projects "a-project" and "b-project" resolve to the same output directory: ' +
+          path.resolve(tempDir, 'src/generated'),
+      });
+    });
+  });
 });

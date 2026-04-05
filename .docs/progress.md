@@ -447,3 +447,38 @@
 
 ### Blockers / notes for next iteration
 - Child #7 remains open; unresolved acceptance criterion is planning-time resolved output collision detection across projects.
+
+## 2026-04-05 - PRD #1 / Child #7 - Safe planning and project targeting guards (task slice: resolved output collision detection)
+
+### Task completed
+- Added planning-time resolved output collision detection across targeted projects before generation writes.
+- Generator now fails deterministically when two project `outDir` values resolve to the same absolute directory.
+- Added focused test coverage for normalized-path collisions (for example `./src/generated` and `./src/../src/generated`).
+
+### Key decisions
+- Kept this slice narrowly scoped to collision detection only, with no broad execution-model refactor.
+- Moved output safety validation into a shared planning pass over selected projects so safety checks run before the current single-project execution guard.
+- Used dedicated deterministic error code/message contract: `QCE_OUTPUT_PATH_COLLISION`.
+
+### Key findings
+- Prior behavior surfaced only `QCE_GENERATION_UNSUPPORTED` for multi-project configs, which masked actionable collision diagnostics.
+- Sorting selected projects by id before safety validation preserves deterministic owner ordering in collision errors.
+- Root `npm run typecheck`, `npm run test`, and `npm run format` remain unavailable; pnpm workspace equivalents continue to be required.
+
+### Validation loops run
+- `pnpm --filter @qwik-custom-elements/core run test` (RED expected failure first, then GREEN pass)
+- `pnpm --filter @qwik-custom-elements/core run check-types` (passed)
+- `npm run typecheck` (missing script at repo root)
+- `npm run test` (missing script at repo root)
+- `pnpm turbo run check-types` (workspace equivalent; passed)
+- `pnpm -r --if-present run test` (workspace equivalent; passed)
+- `npm run format` (missing script at repo root)
+- `pnpm -r --if-present run format` (no format scripts present in workspace packages)
+
+### Files changed
+- `packages/core/src/generator.ts`
+- `packages/core/src/__tests__/generator.test.ts`
+- `.docs/progress.md`
+
+### Blockers / notes for next iteration
+- Child #7 acceptance criteria are now satisfied by completed slices: unknown target id hard-fail, outside-workspace output path rejection, and resolved output collision detection.
