@@ -124,14 +124,33 @@ async function readComponentTagsFromCem(sourcePath: string): Promise<string[]> {
 
   const tags = new Set<string>();
 
-  for (const module of manifest.modules) {
-    for (const declaration of module.declarations ?? []) {
-      if (typeof declaration.tagName === 'string') {
-        const normalizedTag = declaration.tagName.trim();
-        if (normalizedTag) {
-          tags.add(normalizedTag);
-        }
+  for (let moduleIndex = 0; moduleIndex < manifest.modules.length; moduleIndex += 1) {
+    const module = manifest.modules[moduleIndex];
+
+    if (module.declarations != null && !Array.isArray(module.declarations)) {
+      throw new GenerationError(
+        'QCE_CEM_INVALID_SHAPE',
+        `CEM at ${sourcePath} has invalid shape: modules[${moduleIndex}].declarations must be an array when provided.`,
+      );
+    }
+
+    const declarations = module.declarations ?? [];
+
+    for (let declarationIndex = 0; declarationIndex < declarations.length; declarationIndex += 1) {
+      const declaration = declarations[declarationIndex];
+
+      if (!Object.prototype.hasOwnProperty.call(declaration, 'tagName')) {
+        continue;
       }
+
+      if (typeof declaration.tagName !== 'string' || declaration.tagName.trim() === '') {
+        throw new GenerationError(
+          'QCE_CEM_INVALID_SHAPE',
+          `CEM at ${sourcePath} has invalid shape: modules[${moduleIndex}].declarations[${declarationIndex}].tagName must be a non-empty string when provided.`,
+        );
+      }
+
+      tags.add(declaration.tagName.trim());
     }
   }
 

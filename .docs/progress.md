@@ -231,3 +231,36 @@
 
 ### Blockers / notes for next iteration
 - Child #5 remains open; next smallest diagnostics step is validating component declaration shape beyond the top-level `modules` guard.
+
+## 2026-04-05 - PRD #1 / Child #5 - Core single-project CEM generation engine (task slice: component declaration-level CEM diagnostics)
+
+### Task completed
+- Added declaration-level CEM shape diagnostics to fail fast on malformed module/declaration structures.
+- Generator now rejects:
+	- `modules[i].declarations` when provided but not an array.
+	- `modules[i].declarations[j].tagName` when provided but not a non-empty string.
+- Added focused tests for both declaration-level malformed input scenarios with deterministic error messages.
+
+### Key decisions
+- Kept this slice narrow to two concrete declaration-level guards instead of broad schema validation in one pass.
+- Preserved permissive behavior for declarations that omit `tagName` entirely, so only explicitly malformed `tagName` values fail this slice.
+
+### Key findings
+- Without these guards, malformed declaration content silently degraded into empty generated outputs, masking source metadata problems.
+- Index-based diagnostics (`modules[i]`, `declarations[j]`) provide stable and actionable CI/debug output.
+
+### Validation loops run
+- `pnpm --filter @qwik-custom-elements/core run test` (RED expected failure first, then GREEN pass)
+- `pnpm --filter @qwik-custom-elements/core run check-types` (passed)
+- `npm run typecheck` (missing script at repo root)
+- `npm run test` (missing script at repo root)
+- `pnpm turbo run check-types` (workspace equivalent; passed)
+- `pnpm -r --if-present run test` (workspace equivalent; passed)
+
+### Files changed
+- `packages/core/src/generator.ts`
+- `packages/core/src/__tests__/generator.test.ts`
+- `.docs/progress.md`
+
+### Blockers / notes for next iteration
+- Child #5 remains open; a natural next slice is deciding whether empty component extraction (no tags after validation) should hard-fail with a dedicated code.

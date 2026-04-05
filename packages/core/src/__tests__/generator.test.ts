@@ -179,4 +179,60 @@ describe('generateFromConfig', () => {
       });
     });
   });
+
+  it('fails when a module declarations field is not an array', async () => {
+    await withTempDir(async (tempDir) => {
+      await writeFile(
+        path.join(tempDir, 'custom-elements.json'),
+        JSON.stringify({
+          modules: [
+            {
+              declarations: 'not-an-array',
+            },
+          ],
+        }),
+        'utf8',
+      );
+
+      const config = createSingleProjectConfig(tempDir, true);
+
+      await expect(
+        generateFromConfig(config, { cwd: tempDir }),
+      ).rejects.toMatchObject({
+        code: 'QCE_CEM_INVALID_SHAPE',
+        message:
+          'CEM at ' +
+          path.join(tempDir, 'custom-elements.json') +
+          ' has invalid shape: modules[0].declarations must be an array when provided.',
+      });
+    });
+  });
+
+  it('fails when declaration tagName is present but not a non-empty string', async () => {
+    await withTempDir(async (tempDir) => {
+      await writeFile(
+        path.join(tempDir, 'custom-elements.json'),
+        JSON.stringify({
+          modules: [
+            {
+              declarations: [{ tagName: '   ' }],
+            },
+          ],
+        }),
+        'utf8',
+      );
+
+      const config = createSingleProjectConfig(tempDir, true);
+
+      await expect(
+        generateFromConfig(config, { cwd: tempDir }),
+      ).rejects.toMatchObject({
+        code: 'QCE_CEM_INVALID_SHAPE',
+        message:
+          'CEM at ' +
+          path.join(tempDir, 'custom-elements.json') +
+          ' has invalid shape: modules[0].declarations[0].tagName must be a non-empty string when provided.',
+      });
+    });
+  });
 });
