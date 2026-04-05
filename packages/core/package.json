@@ -2,9 +2,31 @@
   "name": "@qwik-custom-elements/core",
   "version": "0.0.0",
   "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./cli": {
+      "types": "./dist/cli.d.ts",
+      "import": "./dist/cli.js"
+    }
+  },
+  "bin": {
+    "qwik-custom-elements": "./dist/cli.js"
+  },
   "scripts": {
-    "build": "node -e \"console.log('core build noop')\"",
-    "check-types": "node -e \"console.log('core check-types noop')\"",
-    "dev": "node -e \"console.log('core dev noop')\""
+    "build": "tsc -p tsconfig.json",
+    "check-types": "tsc -p tsconfig.json --noEmit",
+    "dev": "node ./dist/cli.js --help",
+    "test": "vitest run"
+  },
+  "files": [
+    "dist"
+  ],
+  "devDependencies": {
+    "@types/node": "^24.6.0",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
   }
 }

@@ -76,3 +76,49 @@
 ### Blockers / notes for next iteration
 - No blocker for child issue #3 acceptance criteria after this task.
 - Next logical iteration is child issue #4 (core CLI bootstrap with strict config validation), using the selected contract as input.
+
+## 2026-04-05 - PRD #1 / Child #4 - Core CLI bootstrap with strict config validation
+
+### Task completed
+- Implemented the first runnable core CLI path in `packages/core` with argument parsing, deterministic error handling, and compiled executable output.
+- Added strict config loading/validation for default JSON config and optional JS config variant.
+- Added focused tests for config-path resolution, fail-fast validation behavior, and CLI argument parsing diagnostics.
+
+### Key decisions
+- Kept validation manual and explicit (no schema dependency) to preserve a small tracer-bullet slice and deterministic diagnostics.
+- Enforced strict unknown-field rejection at both root config level and per-project level.
+- Kept CLI behavior intentionally narrow for this issue: parse args, load+validate config, print deterministic success/failure output.
+
+### Key findings
+- Parent PRD child dependency parsing selected issue `#4` as the lowest-number open unblocked child.
+- `npm run typecheck` and `npm run test` are still missing at repo root; workspace equivalents remain required.
+- `pnpm -r run test --if-present` can pass `--if-present` to underlying test scripts if placed after `run`; the correct command shape is `pnpm -r --if-present run test`.
+- Compiled CLI entrypoint executes from repository root (`node packages/core/dist/cli.js --help`) with expected usage output.
+
+### Validation loops run
+- `pnpm install`
+- `pnpm --filter @qwik-custom-elements/core run check-types`
+- `pnpm --filter @qwik-custom-elements/core run test`
+- `npm run typecheck` (missing script at repo root)
+- `npm run test` (missing script at repo root)
+- `pnpm turbo run check-types` (closest equivalent; passed)
+- `pnpm -r run test --if-present` (command shape mismatch; forwarded flag to vitest)
+- `pnpm -r --if-present run test` (correct equivalent; passed)
+- `pnpm --filter @qwik-custom-elements/core run build`
+- `node packages/core/dist/cli.js --help`
+
+### Files changed
+- `.gitignore`
+- `packages/core/package.json`
+- `packages/core/tsconfig.json`
+- `packages/core/src/types.ts`
+- `packages/core/src/config.ts`
+- `packages/core/src/cli.ts`
+- `packages/core/src/index.ts`
+- `packages/core/src/__tests__/config.test.ts`
+- `pnpm-lock.yaml`
+- `.docs/progress.md`
+
+### Blockers / notes for next iteration
+- No blocker for child issue #4 acceptance criteria after this task.
+- Next logical iteration is child issue #5 (single-project CEM generation engine) building on this CLI/config foundation.
