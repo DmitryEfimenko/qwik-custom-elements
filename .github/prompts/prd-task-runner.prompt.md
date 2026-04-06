@@ -75,12 +75,21 @@ Explore the repo and fill your context window with relevant information that wil
 - Any build/lint/typecheck constraints
 - Read only what is necessary to complete this ONE issue.
 
+# REQUIRED SKILL LOADING
+
+Before writing code for the selected task, load relevant skills into context.
+
+- Always load: `../skills/tdd/SKILL.md` when the task changes runtime behavior, output behavior, control flow, data flow, or adds/fixes logic.
+- Also load: `../skills/tdd/SIFERS.md` when writing or updating tests.
+- If the task is purely docs/formatting/scaffolding where TDD would be artificial, you may skip TDD skill loading.
+
 # EXECUTION
 
 Complete the task.
 
 - Keep scope strictly limited to this issue's acceptance criteria.
 - If the issue involves behavior changes, use TDD where practical: add/adjust one test for one behavior, make it pass, repeat, then refactor.
+- For behavior-changing work, do not start implementation until `../skills/tdd/SKILL.md` has been loaded.
 - If you find that the issue is larger than expected (for instance, requires a refactor first), output "HANG ON A SECOND".
 
 Then, find a way to break it into a smaller chunk and only do that chunk (i.e. complete the smaller refactor).
