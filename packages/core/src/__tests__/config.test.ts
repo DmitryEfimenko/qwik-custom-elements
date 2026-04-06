@@ -270,13 +270,26 @@ describe('runCli', () => {
         const exitCode = await runCli(['--config', configPath]);
         const summary = JSON.parse(await readFile(summaryPath, 'utf8')) as {
           observedErrorCodes: string[];
-          projects: Array<unknown>;
+          projects: Array<{
+            projectId: string;
+            status: string;
+            durationMs: number;
+            generatedIndexPath: string;
+            observedErrorCodes: string[];
+          }>;
           dryRun: boolean;
         };
 
         expect(exitCode).toBe(1);
         expect(summary.dryRun).toBe(true);
-        expect(summary.projects).toEqual([]);
+        expect(summary.projects).toHaveLength(1);
+        expect(summary.projects[0].projectId).toBe('broken-project');
+        expect(summary.projects[0].status).toBe('failed');
+        expect(summary.projects[0].durationMs).toBeGreaterThanOrEqual(0);
+        expect(summary.projects[0].generatedIndexPath).toBe('');
+        expect(summary.projects[0].observedErrorCodes).toEqual([
+          'QCE_CEM_READ_FAILED',
+        ]);
         expect(summary.observedErrorCodes).toEqual(['QCE_CEM_READ_FAILED']);
       } finally {
         process.chdir(previousCwd);

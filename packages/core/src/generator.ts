@@ -165,6 +165,7 @@ async function generateProject(
     componentTags,
     plannedWrites,
     wroteFiles: !dryRun,
+    observedErrorCodes: [],
   };
 }
 

@@ -1,5 +1,37 @@
 # Progress Log
 
+## 2026-04-06 - PRD #1 / Child #10 - Run summary artifact contract (task slice: failed-run per-project status representation)
+
+### Task completed
+- Extended failed-run summary emission so `projects[]` is populated with deterministic per-project failed entries instead of an empty list.
+- Added per-project `observedErrorCodes` propagation into summary output and normalization for stable sorted/unique ordering.
+- Updated CLI regression coverage to assert failed project status/details in summary JSON.
+
+### Key decisions
+- Kept this iteration to one smallest tracer-bullet slice for child #10: represent failed per-project summary entries on generation failure.
+- Used selected project ids from CLI/config targeting as the deterministic project set for failure summary emission.
+- Assigned the thrown generation error code to each failed project entry for this slice, leaving mixed per-project error differentiation as follow-up scope.
+
+### Key findings
+- Root repository scripts now execute through Turbo (`npm run typecheck`, `npm run test`, `npm run format`) and succeeded in this run.
+- Existing summary writer path only needed shape enrichment; no schema version change was required.
+- Workspace formatting command currently touches broader package files; task commits should remain intentionally scoped.
+
+### Validation loops run
+- `npm run typecheck` (passed)
+- `npm run test` (passed)
+- `npm run format` (passed)
+
+### Files changed
+- `packages/core/src/types.ts`
+- `packages/core/src/generator.ts`
+- `packages/core/src/cli.ts`
+- `packages/core/src/__tests__/config.test.ts`
+- `.docs/progress.md`
+
+### Blockers / notes for next iteration
+- Child #10 remains open; skipped-status modeling and mixed-result per-project failure attribution still need dedicated follow-up slices.
+
 ## 2026-04-06 - PRD #1 / Child #10 - Run summary artifact contract (task slice: baseline summary JSON emission on successful runs)
 
 ### Task completed

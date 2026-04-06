@@ -101,6 +101,12 @@ export async function runCli(argv: string[]): Promise<number> {
   let resolvedConfigPath: string | undefined;
   let resolvedSummaryPath: string | undefined;
   let resolvedDryRun = false;
+  let selectedProjectsForSummary: Array<{
+    projectId: string;
+    adapterPackage: string;
+    sourcePath: string;
+    outDirPath: string;
+  }> = [];
 
   try {
     const args = parseCliArgs(argv);
@@ -122,6 +128,22 @@ export async function runCli(argv: string[]): Promise<number> {
     resolvedConfigPath = configPath;
     resolvedSummaryPath = config.summaryPath;
     resolvedDryRun = config.dryRun === true;
+
+    const requestedProjectIdSet = new Set(args.projectIds);
+    const selectedProjects =
+      requestedProjectIdSet.size === 0
+        ? config.projects
+        : config.projects.filter((project) =>
+            requestedProjectIdSet.has(project.id),
+          );
+    selectedProjectsForSummary = [...selectedProjects]
+      .sort((a, b) => a.id.localeCompare(b.id))
+      .map((project) => ({
+        projectId: project.id,
+        adapterPackage: project.adapterPackage,
+        sourcePath: path.resolve(process.cwd(), project.source),
+        outDirPath: path.resolve(process.cwd(), project.outDir),
+      }));
 
     if (args.parallel) {
       config.parallel = true;
@@ -161,12 +183,25 @@ export async function runCli(argv: string[]): Promise<number> {
   } catch (error) {
     if (resolvedConfigPath != null && error instanceof GenerationError) {
       const runFinishedAtMs = Date.now();
+      const failedDurationMs = runFinishedAtMs - runStartedAtMs;
       await writeRunSummaryArtifact({
         configPath: resolvedConfigPath,
         summaryPath: resolvedSummaryPath,
         generationResult: {
           dryRun: resolvedDryRun,
-          projects: [],
+          projects: selectedProjectsForSummary.map((project) => ({
+            projectId: project.projectId,
+            status: 'failed',
+            durationMs: failedDurationMs,
+            adapterPackage: project.adapterPackage,
+            sourcePath: project.sourcePath,
+            outDirPath: project.outDirPath,
+            generatedIndexPath: '',
+            componentTags: [],
+            plannedWrites: [],
+            wroteFiles: false,
+            observedErrorCodes: [error.code],
+          })),
         },
         runStartedAtMs,
         runFinishedAtMs,
@@ -230,7 +265,9 @@ async function writeRunSummaryArtifact(params: {
           project.adapterPackage,
           adapterVersionCache,
         ),
-        observedErrorCodes: [],
+        observedErrorCodes: Array.from(
+          new Set(project.observedErrorCodes),
+        ).sort((a, b) => a.localeCompare(b)),
       })),
     ),
     observedErrorCodes: Array.from(new Set(observedErrorCodes)).sort((a, b) =>

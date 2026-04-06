@@ -40,7 +40,7 @@ export interface PlannedWrite {
 
 export interface GenerationProjectResult {
   projectId: string;
-  status: 'success';
+  status: 'success' | 'failed' | 'skipped';
   durationMs: number;
   adapterPackage: string;
   sourcePath: string;
@@ -49,6 +49,7 @@ export interface GenerationProjectResult {
   componentTags: string[];
   plannedWrites: PlannedWrite[];
   wroteFiles: boolean;
+  observedErrorCodes: string[];
 }
 
 export interface RunSummaryProject {
