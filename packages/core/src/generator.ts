@@ -267,17 +267,24 @@ function resolveWorkspaceLocalAdapterPath(
     return undefined;
   }
 
-  const packageDirectoryName = adapterPackage.split('/').at(-1);
-  if (!packageDirectoryName) {
+  const [scope, packageDirectoryName, ...subpathSegments] =
+    adapterPackage.split('/');
+
+  if (scope !== '@qwik-custom-elements' || !packageDirectoryName) {
     return undefined;
   }
+
+  const subpath =
+    subpathSegments.length === 0 ? 'index.js' : subpathSegments.join('/');
+  const subpathWithExtension =
+    path.extname(subpath) === '' ? `${subpath}.js` : subpath;
 
   return path.resolve(
     path.dirname(fileURLToPath(import.meta.url)),
     '..',
     '..',
     packageDirectoryName,
-    'index.js',
+    subpathWithExtension,
   );
 }
 

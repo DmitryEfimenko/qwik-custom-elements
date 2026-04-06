@@ -1,5 +1,39 @@
 # Progress Log
 
+## 2026-04-06 - PRD #1 / Child #13 - Lit SSR happy-path POC (task slice: canonical adapter-lit/ssr subpath consumability in monorepo generation)
+
+### Task completed
+- Added a canonical Lit SSR subpath entrypoint at `@qwik-custom-elements/adapter-lit/ssr` with a minimal happy-path SSR probe contract.
+- Extended core workspace-local adapter resolution so scoped adapter package subpaths resolve deterministically during monorepo runs.
+- Added integration-style generator coverage proving `adapterPackage: "@qwik-custom-elements/adapter-lit/ssr"` loads successfully and does not emit fallback warning code.
+
+### Key decisions
+- Kept this iteration to one narrow tracer-bullet slice for child #13: subpath contract consumability only.
+- Left broader Lit SSR rendering integration out of scope for this slice to avoid overreaching beyond one task.
+- Preserved existing root `@qwik-custom-elements/adapter-lit` behavior while introducing the new canonical `./ssr` path.
+
+### Key findings
+- The new RED test failed with `QCE_ADAPTER_LOAD_FAILED` because workspace-local resolution treated `@qwik-custom-elements/adapter-lit/ssr` as package `ssr`.
+- Supporting scoped adapter subpath resolution plus `adapter-lit/ssr.js` was sufficient to make the Lit SSR subpath contract loadable through core generation.
+- Root Turbo feedback loops passed for this slice (`npm run typecheck`, `npm run test`, `npm run format`).
+
+### Validation loops run
+- `pnpm --filter @qwik-custom-elements/core run test -- generator.test.ts` (RED expected failure first, then GREEN pass)
+- `npm run typecheck` (passed)
+- `npm run test` (passed)
+- `npm run format` (passed)
+
+### Files changed
+- `packages/core/src/generator.ts`
+- `packages/core/src/__tests__/generator.test.ts`
+- `packages/adapter-lit/package.json`
+- `packages/adapter-lit/ssr.js`
+- `.docs/progress.md`
+
+### Blockers / notes for next iteration
+- Child #13 remains open; this slice establishes the canonical adapter-lit SSR subpath contract but does not yet complete a demoable one-component Lit SSR render path.
+- Next smallest slice can wire one concrete Lit SSR happy-path render assertion through an end-to-end surface (core generation output and/or demo route), while documenting explicit POC boundaries.
+
 ## 2026-04-06 - PRD #1 / Child #12 - Lit adapter vertical slice (task slice: adapter-lit entrypoint + deterministic CEM fallback warning regression)
 
 ### Task completed

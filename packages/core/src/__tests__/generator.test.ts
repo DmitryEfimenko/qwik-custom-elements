@@ -288,7 +288,7 @@ describe('generateFromConfig', () => {
     });
   });
 
-  it('loads the lit adapter package and falls back to CEM-only generation', async () => {
+  it('loads the lit adapter SSR subpath package without fallback warning', async () => {
     await withTempDir(async (tempDir) => {
       await writeFile(
         path.join(tempDir, 'custom-elements.json'),
@@ -300,15 +300,14 @@ describe('generateFromConfig', () => {
 
       const config = createSingleProjectConfig(tempDir, true);
       config.projects[0].adapter = 'lit';
-      config.projects[0].adapterPackage = '@qwik-custom-elements/adapter-lit';
+      config.projects[0].adapterPackage =
+        '@qwik-custom-elements/adapter-lit/ssr';
 
       const result = await generateFromConfig(config, { cwd: tempDir });
 
       expect(result.projects[0].status).toBe('success');
       expect(result.projects[0].componentTags).toEqual(['lit-button']);
-      expect(result.projects[0].observedErrorCodes).toEqual([
-        'QCE_SSR_UNSUPPORTED_FALLBACK',
-      ]);
+      expect(result.projects[0].observedErrorCodes).toEqual([]);
     });
   });
 
