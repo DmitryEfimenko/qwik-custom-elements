@@ -36,6 +36,8 @@ Optional:
 
 If the user did not specify a child issue number, determine the next issue by:
 
+Use skill: `../skills/select-next-prd-issue/SKILL.md` to run deterministic next-issue selection.
+
 1. Query open child issues for the parent PRD issue.
 2. Parse each candidate issue's Blocked by section.
 3. Keep issues whose blockers are all closed.
