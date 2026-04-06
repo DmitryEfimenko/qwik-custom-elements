@@ -1,0 +1,11 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "type": "command",
+        "command": "node .github/hooks/scripts/block-gh-issue-comment-newlines.mjs",
+        "timeout": 10
+      }
+    ]
+  }
+}
