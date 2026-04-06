@@ -1,5 +1,42 @@
 # Progress Log
 
+## 2026-04-06 - PRD #1 / Child #11 - Stencil adapter vertical slice (task slice: demo SSR parity route wired to generated wrapper tags)
+
+### Task completed
+- Wired the `stencil-events` demo route to consume core-generated wrapper tag constants from `apps/qwik-demo/src/generated` instead of hardcoded Stencil tag strings.
+- Regenerated deterministic wrapper artifacts for the demo project via core CLI using the repository config (`qwik-custom-elements.config.json`).
+- Preserved the prior unsupported-SSR fallback warning behavior while proving the SSR-available stencil adapter path can be exercised through the monorepo app route.
+
+### Key decisions
+- Kept this iteration to one narrow tracer-bullet slice for child #11: app-level SSR parity wiring only, with no broad SSR runtime refactor.
+- Used generated wrapper constants (`QwikDeButton`, `QwikDeAlert`) as the integration seam so the route depends on the generation pipeline output directly.
+- Left existing fallback-warning validation in core tests unchanged, since that acceptance criterion was already satisfied in the prior #11 slice.
+
+### Key findings
+- `apps/qwik-demo/src/routes/stencil-events/index.tsx` already exercised SSR rendering via `StencilJsLibSSRComponent`; replacing hardcoded tag strings with generated tags provided a minimal end-to-end parity proof path.
+- Root Turbo feedback loops are available and passed for this slice (`npm run typecheck`, `npm run test`, `npm run format`).
+- Running the core CLI writes `generated-run-summary.json` by default; it was removed after generation to keep this task commit scoped.
+
+### Validation loops run
+- `pnpm --filter @qwik-custom-elements/core run build` (passed)
+- `node packages/core/dist/cli.js` (passed)
+- `npm run typecheck` (passed)
+- `npm run test` (passed)
+- `npm run format` (passed)
+
+### Files changed
+- `apps/qwik-demo/src/routes/stencil-events/index.tsx`
+- `apps/qwik-demo/src/generated/index.ts`
+- `apps/qwik-demo/src/generated/de-alert.ts`
+- `apps/qwik-demo/src/generated/de-alert-shadow.ts`
+- `apps/qwik-demo/src/generated/de-button.ts`
+- `apps/qwik-demo/src/generated/de-button-shadow.ts`
+- `.docs/progress.md`
+
+### Blockers / notes for next iteration
+- Child #11 acceptance criteria now appear satisfied across completed slices: adapter integration, unsupported-SSR fallback warning validation, and one demoable/verifiable SSR parity scenario in monorepo app flow.
+- Next logical step is issue state sync: leave final completion comment and close child issue #11.
+
 ## 2026-04-06 - PRD #1 / Child #11 - Stencil adapter vertical slice (task slice: adapter SSR probe integration with deterministic CEM fallback warning)
 
 ### Task completed

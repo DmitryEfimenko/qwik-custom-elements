@@ -5,6 +5,7 @@ import {
   StencilJsLibSSRComponent,
   useStencilClientSetup,
 } from '../../components/stencil-lib-ssr';
+import { QwikDeAlert, QwikDeButton } from '../../generated';
 
 export default component$(() => {
   const buttonSize = useSignal<'md' | 'lg'>('md');
@@ -75,7 +76,7 @@ export default component$(() => {
       <div id="buttons">
         <StencilJsLibSSRComponent
           id="first-stencil-wrapper"
-          tagName="de-button"
+          tagName={QwikDeButton}
           props={{ size: buttonSize.value }}
           events={firstEvents}
         >
@@ -84,7 +85,7 @@ export default component$(() => {
 
         <StencilJsLibSSRComponent
           id="second-stencil-wrapper"
-          tagName="de-button"
+          tagName={QwikDeButton}
           props={{ size: buttonSize.value }}
           events={{ tripleClick: handleSecond$ }}
         >
@@ -94,7 +95,7 @@ export default component$(() => {
 
       <StencilJsLibSSRComponent
         id="alert-stencil-wrapper"
-        tagName="de-alert"
+        tagName={QwikDeAlert}
         props={{ heading: 'Validation Alert' }}
         slots={['footer']}
       >
