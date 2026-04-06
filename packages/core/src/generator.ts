@@ -26,6 +26,9 @@ export async function generateFromConfig(
   const cwd = options.cwd ?? process.cwd();
   const requestedProjectIds = options.targetProjectIds ?? [];
   const requestedProjectIdSet = new Set(requestedProjectIds);
+  const sortedProjects = [...config.projects].sort((a, b) =>
+    a.id.localeCompare(b.id),
+  );
 
   for (const requestedProjectId of requestedProjectIds) {
     if (!config.projects.some((project) => project.id === requestedProjectId)) {
@@ -38,32 +41,38 @@ export async function generateFromConfig(
 
   const filteredProjects =
     requestedProjectIdSet.size === 0
-      ? config.projects
-      : config.projects.filter((project) =>
+      ? sortedProjects
+      : sortedProjects.filter((project) =>
           requestedProjectIdSet.has(project.id),
         );
-  const sortedProjects = [...filteredProjects].sort((a, b) =>
-    a.id.localeCompare(b.id),
-  );
 
-  validateProjectOutputSafety(sortedProjects, cwd);
+  validateProjectOutputSafety(filteredProjects, cwd);
 
   const projectResults =
     config.parallel === true
       ? await generateProjectsInParallel(
-          sortedProjects,
+          filteredProjects,
           cwd,
           config.dryRun === true,
         )
       : await generateProjectsSequentially(
-          sortedProjects,
+          filteredProjects,
           cwd,
           config.dryRun === true,
         );
 
+  const skippedProjectResults =
+    requestedProjectIdSet.size === 0
+      ? []
+      : sortedProjects
+          .filter((project) => !requestedProjectIdSet.has(project.id))
+          .map((project) => createSkippedProjectResult(project, cwd));
+
   return {
     dryRun: config.dryRun === true,
-    projects: projectResults,
+    projects: [...projectResults, ...skippedProjectResults].sort((a, b) =>
+      a.projectId.localeCompare(b.projectId),
+    ),
   };
 }
 
@@ -165,6 +174,27 @@ async function generateProject(
     componentTags,
     plannedWrites,
     wroteFiles: !dryRun,
+    observedErrorCodes: [],
+  };
+}
+
+function createSkippedProjectResult(
+  project: GeneratorProject,
+  cwd: string,
+): GenerationProjectResult {
+  const outDirPath = path.resolve(cwd, project.outDir);
+
+  return {
+    projectId: project.id,
+    status: 'skipped',
+    durationMs: 0,
+    adapterPackage: project.adapterPackage,
+    sourcePath: path.resolve(cwd, project.source),
+    outDirPath,
+    generatedIndexPath: path.join(outDirPath, 'index.ts'),
+    componentTags: [],
+    plannedWrites: [],
+    wroteFiles: false,
     observedErrorCodes: [],
   };
 }

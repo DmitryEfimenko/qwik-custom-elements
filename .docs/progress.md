@@ -1,5 +1,36 @@
 # Progress Log
 
+## 2026-04-06 - PRD #1 / Child #10 - Run summary artifact contract (task slice: skipped-status outcomes for non-targeted projects)
+
+### Task completed
+- Added deterministic `skipped` project outcomes to generation results when CLI targeting excludes configured projects.
+- Extended failed-run summary fallback to include skipped entries for non-targeted projects instead of marking every project as failed.
+- Added CLI regression coverage asserting skipped project shape/details in emitted summary JSON.
+
+### Key decisions
+- Kept scope to one small tracer-bullet slice: represent non-targeted projects as `skipped` without broadening into per-project mixed parallel failure attribution.
+- Preserved deterministic ordering by `projectId` for mixed success/skipped summary output.
+- Kept skipped project artifacts minimal (`durationMs: 0`, empty error codes, deterministic generated index path) to match current summary contract.
+
+### Key findings
+- Issue #10 was the lowest-number open unblocked child under PRD #1 and remains the active execution target.
+- Root Turbo scripts now exist and are stable for required feedback loops (`npm run typecheck`, `npm run test`, `npm run format`).
+- Existing summary contract handled skipped status already at type level; the implementation gap was generation/CLI population.
+
+### Validation loops run
+- `npm run typecheck` (passed)
+- `npm run test` (passed)
+- `npm run format` (passed)
+
+### Files changed
+- `packages/core/src/generator.ts`
+- `packages/core/src/cli.ts`
+- `packages/core/src/__tests__/config.test.ts`
+- `.docs/progress.md`
+
+### Blockers / notes for next iteration
+- If needed for follow-up hardening, add mixed-result parallel tests that preserve per-project failure codes instead of relying on aggregate parallel failure code.
+
 ## 2026-04-06 - PRD #1 / Child #10 - Run summary artifact contract (task slice: failed-run per-project status representation)
 
 ### Task completed

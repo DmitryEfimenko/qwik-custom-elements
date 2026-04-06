@@ -106,6 +106,7 @@ export async function runCli(argv: string[]): Promise<number> {
     adapterPackage: string;
     sourcePath: string;
     outDirPath: string;
+    isTargeted: boolean;
   }> = [];
 
   try {
@@ -130,19 +131,16 @@ export async function runCli(argv: string[]): Promise<number> {
     resolvedDryRun = config.dryRun === true;
 
     const requestedProjectIdSet = new Set(args.projectIds);
-    const selectedProjects =
-      requestedProjectIdSet.size === 0
-        ? config.projects
-        : config.projects.filter((project) =>
-            requestedProjectIdSet.has(project.id),
-          );
-    selectedProjectsForSummary = [...selectedProjects]
+    selectedProjectsForSummary = [...config.projects]
       .sort((a, b) => a.id.localeCompare(b.id))
       .map((project) => ({
         projectId: project.id,
         adapterPackage: project.adapterPackage,
         sourcePath: path.resolve(process.cwd(), project.source),
         outDirPath: path.resolve(process.cwd(), project.outDir),
+        isTargeted:
+          requestedProjectIdSet.size === 0 ||
+          requestedProjectIdSet.has(project.id),
       }));
 
     if (args.parallel) {
@@ -191,16 +189,18 @@ export async function runCli(argv: string[]): Promise<number> {
           dryRun: resolvedDryRun,
           projects: selectedProjectsForSummary.map((project) => ({
             projectId: project.projectId,
-            status: 'failed',
-            durationMs: failedDurationMs,
+            status: project.isTargeted ? 'failed' : 'skipped',
+            durationMs: project.isTargeted ? failedDurationMs : 0,
             adapterPackage: project.adapterPackage,
             sourcePath: project.sourcePath,
             outDirPath: project.outDirPath,
-            generatedIndexPath: '',
+            generatedIndexPath: project.isTargeted
+              ? ''
+              : path.join(project.outDirPath, 'index.ts'),
             componentTags: [],
             plannedWrites: [],
             wroteFiles: false,
-            observedErrorCodes: [error.code],
+            observedErrorCodes: project.isTargeted ? [error.code] : [],
           })),
         },
         runStartedAtMs,
