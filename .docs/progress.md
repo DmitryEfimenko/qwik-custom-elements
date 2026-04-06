@@ -746,3 +746,30 @@
 ### Blockers / notes for next iteration
 - No blocker for entering child issue #11 with real app + real stencil fixture context now in place.
 - Next iteration can focus directly on adapter-stencil SSR parity behavior using this migrated baseline.
+
+## 2026-04-06 - PRD #1 / Child #11 prep - cleanup of POC-era generation/copying approach in qwik-demo
+
+### Task completed
+- Removed legacy generated wrapper artifacts under `apps/qwik-demo/src/components/generated/stencil` that came from the prior POC-oriented generation flow.
+- Removed the old in-app generator script subtree at `apps/qwik-demo/scripts/generate-qwik-from-stenciljs`.
+- Removed the old stencil runtime copy script `apps/qwik-demo/scripts/sync-stencil-assets.ts`.
+
+### Key decisions
+- Decided not to continue with the previous POC approach that generated Qwik components from Stencil components directly inside `apps/qwik-demo`.
+- Kept the migrated Qwik app while removing now-obsolete generation/copying implementation details that are not part of the new project direction.
+
+### Key findings
+- The cleanup reduces confusion by removing stale generated files and scripts that no longer represent the intended architecture.
+- The Qwik app migration remains intact while POC-specific shims/shenanigans are removed.
+
+### Validation loops run
+- `git status --short` (verified expected cleanup deletions)
+
+### Files changed
+- `apps/qwik-demo/scripts/generate-qwik-from-stenciljs/*` (deleted)
+- `apps/qwik-demo/scripts/sync-stencil-assets.ts` (deleted)
+- `apps/qwik-demo/src/components/generated/stencil/*` (deleted)
+- `.docs/progress.md`
+
+### Blockers / notes for next iteration
+- No blocker introduced by this cleanup; next work for child #11 can proceed on the simplified migrated app baseline.
