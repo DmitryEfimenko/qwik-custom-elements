@@ -168,8 +168,13 @@ async function writeRunSummaryArtifact(params: {
   runStartedAtMs: number;
   runFinishedAtMs: number;
 }): Promise<void> {
-  const { configPath, summaryPath, generationResult, runStartedAtMs, runFinishedAtMs } =
-    params;
+  const {
+    configPath,
+    summaryPath,
+    generationResult,
+    runStartedAtMs,
+    runFinishedAtMs,
+  } = params;
   const configDir = path.dirname(configPath);
   const resolvedSummaryPath = path.resolve(
     configDir,

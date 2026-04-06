@@ -19,6 +19,8 @@
     "build": "tsc -p tsconfig.json",
     "check-types": "tsc -p tsconfig.json --noEmit",
     "dev": "node ./dist/cli.js --help",
+    "format": "node -e \"console.log('core format noop')\"",
+    "lint": "node -e \"console.log('core lint noop')\"",
     "test": "vitest run"
   },
   "files": [

@@ -5,6 +5,9 @@
   "scripts": {
     "build": "node -e \"console.log('adapter-lit build noop')\"",
     "check-types": "node -e \"console.log('adapter-lit check-types noop')\"",
-    "dev": "node -e \"console.log('adapter-lit dev noop')\""
+    "dev": "node -e \"console.log('adapter-lit dev noop')\"",
+    "format": "node -e \"console.log('adapter-lit format noop')\"",
+    "lint": "node -e \"console.log('adapter-lit lint noop')\"",
+    "test": "node -e \"console.log('adapter-lit test noop')\""
   }
 }

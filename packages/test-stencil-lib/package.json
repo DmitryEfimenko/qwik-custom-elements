@@ -42,7 +42,9 @@
     "build": "stencil build",
     "check-types": "tsc --noEmit -p tsconfig.json",
     "dev": "stencil build --dev --watch",
+    "format": "node -e \"console.log('test-stencil-lib format noop')\"",
     "start": "stencil build --dev --watch --serve",
+    "lint": "node -e \"console.log('test-stencil-lib lint noop')\"",
     "test": "stencil-test",
     "test:watch": "stencil-test --watch",
     "generate": "stencil generate"
@@ -53,6 +55,7 @@
     "@stencil/vitest": "^1.8.3",
     "@types/node": "^22.13.5",
     "@vitest/browser-playwright": "^4.0.0",
+    "typescript": "^5.9.3",
     "vitest": "^4.0.0"
   },
   "license": "MIT"

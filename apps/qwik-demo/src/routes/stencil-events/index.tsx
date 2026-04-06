@@ -1,17 +1,17 @@
-import { $, component$, useSignal } from '@builder.io/qwik';
-import type { DocumentHead } from '@builder.io/qwik-city';
+import { $, component$, useSignal } from "@builder.io/qwik";
+import type { DocumentHead } from "@builder.io/qwik-city";
 
 import {
   StencilJsLibSSRComponent,
   useStencilClientSetup,
-} from '../../components/stencil-lib-ssr';
+} from "../../components/stencil-lib-ssr";
 
 export default component$(() => {
-  const buttonSize = useSignal<'md' | 'lg'>('md');
+  const buttonSize = useSignal<"md" | "lg">("md");
   const firstAlphaCount = useSignal(0);
   const firstBetaCount = useSignal(0);
   const secondCount = useSignal(0);
-  const activeHandler = useSignal<'alpha' | 'beta'>('alpha');
+  const activeHandler = useSignal<"alpha" | "beta">("alpha");
 
   useStencilClientSetup();
 
@@ -28,16 +28,16 @@ export default component$(() => {
   });
 
   const toggleSize$ = $(() => {
-    buttonSize.value = buttonSize.value === 'md' ? 'lg' : 'md';
+    buttonSize.value = buttonSize.value === "md" ? "lg" : "md";
   });
 
   const toggleHandler$ = $(() => {
-    activeHandler.value = activeHandler.value === 'alpha' ? 'beta' : 'alpha';
+    activeHandler.value = activeHandler.value === "alpha" ? "beta" : "alpha";
   });
 
   const firstEvents = {
     tripleClick:
-      activeHandler.value === 'alpha' ? handleFirstAlpha$ : handleFirstBeta$,
+      activeHandler.value === "alpha" ? handleFirstAlpha$ : handleFirstBeta$,
   };
 
   return (
@@ -57,10 +57,18 @@ export default component$(() => {
         Toggle button size
       </button>
 
-      <button id="alpha-handler-warmup" onClick$={handleFirstAlpha$} style={{ display: 'none' }}>
+      <button
+        id="alpha-handler-warmup"
+        onClick$={handleFirstAlpha$}
+        style={{ display: "none" }}
+      >
         alpha handler warmup
       </button>
-      <button id="beta-handler-warmup" onClick$={handleFirstBeta$} style={{ display: 'none' }}>
+      <button
+        id="beta-handler-warmup"
+        onClick$={handleFirstBeta$}
+        style={{ display: "none" }}
+      >
         beta handler warmup
       </button>
 
@@ -87,8 +95,8 @@ export default component$(() => {
       <StencilJsLibSSRComponent
         id="alert-stencil-wrapper"
         tagName="de-alert"
-        props={{ heading: 'Validation Alert' }}
-        slots={['footer']}
+        props={{ heading: "Validation Alert" }}
+        slots={["footer"]}
       >
         <span>Alert body content</span>
         <span q:slot="footer">Alert footer content</span>
@@ -98,5 +106,5 @@ export default component$(() => {
 });
 
 export const head: DocumentHead = {
-  title: 'Stencil Events Validation',
+  title: "Stencil Events Validation",
 };

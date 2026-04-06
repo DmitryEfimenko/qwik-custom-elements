@@ -5,6 +5,9 @@
   "scripts": {
     "build": "node -e \"console.log('adapter-stencil build noop')\"",
     "check-types": "node -e \"console.log('adapter-stencil check-types noop')\"",
-    "dev": "node -e \"console.log('adapter-stencil dev noop')\""
+    "dev": "node -e \"console.log('adapter-stencil dev noop')\"",
+    "format": "node -e \"console.log('adapter-stencil format noop')\"",
+    "lint": "node -e \"console.log('adapter-stencil lint noop')\"",
+    "test": "node -e \"console.log('adapter-stencil test noop')\""
   }
 }

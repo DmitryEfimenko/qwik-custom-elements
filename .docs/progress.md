@@ -832,7 +832,7 @@
 - After decoupling scripts and simplifying home route, the dev server starts successfully through both package-level and root-level commands.
 
 ### Validation loops run
-- `pnpm --filter qwik-demo run build.types`
+- `pnpm --filter qwik-demo run check-types`
 - `pnpm --filter qwik-demo run dev` (confirmed Vite ready)
 - `npm start` (confirmed Turborepo starts `qwik-demo#dev` without the previous missing-Stencil-source error)
 

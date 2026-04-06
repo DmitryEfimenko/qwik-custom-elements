@@ -1,7 +1,7 @@
-import type { DocumentStyle, RequestEventBase } from '@builder.io/qwik-city';
-import type { StencilRenderToStringResult } from './model';
+import type { DocumentStyle, RequestEventBase } from "@builder.io/qwik-city";
+import type { StencilRenderToStringResult } from "./model";
 
-const STENCIL_STYLE_STORE_KEY = '__stencil_ssr_style_store__';
+const STENCIL_STYLE_STORE_KEY = "__stencil_ssr_style_store__";
 
 export interface StencilSsrStyleStore {
   stylesByKey: Map<string, string>;
@@ -14,7 +14,7 @@ export interface StencilSsrHeadStyleOptions {
 
 function normalizeStyleKey(
   styleId?: string,
-  styleText = '',
+  styleText = "",
   tagName?: string,
 ): string {
   if (styleId && styleId.length > 0) {
@@ -42,7 +42,7 @@ export function createStencilSsrStyleStore(): StencilSsrStyleStore {
  * Ensures styles are deduplicated across multiple renders in the same request.
  */
 export function getOrCreateStencilSsrStyleStore(
-  requestEvent: Pick<RequestEventBase, 'sharedMap'>,
+  requestEvent: Pick<RequestEventBase, "sharedMap">,
 ): StencilSsrStyleStore {
   const existing = requestEvent.sharedMap.get(STENCIL_STYLE_STORE_KEY) as
     | StencilSsrStyleStore
@@ -71,7 +71,7 @@ export function collectStencilSsrStyles(
   }
 
   for (const styleEntry of result.styles) {
-    const styleText = styleEntry.content ?? '';
+    const styleText = styleEntry.content ?? "";
     const styleId = styleEntry.id;
     if (!styleText) continue;
 
@@ -88,7 +88,7 @@ export function toDocumentHeadStyles(
   styleStore: StencilSsrStyleStore,
   options?: StencilSsrHeadStyleOptions,
 ): DocumentStyle[] {
-  const keyPrefix = options?.keyPrefix ?? 'stencil-ssr';
+  const keyPrefix = options?.keyPrefix ?? "stencil-ssr";
   const nonce = options?.nonce;
 
   return [...styleStore.stylesByKey.entries()].map(([styleKey, style]) => ({

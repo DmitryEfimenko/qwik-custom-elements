@@ -6,6 +6,9 @@
   "scripts": {
     "build": "node -e \"console.log('test-lit-lib build noop')\"",
     "check-types": "node -e \"console.log('test-lit-lib check-types noop')\"",
-    "dev": "node -e \"console.log('test-lit-lib dev noop')\""
+    "dev": "node -e \"console.log('test-lit-lib dev noop')\"",
+    "format": "node -e \"console.log('test-lit-lib format noop')\"",
+    "lint": "node -e \"console.log('test-lit-lib lint noop')\"",
+    "test": "node -e \"console.log('test-lit-lib test noop')\""
   }
 }
