@@ -1,8 +1,13 @@
+import { mkdir, writeFile } from 'node:fs/promises';
+import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 import { ConfigValidationError, loadGeneratorConfig } from './config.js';
 import { GenerationError, generateFromConfig } from './generator.js';
-import type { CliArgs } from './types.js';
+import type { CliArgs, GenerationResult, RunSummary } from './types.js';
+
+const RUN_SUMMARY_SCHEMA_VERSION = '1.0.0';
+const DEFAULT_RUN_SUMMARY_PATH = './generated-run-summary.json';
 
 export function parseCliArgs(argv: string[]): CliArgs {
   let configPath: string | undefined;
@@ -87,6 +92,7 @@ export function parseCliArgs(argv: string[]): CliArgs {
 }
 
 export async function runCli(argv: string[]): Promise<number> {
+  const runStartedAtMs = Date.now();
   try {
     const args = parseCliArgs(argv);
 
@@ -126,6 +132,15 @@ export async function runCli(argv: string[]): Promise<number> {
       }
     }
 
+    const runFinishedAtMs = Date.now();
+    await writeRunSummaryArtifact({
+      configPath,
+      summaryPath: config.summaryPath,
+      generationResult,
+      runStartedAtMs,
+      runFinishedAtMs,
+    });
+
     process.stdout.write(
       `Generation completed (${mode}) from ${configPath}. Projects: ${generationResult.projects.length}. Planned writes: ${totalWrites}.\n`,
     );
@@ -144,6 +159,47 @@ export async function runCli(argv: string[]): Promise<number> {
     process.stderr.write(`QCE_UNEXPECTED: ${message}\n`);
     return 1;
   }
+}
+
+async function writeRunSummaryArtifact(params: {
+  configPath: string;
+  summaryPath?: string;
+  generationResult: GenerationResult;
+  runStartedAtMs: number;
+  runFinishedAtMs: number;
+}): Promise<void> {
+  const { configPath, summaryPath, generationResult, runStartedAtMs, runFinishedAtMs } =
+    params;
+  const configDir = path.dirname(configPath);
+  const resolvedSummaryPath = path.resolve(
+    configDir,
+    summaryPath ?? DEFAULT_RUN_SUMMARY_PATH,
+  );
+
+  const observedErrorCodes: string[] = [];
+  const summary: RunSummary = {
+    schemaVersion: RUN_SUMMARY_SCHEMA_VERSION,
+    startedAt: new Date(runStartedAtMs).toISOString(),
+    finishedAt: new Date(runFinishedAtMs).toISOString(),
+    dryRun: generationResult.dryRun,
+    projects: generationResult.projects.map((project) => ({
+      projectId: project.projectId,
+      status: project.status,
+      durationMs: project.durationMs,
+      generatedIndexPath: project.generatedIndexPath,
+      observedErrorCodes: [],
+    })),
+    observedErrorCodes: Array.from(new Set(observedErrorCodes)).sort((a, b) =>
+      a.localeCompare(b),
+    ),
+  };
+
+  await mkdir(path.dirname(resolvedSummaryPath), { recursive: true });
+  await writeFile(
+    resolvedSummaryPath,
+    `${JSON.stringify(summary, null, 2)}\n`,
+    'utf8',
+  );
 }
 
 function isMainModule(): boolean {

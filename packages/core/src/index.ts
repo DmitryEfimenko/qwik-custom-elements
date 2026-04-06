@@ -15,4 +15,5 @@ export type {
   LoadConfigOptions,
   LoadedConfig,
   PlannedWrite,
+  RunSummary,
 } from './types.js';

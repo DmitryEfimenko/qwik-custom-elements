@@ -40,11 +40,31 @@ export interface PlannedWrite {
 
 export interface GenerationProjectResult {
   projectId: string;
+  status: 'success';
+  durationMs: number;
   sourcePath: string;
   outDirPath: string;
+  generatedIndexPath: string;
   componentTags: string[];
   plannedWrites: PlannedWrite[];
   wroteFiles: boolean;
+}
+
+export interface RunSummaryProject {
+  projectId: string;
+  status: 'success' | 'failed' | 'skipped';
+  durationMs: number;
+  generatedIndexPath: string;
+  observedErrorCodes: string[];
+}
+
+export interface RunSummary {
+  schemaVersion: string;
+  startedAt: string;
+  finishedAt: string;
+  dryRun: boolean;
+  projects: RunSummaryProject[];
+  observedErrorCodes: string[];
 }
 
 export interface GenerationResult {

@@ -1,5 +1,45 @@
 # Progress Log
 
+## 2026-04-06 - PRD #1 / Child #10 - Run summary artifact contract (task slice: baseline summary JSON emission on successful runs)
+
+### Task completed
+- Added baseline run summary artifact emission from core CLI to `generated-run-summary.json` by default (or `summaryPath` when configured).
+- Extended generation result metadata to include per-project status, duration, and generated index path so summary payload can be built from deterministic runtime data.
+- Added focused CLI regression coverage validating summary file creation and required baseline fields.
+
+### Key decisions
+- Kept this iteration to one smallest tracer-bullet slice for child #10: successful-run summary emission only.
+- Scoped summary status to currently supported outcome (`success`) for this slice and left failed/skipped project status expansion for follow-up slices.
+- Used schema version `1.0.0` for initial summary contract and deterministic sorted unique run-level error code aggregation (currently empty for successful runs).
+
+### Key findings
+- `summaryPath` was already available in config parsing, so the main implementation gap was CLI summary writing and result-shape metadata.
+- Existing deterministic project sorting in generation flow naturally carries into deterministic summary project ordering.
+- Root `npm run typecheck`, `npm run test`, and `npm run format` remain unavailable; pnpm workspace/package equivalents are required.
+- Workspace typecheck loop currently fails in `packages/test-stencil-lib` because `tsc` is not available in that package execution environment (`'tsc' is not recognized as an internal or external command`).
+
+### Validation loops run
+- `npm run typecheck` (missing script at repo root)
+- `npm run test` (missing script at repo root)
+- `pnpm --filter @qwik-custom-elements/core run check-types` (passed)
+- `pnpm --filter @qwik-custom-elements/core run test` (passed)
+- `pnpm turbo run check-types` (failed in `@qwik-custom-elements/test-stencil-lib` due to missing `tsc` command in package env)
+- `pnpm -r --if-present run test` (passed)
+- `npm run format` (missing script at repo root)
+- `pnpm -r --if-present run format` (no format scripts present in workspace packages)
+
+### Files changed
+- `packages/core/src/types.ts`
+- `packages/core/src/generator.ts`
+- `packages/core/src/cli.ts`
+- `packages/core/src/index.ts`
+- `packages/core/src/__tests__/config.test.ts`
+- `.docs/progress.md`
+
+### Blockers / notes for next iteration
+- Child #10 remains open; this slice did not yet implement failure/skipped project status representation or non-empty observed error code aggregation in summary JSON.
+- Next logical slice is extending summary emission to include deterministic failure outcomes and observed error codes for mixed-result runs.
+
 ## 2026-04-05 - PRD #1 / Child #2 - Baseline workspace manifests
 
 ### Task completed

@@ -134,6 +134,7 @@ async function generateProject(
   cwd: string,
   dryRun: boolean,
 ): Promise<GenerationProjectResult> {
+  const startedAtMs = Date.now();
   const sourcePath = path.resolve(cwd, project.source);
   const outDirPath = path.resolve(cwd, project.outDir);
   const componentTags = await readComponentTagsFromCem(sourcePath);
@@ -150,10 +151,16 @@ async function generateProject(
     }
   }
 
+  const generatedIndexPath = path.join(outDirPath, 'index.ts');
+  const durationMs = Date.now() - startedAtMs;
+
   return {
     projectId: project.id,
+    status: 'success',
+    durationMs,
     sourcePath,
     outDirPath,
+    generatedIndexPath,
     componentTags,
     plannedWrites,
     wroteFiles: !dryRun,

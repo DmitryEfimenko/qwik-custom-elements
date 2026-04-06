@@ -1,4 +1,4 @@
-import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 
@@ -309,6 +309,108 @@ describe('runCli', () => {
         expect(zProjectLineIndex).toBeGreaterThanOrEqual(0);
         expect(aProjectLineIndex).toBeLessThan(zProjectLineIndex);
         expect(summaryLineIndex).toBeGreaterThan(zProjectLineIndex);
+      } finally {
+        process.chdir(previousCwd);
+      }
+    });
+  });
+
+  it('writes run summary artifact with required baseline fields', async () => {
+    await withTempDir(async (tempDir) => {
+      const previousCwd = process.cwd();
+      process.chdir(tempDir);
+
+      try {
+        const configPath = path.join(
+          tempDir,
+          'qwik-custom-elements.config.json',
+        );
+        const summaryPath = path.join(tempDir, 'generated-run-summary.json');
+
+        await writeFile(
+          './custom-elements-a.json',
+          JSON.stringify({
+            modules: [{ declarations: [{ tagName: 'alpha-card' }] }],
+          }),
+          'utf8',
+        );
+        await writeFile(
+          './custom-elements-z.json',
+          JSON.stringify({
+            modules: [{ declarations: [{ tagName: 'zeta-card' }] }],
+          }),
+          'utf8',
+        );
+
+        await writeFile(
+          configPath,
+          JSON.stringify(
+            {
+              dryRun: true,
+              projects: [
+                {
+                  id: 'z-project',
+                  adapter: 'stencil',
+                  adapterPackage: '@qwik-custom-elements/adapter-stencil',
+                  source: './custom-elements-z.json',
+                  outDir: './generated/z',
+                },
+                {
+                  id: 'a-project',
+                  adapter: 'stencil',
+                  adapterPackage: '@qwik-custom-elements/adapter-stencil',
+                  source: './custom-elements-a.json',
+                  outDir: './generated/a',
+                },
+              ],
+            },
+            null,
+            2,
+          ),
+          'utf8',
+        );
+
+        vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+        vi.spyOn(process.stderr, 'write').mockImplementation(() => true);
+
+        const exitCode = await runCli(['--config', configPath]);
+        const summary = JSON.parse(await readFile(summaryPath, 'utf8')) as {
+          schemaVersion: string;
+          startedAt: string;
+          finishedAt: string;
+          dryRun: boolean;
+          projects: Array<{
+            projectId: string;
+            status: string;
+            durationMs: number;
+            generatedIndexPath: string;
+            observedErrorCodes: string[];
+          }>;
+          observedErrorCodes: string[];
+        };
+
+        expect(exitCode).toBe(0);
+        expect(summary.schemaVersion).toBe('1.0.0');
+        expect(summary.startedAt).toMatch(/T/);
+        expect(summary.finishedAt).toMatch(/T/);
+        expect(summary.dryRun).toBe(true);
+        expect(summary.observedErrorCodes).toEqual([]);
+        expect(summary.projects.map((project) => project.projectId)).toEqual([
+          'a-project',
+          'z-project',
+        ]);
+        expect(summary.projects[0].status).toBe('success');
+        expect(summary.projects[1].status).toBe('success');
+        expect(summary.projects[0].durationMs).toBeGreaterThanOrEqual(0);
+        expect(summary.projects[1].durationMs).toBeGreaterThanOrEqual(0);
+        expect(summary.projects[0].generatedIndexPath).toBe(
+          path.join(tempDir, 'generated', 'a', 'index.ts'),
+        );
+        expect(summary.projects[1].generatedIndexPath).toBe(
+          path.join(tempDir, 'generated', 'z', 'index.ts'),
+        );
+        expect(summary.projects[0].observedErrorCodes).toEqual([]);
+        expect(summary.projects[1].observedErrorCodes).toEqual([]);
       } finally {
         process.chdir(previousCwd);
       }
