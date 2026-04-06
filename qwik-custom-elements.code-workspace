@@ -1,11 +1,18 @@
 {
-	"folders": [
-		{
-			"path": "."
-		},
-		{
-			"path": "../Random/qwik-stenciljs"
-		}
-	],
-  "settings": {}
+  "folders": [
+    {
+      "path": ".",
+    },
+    {
+      "path": "../Random/qwik-stenciljs",
+    },
+  ],
+  "settings": {
+    "chat.tools.terminal.autoApprove": {
+      "/^powershell -File \\./\\.github/skills/select-next-prd-issue/scripts/select-next-child-issue\\.ps1 -Repo DmitryEfimenko/qwik-custom-elements -ParentIssueNumber \\d+$/": {
+        "approve": true,
+        "matchCommandLine": true,
+      },
+    },
+  },
 }
