@@ -67,7 +67,11 @@ For example, given your Stencil project namespace is called `my-design-system`, 
 To avoid unpkg.com redirects to the actual file, you can also directly import:
 https://unpkg.com/foobar-design-system@0.0.1/dist/foobar-design-system/foobar-design-system.esm.js
 -->
-<my-component first="Stencil" middle="'Don't call me a framework'" last="JS"></my-component>
+<my-component
+  first="Stencil"
+  middle="'Don't call me a framework'"
+  last="JS"
+></my-component>
 ```
 
 This will only load the necessary scripts needed to render `<my-component />`. Once more components of this package are used, they will automatically be loaded lazily.

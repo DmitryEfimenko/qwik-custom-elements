@@ -6,8 +6,9 @@
     "build": "node -e \"console.log('adapter-lit build noop')\"",
     "check-types": "node -e \"console.log('adapter-lit check-types noop')\"",
     "dev": "node -e \"console.log('adapter-lit dev noop')\"",
-    "format": "node -e \"console.log('adapter-lit format noop')\"",
-    "lint": "node -e \"console.log('adapter-lit lint noop')\"",
+    "format": "prettier --write . --config ../../.prettierrc.json --ignore-path ../../.prettierignore",
+    "format:check": "prettier --check . --config ../../.prettierrc.json --ignore-path ../../.prettierignore",
+    "lint": "eslint \"**/*.{js,mjs,cjs,ts,mts,cts,tsx}\" --no-error-on-unmatched-pattern",
     "test": "node -e \"console.log('adapter-lit test noop')\""
   }
 }

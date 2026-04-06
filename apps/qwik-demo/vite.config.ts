@@ -2,12 +2,12 @@
  * This is the base config for vite.
  * When building, the adapter config is used which loads this file and extends it.
  */
-import { qwikCity } from "@builder.io/qwik-city/vite";
-import { qwikVite, QwikVitePluginApi } from "@builder.io/qwik/optimizer";
-import { resolve } from "node:path";
-import { defineConfig, searchForWorkspaceRoot, type UserConfig } from "vite";
-import tsconfigPaths from "vite-tsconfig-paths";
-import pkg from "./package.json";
+import { qwikCity } from '@builder.io/qwik-city/vite';
+import { qwikVite, QwikVitePluginApi } from '@builder.io/qwik/optimizer';
+import { resolve } from 'node:path';
+import { defineConfig, searchForWorkspaceRoot, type UserConfig } from 'vite';
+import tsconfigPaths from 'vite-tsconfig-paths';
+import pkg from './package.json';
 
 type PkgDep = Record<string, string>;
 const { dependencies = {}, devDependencies = {} } = pkg as any as {
@@ -24,16 +24,16 @@ export default defineConfig(({ command, mode }): UserConfig => {
   let qwikApi: QwikVitePluginApi;
   const stencilEsmDirFsPath = resolve(
     __dirname,
-    "../../packages/test-stencil-lib/dist/esm",
-  ).replace(/\\/g, "/");
+    '../../packages/test-stencil-lib/dist/esm',
+  ).replace(/\\/g, '/');
   const workspaceRoot = searchForWorkspaceRoot(process.cwd());
   const stencilLibFsAllowPath = resolve(
     __dirname,
-    "../../packages/test-stencil-lib",
+    '../../packages/test-stencil-lib',
   );
   const stencilLoaderDevUrl = `/@fs/${stencilEsmDirFsPath}/loader.js`;
   const stencilResourcesDevUrl = `/@fs/${stencilEsmDirFsPath}/`;
-  
+
   return {
     define: {
       __STENCIL_LOADER_DEV_URL__: JSON.stringify(stencilLoaderDevUrl),
@@ -42,7 +42,7 @@ export default defineConfig(({ command, mode }): UserConfig => {
     plugins: [
       qwikCity(),
       qwikVite(),
-      tsconfigPaths({ root: "." }),
+      tsconfigPaths({ root: '.' }),
       // {
       //   name: 'dev-manifest-bridge',
       //   configureServer(server) {
@@ -57,7 +57,7 @@ export default defineConfig(({ command, mode }): UserConfig => {
       //     if (id === '\0virtual:qwik-client-manifest') {
       //       // Retrieve the "in-progress" manifest from the Optimizer
       //       const manifest = qwikApi ? await qwikApi.getManifest() : null;
-            
+
       //       return `export const manifest = ${JSON.stringify(manifest || { symbols: {}, mapping: {} })};`;
       //     }
       //   },
@@ -93,13 +93,13 @@ export default defineConfig(({ command, mode }): UserConfig => {
       },
       headers: {
         // Don't cache the server response in dev mode
-        "Cache-Control": "public, max-age=0",
+        'Cache-Control': 'public, max-age=0',
       },
     },
     preview: {
       headers: {
         // Keep preview uncached for local linked-package testing.
-        "Cache-Control": "no-store",
+        'Cache-Control': 'no-store',
       },
     },
   };
@@ -116,7 +116,7 @@ function errorOnDuplicatesPkgDeps(
   devDependencies: PkgDep,
   dependencies: PkgDep,
 ) {
-  let msg = "";
+  let msg = '';
   // Create an array 'duplicateDeps' by filtering devDependencies.
   // If a dependency also exists in dependencies, it is considered a duplicate.
   const duplicateDeps = Object.keys(devDependencies).filter(
@@ -130,7 +130,7 @@ function errorOnDuplicatesPkgDeps(
 
   // any errors for missing "qwik-city-plan"
   // [PLUGIN_ERROR]: Invalid module "@qwik-city-plan" is not a valid package
-  msg = `Move qwik packages ${qwikPkg.join(", ")} to devDependencies`;
+  msg = `Move qwik packages ${qwikPkg.join(', ')} to devDependencies`;
 
   if (qwikPkg.length > 0) {
     throw new Error(msg);
@@ -139,7 +139,7 @@ function errorOnDuplicatesPkgDeps(
   // Format the error message with the duplicates list.
   // The `join` function is used to represent the elements of the 'duplicateDeps' array as a comma-separated string.
   msg = `
-    Warning: The dependency "${duplicateDeps.join(", ")}" is listed in both "devDependencies" and "dependencies".
+    Warning: The dependency "${duplicateDeps.join(', ')}" is listed in both "devDependencies" and "dependencies".
     Please move the duplicated dependencies to "devDependencies" only and remove it from "dependencies"
   `;
 

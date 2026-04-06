@@ -1,7 +1,5 @@
 # de-alert
 
-
-
 <!-- Auto Generated Below -->
 
 

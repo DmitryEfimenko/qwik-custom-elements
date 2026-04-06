@@ -1,5 +1,5 @@
-import { cpSync, existsSync, mkdirSync, rmSync } from "node:fs";
-import { resolve } from "node:path";
+import { cpSync, existsSync, mkdirSync, rmSync } from 'node:fs';
+import { resolve } from 'node:path';
 
 type CopyTarget = {
   label: string;
@@ -11,14 +11,14 @@ const appRoot = process.cwd();
 
 const targets: CopyTarget[] = [
   {
-    label: "Stencil ESM runtime",
-    source: resolve(appRoot, "../../packages/test-stencil-lib/dist/esm"),
-    destination: resolve(appRoot, "public/stencil-runtime/esm"),
+    label: 'Stencil ESM runtime',
+    source: resolve(appRoot, '../../packages/test-stencil-lib/dist/esm'),
+    destination: resolve(appRoot, 'public/stencil-runtime/esm'),
   },
   {
-    label: "Stencil hydrate runtime",
-    source: resolve(appRoot, "../../packages/test-stencil-lib/hydrate"),
-    destination: resolve(appRoot, "public/stencil-runtime/hydrate"),
+    label: 'Stencil hydrate runtime',
+    source: resolve(appRoot, '../../packages/test-stencil-lib/hydrate'),
+    destination: resolve(appRoot, 'public/stencil-runtime/hydrate'),
   },
 ];
 
@@ -42,4 +42,4 @@ for (const target of targets) {
   syncTarget(target);
 }
 
-console.log("Stencil runtime assets synced successfully.");
+console.log('Stencil runtime assets synced successfully.');

@@ -1,6 +1,5 @@
 import { Component, Prop, h } from '@stencil/core';
 
-
 @Component({
   tag: 'de-button-shadow',
   styleUrl: 'de-button-shadow.scss',
@@ -10,9 +9,10 @@ export class DeButtonShadow {
   @Prop() size: 'sm' | 'md' | 'lg' = 'md';
 
   render() {
-    return (<button class={`de-button de-button--${this.size}`}>
-      <slot></slot>
-    </button>
+    return (
+      <button class={`de-button de-button--${this.size}`}>
+        <slot></slot>
+      </button>
     );
   }
 }

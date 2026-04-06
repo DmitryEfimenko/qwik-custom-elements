@@ -42,9 +42,10 @@
     "build": "stencil build",
     "check-types": "tsc --noEmit -p tsconfig.json",
     "dev": "stencil build --dev --watch",
-    "format": "node -e \"console.log('test-stencil-lib format noop')\"",
+    "format": "prettier --write . --config ../../.prettierrc.json --ignore-path ../../.prettierignore",
+    "format:check": "prettier --check . --config ../../.prettierrc.json --ignore-path ../../.prettierignore",
     "start": "stencil build --dev --watch --serve",
-    "lint": "node -e \"console.log('test-stencil-lib lint noop')\"",
+    "lint": "eslint \"src/**/*.{ts,tsx}\" stencil.config.ts vitest.config.ts vitest-setup.ts --ignore-pattern \"**/*.d.ts\" --no-error-on-unmatched-pattern",
     "test": "stencil-test",
     "test:watch": "stencil-test --watch",
     "generate": "stencil generate"

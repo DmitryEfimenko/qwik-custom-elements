@@ -15,6 +15,8 @@ describe('format', () => {
   });
 
   it('formats first, middle and last names', () => {
-    expect(format('Joseph', 'Quincy', 'Publique')).toEqual('Joseph Quincy Publique');
+    expect(format('Joseph', 'Quincy', 'Publique')).toEqual(
+      'Joseph Quincy Publique',
+    );
   });
 });

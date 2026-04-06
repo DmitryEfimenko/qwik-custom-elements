@@ -40,7 +40,8 @@ describe('de-button', () => {
     );
 
     expect(onTripleClick).toHaveBeenCalledTimes(1);
-    const emittedEvent = onTripleClick.mock.calls[0][0] as CustomEvent<MouseEvent>;
+    const emittedEvent = onTripleClick.mock
+      .calls[0][0] as CustomEvent<MouseEvent>;
     expect(emittedEvent.detail).toBeInstanceOf(MouseEvent);
     expect(emittedEvent.detail.type).toBe('click');
   });

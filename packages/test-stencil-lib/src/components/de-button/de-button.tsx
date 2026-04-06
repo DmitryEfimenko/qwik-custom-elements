@@ -1,6 +1,5 @@
 import { Component, Event, EventEmitter, Prop, h } from '@stencil/core';
 
-
 @Component({
   tag: 'de-button',
   styleUrl: 'de-button.scss',

@@ -11,21 +11,21 @@ import {
   useOnDocument,
   useSignal,
   useTask$,
-} from "@builder.io/qwik";
+} from '@builder.io/qwik';
 
-import { updateStencilElementProps } from "./element-props-utils";
-import type { StencilRenderToString, StencilSSRProps } from "./model";
+import { updateStencilElementProps } from './element-props-utils';
+import type { StencilRenderToString, StencilSSRProps } from './model';
 import {
   collectStencilSsrStyles,
   createStencilSsrStyleStore,
-} from "./styles-core";
+} from './styles-core';
 
-const INLINE_EMITTED_KEY = "__stencil_ssr_inline_emitted__";
+const INLINE_EMITTED_KEY = '__stencil_ssr_inline_emitted__';
 const EVENT_QRL_IDS = new WeakMap<object, number>();
 let eventQrlIdCounter = 0;
 
 function getEventQrlId(qrl: unknown): number {
-  if (!qrl || (typeof qrl !== "object" && typeof qrl !== "function")) {
+  if (!qrl || (typeof qrl !== 'object' && typeof qrl !== 'function')) {
     return -1;
   }
   const qrlObj = qrl as object;
@@ -80,7 +80,7 @@ function buildInlineStylesHtml(
   const tempStore = createStencilSsrStyleStore();
   collectStencilSsrStyles(renderResult, tempStore, tagName);
 
-  let html = "";
+  let html = '';
   for (const [key, style] of tempStore.stylesByKey) {
     if (!emittedKeys.has(key)) {
       emittedKeys.add(key);
@@ -90,7 +90,7 @@ function buildInlineStylesHtml(
   return html;
 }
 
-const DEFAULT_SLOT_MARKER = "<!--SLOT-->";
+const DEFAULT_SLOT_MARKER = '<!--SLOT-->';
 
 function namedSlotMarker(name: string) {
   return `<!--SLOT:${name}-->`;
@@ -112,19 +112,19 @@ function getWrapperElement(wrapperId: string): HTMLDivElement | undefined {
   );
 }
 
-function getEventEntries(events: StencilSSRProps["events"]) {
+function getEventEntries(events: StencilSSRProps['events']) {
   return Object.entries(events ?? {}).filter(
     ([eventName, eventQrl]) => eventName.trim().length > 0 && Boolean(eventQrl),
   );
 }
 
-function getEventsDependencyKey(events: StencilSSRProps["events"]): string {
+function getEventsDependencyKey(events: StencilSSRProps['events']): string {
   return getEventEntries(events)
     .map(([eventName, eventQrl]) => {
       return `${eventName}:${getEventQrlId(eventQrl)}`;
     })
     .sort()
-    .join("|");
+    .join('|');
 }
 
 type EventQrlInternal = QRL<(...args: any[]) => void> & {
@@ -147,7 +147,7 @@ function buildInputHtml(tagName: string, slots: string[]) {
       (s) =>
         `<div slot="${s}" style="display:contents">${namedSlotMarker(s)}</div>`,
     )
-    .join("");
+    .join('');
   return `<${tagName}>${DEFAULT_SLOT_MARKER}${namedSlotHtml}</${tagName}>`;
 }
 
@@ -211,7 +211,7 @@ export function createStencilSSRComponent(
         clientReady.value = true;
       });
 
-      useOnDocument("qinit", markClientReady$);
+      useOnDocument('qinit', markClientReady$);
 
       // Keeps the Stencil element's props in sync with Qwik signals on the client.
       // On the server, props are applied via `beforeHydrate` inside the SSRStream.
@@ -253,7 +253,7 @@ export function createStencilSSRComponent(
         for (const [eventName, eventQrl] of eventEntries) {
           const listener: EventListener = (event) => {
             const qrl = eventQrl as EventQrlInternal;
-            const containerEl = stencilEl.closest("[q\\:container]");
+            const containerEl = stencilEl.closest('[q\\:container]');
             if (containerEl) {
               qrl.$setContainer$?.(containerEl);
             }
@@ -280,7 +280,7 @@ export function createStencilSSRComponent(
             ref={wrapperRef}
             data-stencil-wrapper-id={wrapperId}
             {...restProps}
-            style={{ display: "contents" }}
+            style={{ display: 'contents' }}
           >
             <SSRStream>
               {async function* () {
@@ -357,7 +357,7 @@ export function createStencilSSRComponent(
           ref={wrapperRef}
           data-stencil-wrapper-id={wrapperId}
           {...restProps}
-          style={{ display: "contents" }}
+          style={{ display: 'contents' }}
         >
           <Slot />
           {namedSlots.map((name) => (

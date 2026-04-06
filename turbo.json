@@ -1,5 +1,11 @@
 {
   "$schema": "https://turborepo.dev/schema.json",
+  "globalDependencies": [
+    ".editorconfig",
+    ".prettierignore",
+    ".prettierrc.json",
+    "eslint.config.mjs"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
@@ -16,6 +22,9 @@
     },
     "format": {
       "dependsOn": ["^format"]
+    },
+    "format:check": {
+      "dependsOn": ["^format:check"]
     },
     "dev": {
       "persistent": true,

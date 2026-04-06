@@ -1,4 +1,4 @@
-import { QRL } from "@builder.io/qwik";
+import { QRL } from '@builder.io/qwik';
 
 export interface StencilRenderToStringOptions {
   prettyHtml?: boolean;
@@ -6,12 +6,12 @@ export interface StencilRenderToStringOptions {
   fullDocument?: boolean;
   removeUnusedStyles?: boolean;
   serializeShadowRoot?:
-    | "declarative-shadow-dom"
-    | "scoped"
+    | 'declarative-shadow-dom'
+    | 'scoped'
     | {
-        "declarative-shadow-dom"?: string[];
+        'declarative-shadow-dom'?: string[];
         scoped?: string[];
-        default: "declarative-shadow-dom" | "scoped";
+        default: 'declarative-shadow-dom' | 'scoped';
       }
     | boolean;
   beforeHydrate?: (root: ParentNode) => void;

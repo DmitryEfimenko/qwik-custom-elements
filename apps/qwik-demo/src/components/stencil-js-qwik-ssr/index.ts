@@ -1,7 +1,7 @@
-export * from "./client-setup";
-export * from "./element-props-utils";
-export * from "./model";
-export * from "./stencil-ssr";
+export * from './client-setup';
+export * from './element-props-utils';
+export * from './model';
+export * from './stencil-ssr';
 export {
   collectStencilSsrStyles,
   createStencilSsrStyleStore,
@@ -9,4 +9,4 @@ export {
   toDocumentHeadStyles,
   type StencilSsrHeadStyleOptions,
   type StencilSsrStyleStore,
-} from "./styles-core";
+} from './styles-core';

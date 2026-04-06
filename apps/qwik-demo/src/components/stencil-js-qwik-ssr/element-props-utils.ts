@@ -2,9 +2,9 @@ function isSerializablePrimitive(value: unknown) {
   const valueType = typeof value;
   return (
     value == null ||
-    valueType === "string" ||
-    valueType === "number" ||
-    valueType === "boolean"
+    valueType === 'string' ||
+    valueType === 'number' ||
+    valueType === 'boolean'
   );
 }
 
@@ -26,7 +26,7 @@ export function updateStencilElementProps(
 
   for (const key of keys) {
     const value = props[key];
-    const isEvent = key.startsWith("on") || key.startsWith("$");
+    const isEvent = key.startsWith('on') || key.startsWith('$');
     if (isEvent) {
       continue;
     }

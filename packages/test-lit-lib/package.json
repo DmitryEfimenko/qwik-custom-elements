@@ -7,8 +7,9 @@
     "build": "node -e \"console.log('test-lit-lib build noop')\"",
     "check-types": "node -e \"console.log('test-lit-lib check-types noop')\"",
     "dev": "node -e \"console.log('test-lit-lib dev noop')\"",
-    "format": "node -e \"console.log('test-lit-lib format noop')\"",
-    "lint": "node -e \"console.log('test-lit-lib lint noop')\"",
+    "format": "prettier --write . --config ../../.prettierrc.json --ignore-path ../../.prettierignore",
+    "format:check": "prettier --check . --config ../../.prettierrc.json --ignore-path ../../.prettierignore",
+    "lint": "eslint \"**/*.{js,mjs,cjs,ts,mts,cts,tsx}\" --no-error-on-unmatched-pattern",
     "test": "node -e \"console.log('test-lit-lib test noop')\""
   }
 }

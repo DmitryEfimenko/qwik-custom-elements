@@ -1,4 +1,4 @@
-import type { StencilRenderToStringOptions } from "./stencil-js-qwik-ssr/model";
+import type { StencilRenderToStringOptions } from './stencil-js-qwik-ssr/model';
 
 export async function defineCustomElements() {
   // With a regular npm-installed Stencil package, this is usually much simpler:
@@ -7,10 +7,10 @@ export async function defineCustomElements() {
   // Vite server/fs configuration complexity while still showing Stencil in Qwik.
   const stencilLoaderUrl = import.meta.env.DEV
     ? __STENCIL_LOADER_DEV_URL__
-    : "/stencil-runtime/esm/loader.js";
+    : '/stencil-runtime/esm/loader.js';
   const stencilResourcesUrl = import.meta.env.DEV
     ? __STENCIL_RESOURCES_DEV_URL__
-    : "/stencil-runtime/esm/";
+    : '/stencil-runtime/esm/';
   const { defineCustomElements: defineCustomElementsFromLoader } = await import(
     /* @vite-ignore */ stencilLoaderUrl
   );
@@ -31,7 +31,7 @@ export async function renderToString(
   // With regular npm-installed components, this would typically be a direct
   // package import. In this demo we load the copied hydrate output target so
   // SSR does not depend on npm link resolution behavior.
-  const cwdPosix = process.cwd().replace(/\\/g, "/");
+  const cwdPosix = process.cwd().replace(/\\/g, '/');
   const hydrateModuleId = encodeURI(
     `file:///${cwdPosix}/public/stencil-runtime/hydrate/index.mjs`,
   );
@@ -41,7 +41,7 @@ export async function renderToString(
   const result = await stencilRenderToString(input, options);
 
   return {
-    html: result.html ?? "",
+    html: result.html ?? '',
     styles: result.styles,
     components: result.components,
   };

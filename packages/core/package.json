@@ -19,8 +19,9 @@
     "build": "tsc -p tsconfig.json",
     "check-types": "tsc -p tsconfig.json --noEmit",
     "dev": "node ./dist/cli.js --help",
-    "format": "node -e \"console.log('core format noop')\"",
-    "lint": "node -e \"console.log('core lint noop')\"",
+    "format": "prettier --write . --config ../../.prettierrc.json --ignore-path ../../.prettierignore",
+    "format:check": "prettier --check . --config ../../.prettierrc.json --ignore-path ../../.prettierignore",
+    "lint": "eslint \"**/*.{js,mjs,cjs,ts,mts,cts,tsx}\" --no-error-on-unmatched-pattern",
     "test": "vitest run"
   },
   "files": [

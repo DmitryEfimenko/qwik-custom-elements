@@ -1,4 +1,4 @@
-import { $, useOnDocument, type QRL } from "@builder.io/qwik";
+import { $, useOnDocument, type QRL } from '@builder.io/qwik';
 
 /**
  * Creates a client-side setup hook for Stencil components.
@@ -9,13 +9,13 @@ export function createStencilClientSetup(
 ) {
   const useStencilClientSetup = () => {
     useOnDocument(
-      "load",
+      'load',
       $(async () => {
         // SSR emits component styles as <style sty-id="..."> in the body to prevent FOUC.
         // Before Stencil bootstrap, move these into document.head so that when
         // Stencil's addStyle() queries style[sty-id="..."], it finds them there.
         const inlineBodyStyles =
-          document.querySelectorAll<HTMLStyleElement>("style[sty-id]");
+          document.querySelectorAll<HTMLStyleElement>('style[sty-id]');
 
         const seenContent = new Set<string>();
 
@@ -24,7 +24,7 @@ export function createStencilClientSetup(
             // Deduplicate by CSS content to handle cases where Stencil's
             // renderToString returns styles without proper IDs, causing
             // fallback key generation that may not be unique.
-            const content = styleEl.textContent ?? "";
+            const content = styleEl.textContent ?? '';
             if (!seenContent.has(content)) {
               document.head.appendChild(styleEl);
               seenContent.add(content);

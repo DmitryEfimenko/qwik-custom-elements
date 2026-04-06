@@ -1,6 +1,5 @@
 import { Component, Prop, h } from '@stencil/core';
 
-
 @Component({
   tag: 'de-alert-shadow',
   styleUrl: 'de-alert-shadow.scss',
@@ -13,7 +12,7 @@ export class DeAlertShadow {
     return (
       <div class="de-alert">
         <strong>{this.heading}</strong>
-        
+
         <div class="de-alert__content">
           <slot></slot>
         </div>
