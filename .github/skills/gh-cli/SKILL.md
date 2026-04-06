@@ -807,6 +807,35 @@ gh issue close 123 --comment "Fixed in PR #456"
 gh issue reopen 123
 ```
 
+### Multiline Close Comments (PowerShell)
+
+For multiline close comments in PowerShell, use a here-string variable.
+
+```powershell
+# Option 1: close with multiline comment
+$comment = @"
+Completed implementation for this issue.
+
+Validation run:
+- npm run typecheck
+- npm run test
+"@
+
+gh issue close 123 --repo owner/repo --comment "$comment"
+
+# Option 2: comment first, then close without --comment
+$body = @"
+Completed implementation for this issue.
+
+Validation run:
+- npm run typecheck
+- npm run test
+"@
+
+gh issue comment 123 --repo owner/repo --body "$body"
+gh issue close 123 --repo owner/repo
+```
+
 ### Comment on Issue
 
 ```bash

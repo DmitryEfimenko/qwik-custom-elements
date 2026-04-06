@@ -132,6 +132,12 @@ Make a git commit with a clear message referencing the issue.
 
 If the task is complete, close the original GitHub issue.
 
+Reference for GitHub CLI usage and PowerShell multiline comment safety:
+
+- `../skills/gh-cli/SKILL.md`
+
+When adding multiline close/comment text in PowerShell, use a here-string or `--body-file` approach. Do not rely on escaped newline sequences inside a single quoted command argument.
+
 If the task is not complete, leave a comment on the GitHub issue with what was done.
 
 # FINAL RULES
