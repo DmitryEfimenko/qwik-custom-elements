@@ -297,6 +297,72 @@ describe('runCli', () => {
     });
   });
 
+  it('emits deterministic warning when adapter SSR falls back to CEM-only', async () => {
+    await withTempDir(async (tempDir) => {
+      const previousCwd = process.cwd();
+      process.chdir(tempDir);
+
+      try {
+        const configPath = path.join(
+          tempDir,
+          'qwik-custom-elements.config.json',
+        );
+
+        await writeFile(
+          './custom-elements.json',
+          JSON.stringify({
+            modules: [{ declarations: [{ tagName: 'app-root' }] }],
+          }),
+          'utf8',
+        );
+        await writeFile(
+          './adapter-unsupported.mjs',
+          [
+            'export async function probeSSR() {',
+            '  return { available: false };',
+            '}',
+            '',
+          ].join('\n'),
+          'utf8',
+        );
+        await writeFile(
+          configPath,
+          JSON.stringify(
+            {
+              dryRun: true,
+              projects: [
+                {
+                  id: 'demo',
+                  adapter: 'stencil',
+                  adapterPackage: './adapter-unsupported.mjs',
+                  source: './custom-elements.json',
+                  outDir: './generated/demo',
+                },
+              ],
+            },
+            null,
+            2,
+          ),
+          'utf8',
+        );
+
+        vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+        const stderrSpy = vi
+          .spyOn(process.stderr, 'write')
+          .mockImplementation(() => true);
+
+        const exitCode = await runCli(['--config', configPath]);
+
+        expect(exitCode).toBe(0);
+        expect(stderrSpy).toHaveBeenCalledWith(
+          expect.stringContaining('QCE_SSR_UNSUPPORTED_FALLBACK'),
+        );
+      } finally {
+        process.chdir(previousCwd);
+      }
+    });
+  });
+
   it('prints buffered per-project logs in deterministic id order for parallel runs', async () => {
     await withTempDir(async (tempDir) => {
       const previousCwd = process.cwd();

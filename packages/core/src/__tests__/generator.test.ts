@@ -255,6 +255,39 @@ describe('generateFromConfig', () => {
     });
   });
 
+  it('falls back to CEM-only generation when adapter SSR is unavailable', async () => {
+    await withTempDir(async (tempDir) => {
+      await writeFile(
+        path.join(tempDir, 'custom-elements.json'),
+        JSON.stringify({
+          modules: [{ declarations: [{ tagName: 'app-root' }] }],
+        }),
+        'utf8',
+      );
+      await writeFile(
+        path.join(tempDir, 'adapter-unsupported.mjs'),
+        [
+          'export async function probeSSR() {',
+          '  return { available: false };',
+          '}',
+          '',
+        ].join('\n'),
+        'utf8',
+      );
+
+      const config = createSingleProjectConfig(tempDir, true);
+      config.projects[0].adapterPackage = './adapter-unsupported.mjs';
+
+      const result = await generateFromConfig(config, { cwd: tempDir });
+
+      expect(result.projects[0].status).toBe('success');
+      expect(result.projects[0].plannedWrites).toHaveLength(2);
+      expect(result.projects[0].observedErrorCodes).toEqual([
+        'QCE_SSR_UNSUPPORTED_FALLBACK',
+      ]);
+    });
+  });
+
   it('fails with deterministic code when CEM shape is invalid', async () => {
     await withTempDir(async (tempDir) => {
       await writeFile(

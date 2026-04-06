@@ -1,5 +1,6 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import type {
   GenerateOptions,
@@ -18,6 +19,8 @@ export class GenerationError extends Error {
     this.code = code;
   }
 }
+
+const SSR_UNSUPPORTED_FALLBACK_CODE = 'QCE_SSR_UNSUPPORTED_FALLBACK';
 
 export async function generateFromConfig(
   config: GeneratorConfig,
@@ -152,6 +155,12 @@ async function generateProject(
     outDirPath,
     componentTags,
   );
+  const observedErrorCodes: string[] = [];
+  const ssrProbe = await probeProjectSsrAvailability(project, cwd);
+
+  if (!ssrProbe.available) {
+    observedErrorCodes.push(SSR_UNSUPPORTED_FALLBACK_CODE);
+  }
 
   if (!dryRun) {
     await mkdir(outDirPath, { recursive: true });
@@ -174,8 +183,102 @@ async function generateProject(
     componentTags,
     plannedWrites,
     wroteFiles: !dryRun,
-    observedErrorCodes: [],
+    observedErrorCodes,
   };
+}
+
+async function probeProjectSsrAvailability(
+  project: GeneratorProject,
+  cwd: string,
+): Promise<{ available: boolean }> {
+  const adapterModule = await loadAdapterModule(project.adapterPackage, cwd);
+  const probeSSR =
+    adapterModule != null && typeof adapterModule.probeSSR === 'function'
+      ? adapterModule.probeSSR
+      : undefined;
+
+  if (probeSSR == null) {
+    return { available: false };
+  }
+
+  const probeResult = (await probeSSR({
+    projectId: project.id,
+    adapterOptions: project.adapterOptions ?? {},
+  })) as { available?: unknown };
+
+  if (probeResult != null && probeResult.available === true) {
+    return { available: true };
+  }
+
+  return { available: false };
+}
+
+async function loadAdapterModule(
+  adapterPackage: string,
+  cwd: string,
+): Promise<Record<string, unknown>> {
+  if (isRelativeOrAbsoluteSpecifier(adapterPackage)) {
+    const resolvedPath = path.isAbsolute(adapterPackage)
+      ? adapterPackage
+      : path.resolve(cwd, adapterPackage);
+    return (await import(pathToFileURL(resolvedPath).href)) as Record<
+      string,
+      unknown
+    >;
+  }
+
+  try {
+    return (await import(adapterPackage)) as Record<string, unknown>;
+  } catch (error) {
+    const workspaceLocalPath = resolveWorkspaceLocalAdapterPath(adapterPackage);
+    if (workspaceLocalPath == null) {
+      throw new GenerationError(
+        'QCE_ADAPTER_LOAD_FAILED',
+        `Could not load adapter package "${adapterPackage}": ${toErrorMessage(error)}`,
+      );
+    }
+
+    try {
+      return (await import(pathToFileURL(workspaceLocalPath).href)) as Record<
+        string,
+        unknown
+      >;
+    } catch (workspaceError) {
+      throw new GenerationError(
+        'QCE_ADAPTER_LOAD_FAILED',
+        `Could not load adapter package "${adapterPackage}": ${toErrorMessage(workspaceError)}`,
+      );
+    }
+  }
+}
+
+function isRelativeOrAbsoluteSpecifier(specifier: string): boolean {
+  return (
+    specifier.startsWith('.') ||
+    specifier.startsWith('/') ||
+    path.isAbsolute(specifier)
+  );
+}
+
+function resolveWorkspaceLocalAdapterPath(
+  adapterPackage: string,
+): string | undefined {
+  if (!adapterPackage.startsWith('@qwik-custom-elements/')) {
+    return undefined;
+  }
+
+  const packageDirectoryName = adapterPackage.split('/').at(-1);
+  if (!packageDirectoryName) {
+    return undefined;
+  }
+
+  return path.resolve(
+    path.dirname(fileURLToPath(import.meta.url)),
+    '..',
+    '..',
+    packageDirectoryName,
+    'index.js',
+  );
 }
 
 function createSkippedProjectResult(

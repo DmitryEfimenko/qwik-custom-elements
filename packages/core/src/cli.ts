@@ -8,6 +8,7 @@ import type { CliArgs, GenerationResult, RunSummary } from './types.js';
 
 const RUN_SUMMARY_SCHEMA_VERSION = '1.0.0';
 const DEFAULT_RUN_SUMMARY_PATH = './generated-run-summary.json';
+const SSR_UNSUPPORTED_FALLBACK_CODE = 'QCE_SSR_UNSUPPORTED_FALLBACK';
 const CORE_PACKAGE_JSON_PATH = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   '..',
@@ -160,6 +161,14 @@ export async function runCli(argv: string[]): Promise<number> {
       for (const project of generationResult.projects) {
         process.stdout.write(
           `[project:${project.projectId}] mode=${mode} plannedWrites=${project.plannedWrites.length}\n`,
+        );
+      }
+    }
+
+    for (const project of generationResult.projects) {
+      if (project.observedErrorCodes.includes(SSR_UNSUPPORTED_FALLBACK_CODE)) {
+        process.stderr.write(
+          `${SSR_UNSUPPORTED_FALLBACK_CODE}: Project "${project.projectId}" adapter SSR is unavailable; falling back to CEM-only generation.\n`,
         );
       }
     }

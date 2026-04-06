@@ -1,5 +1,42 @@
 # Progress Log
 
+## 2026-04-06 - PRD #1 / Child #11 - Stencil adapter vertical slice (task slice: adapter SSR probe integration with deterministic CEM fallback warning)
+
+### Task completed
+- Added adapter SSR probing in core generation flow and integrated adapter package loading for project-configured `adapterPackage` values.
+- Added deterministic fallback behavior for unsupported SSR probes: generation continues in CEM-only mode and records warning code `QCE_SSR_UNSUPPORTED_FALLBACK` at project-result level.
+- Added a minimal adapter-stencil package entrypoint (`index.js`) exposing `probeSSR()` so stencil projects can participate in the generation contract.
+- Added generator + CLI regression coverage for unsupported SSR fallback behavior and warning emission.
+
+### Key decisions
+- Kept this iteration to one narrow tracer-bullet slice for child #11: contract integration + fallback warning only (no SSR wrapper/rendering implementation yet).
+- Treated unsupported SSR as non-fatal for this slice, preserving successful generation output while surfacing deterministic diagnostics.
+- Added workspace-local adapter module resolution fallback for `@qwik-custom-elements/*` package names to keep local monorepo execution deterministic.
+
+### Key findings
+- Issue #11 is now the lowest-number open unblocked child under PRD #1 and active execution target.
+- Existing generation result shape already supported per-project observed error codes, which made fallback warning modeling low-risk.
+- Root Turbo feedback loops are now available and passed for this slice (`npm run typecheck`, `npm run test`, `npm run format`).
+
+### Validation loops run
+- `pnpm --filter @qwik-custom-elements/core run test` (passed)
+- `pnpm --filter @qwik-custom-elements/core run check-types` (passed)
+- `npm run typecheck` (passed)
+- `npm run test` (passed)
+- `npm run format` (passed)
+
+### Files changed
+- `packages/core/src/generator.ts`
+- `packages/core/src/cli.ts`
+- `packages/core/src/__tests__/generator.test.ts`
+- `packages/core/src/__tests__/config.test.ts`
+- `packages/adapter-stencil/index.js`
+- `.docs/progress.md`
+
+### Blockers / notes for next iteration
+- Child #11 remains open. This slice does not yet prove an end-to-end SSR parity render scenario in demo/app flow.
+- Next smallest slice can wire one concrete adapter-stencil SSR-available path with verifiable parity assertion while preserving fallback diagnostics.
+
 ## 2026-04-06 - PRD #1 / Child #10 - Run summary artifact contract (task slice: skipped-status outcomes for non-targeted projects)
 
 ### Task completed
