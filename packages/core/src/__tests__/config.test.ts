@@ -385,6 +385,8 @@ describe('runCli', () => {
             durationMs: number;
             generatedIndexPath: string;
             observedErrorCodes: string[];
+            resolvedCoreVersion: string;
+            resolvedAdapterVersion: string;
           }>;
           observedErrorCodes: string[];
         };
@@ -411,6 +413,10 @@ describe('runCli', () => {
         );
         expect(summary.projects[0].observedErrorCodes).toEqual([]);
         expect(summary.projects[1].observedErrorCodes).toEqual([]);
+        expect(summary.projects[0].resolvedCoreVersion).toBe('0.0.0');
+        expect(summary.projects[1].resolvedCoreVersion).toBe('0.0.0');
+        expect(summary.projects[0].resolvedAdapterVersion).toBe('0.0.0');
+        expect(summary.projects[1].resolvedAdapterVersion).toBe('0.0.0');
       } finally {
         process.chdir(previousCwd);
       }

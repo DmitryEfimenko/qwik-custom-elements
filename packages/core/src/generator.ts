@@ -158,6 +158,7 @@ async function generateProject(
     projectId: project.id,
     status: 'success',
     durationMs,
+    adapterPackage: project.adapterPackage,
     sourcePath,
     outDirPath,
     generatedIndexPath,

@@ -1,6 +1,6 @@
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import { pathToFileURL } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { ConfigValidationError, loadGeneratorConfig } from './config.js';
 import { GenerationError, generateFromConfig } from './generator.js';
@@ -8,6 +8,11 @@ import type { CliArgs, GenerationResult, RunSummary } from './types.js';
 
 const RUN_SUMMARY_SCHEMA_VERSION = '1.0.0';
 const DEFAULT_RUN_SUMMARY_PATH = './generated-run-summary.json';
+const CORE_PACKAGE_JSON_PATH = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  '..',
+  'package.json',
+);
 
 export function parseCliArgs(argv: string[]): CliArgs {
   let configPath: string | undefined;
@@ -180,6 +185,10 @@ async function writeRunSummaryArtifact(params: {
     configDir,
     summaryPath ?? DEFAULT_RUN_SUMMARY_PATH,
   );
+  const resolvedCoreVersion = await readVersionFromPackageJson(
+    CORE_PACKAGE_JSON_PATH,
+  );
+  const adapterVersionCache = new Map<string, string>();
 
   const observedErrorCodes: string[] = [];
   const summary: RunSummary = {
@@ -187,13 +196,20 @@ async function writeRunSummaryArtifact(params: {
     startedAt: new Date(runStartedAtMs).toISOString(),
     finishedAt: new Date(runFinishedAtMs).toISOString(),
     dryRun: generationResult.dryRun,
-    projects: generationResult.projects.map((project) => ({
-      projectId: project.projectId,
-      status: project.status,
-      durationMs: project.durationMs,
-      generatedIndexPath: project.generatedIndexPath,
-      observedErrorCodes: [],
-    })),
+    projects: await Promise.all(
+      generationResult.projects.map(async (project) => ({
+        projectId: project.projectId,
+        status: project.status,
+        durationMs: project.durationMs,
+        generatedIndexPath: project.generatedIndexPath,
+        resolvedCoreVersion,
+        resolvedAdapterVersion: await resolveAdapterVersion(
+          project.adapterPackage,
+          adapterVersionCache,
+        ),
+        observedErrorCodes: [],
+      })),
+    ),
     observedErrorCodes: Array.from(new Set(observedErrorCodes)).sort((a, b) =>
       a.localeCompare(b),
     ),
@@ -205,6 +221,58 @@ async function writeRunSummaryArtifact(params: {
     `${JSON.stringify(summary, null, 2)}\n`,
     'utf8',
   );
+}
+
+async function resolveAdapterVersion(
+  adapterPackage: string,
+  cache: Map<string, string>,
+): Promise<string> {
+  const cached = cache.get(adapterPackage);
+  if (cached != null) {
+    return cached;
+  }
+
+  const packageNameSegments = adapterPackage.split('/');
+  const packageDirectoryName = packageNameSegments.at(-1);
+
+  if (!packageDirectoryName) {
+    cache.set(adapterPackage, 'unknown');
+    return 'unknown';
+  }
+
+  const adapterPackageJsonPath = path.resolve(
+    path.dirname(fileURLToPath(import.meta.url)),
+    '..',
+    '..',
+    packageDirectoryName,
+    'package.json',
+  );
+
+  const resolvedVersion = await readVersionFromPackageJson(
+    adapterPackageJsonPath,
+  );
+  cache.set(adapterPackage, resolvedVersion);
+  return resolvedVersion;
+}
+
+async function readVersionFromPackageJson(
+  packageJsonPath: string,
+): Promise<string> {
+  try {
+    const packageJsonText = await readFile(packageJsonPath, 'utf8');
+    const packageJson = JSON.parse(packageJsonText) as Record<string, unknown>;
+    if (
+      packageJson != null &&
+      typeof packageJson.version === 'string' &&
+      packageJson.version.length > 0
+    ) {
+      return packageJson.version;
+    }
+
+    return 'unknown';
+  } catch {
+    return 'unknown';
+  }
 }
 
 function isMainModule(): boolean {

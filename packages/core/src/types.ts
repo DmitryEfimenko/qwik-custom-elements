@@ -42,6 +42,7 @@ export interface GenerationProjectResult {
   projectId: string;
   status: 'success';
   durationMs: number;
+  adapterPackage: string;
   sourcePath: string;
   outDirPath: string;
   generatedIndexPath: string;
@@ -55,6 +56,8 @@ export interface RunSummaryProject {
   status: 'success' | 'failed' | 'skipped';
   durationMs: number;
   generatedIndexPath: string;
+  resolvedCoreVersion: string;
+  resolvedAdapterVersion: string;
   observedErrorCodes: string[];
 }
 

@@ -870,3 +870,36 @@
 
 ### Blockers / notes for next iteration
 - No blocker. This is a planning-only update; no implementation work was started.
+
+## 2026-04-06 - PRD #1 / Child #10 - Run summary artifact contract (task slice: resolved core/adapter versions in summary projects)
+
+### Task completed
+- Extended run summary project entries to include resolved version fields for both core and adapter package versions.
+- Wired generation metadata so summary emission can resolve adapter versions from the project adapter package reference.
+- Extended CLI summary regression coverage to validate deterministic `resolvedCoreVersion` and `resolvedAdapterVersion` fields.
+
+### Key decisions
+- Kept this iteration as one narrow tracer-bullet slice for child #10: version-field coverage only.
+- Resolved package versions from monorepo package manifests with safe `unknown` fallback when a package manifest cannot be resolved.
+- Left failure/skipped project status expansion and non-empty observed error code aggregation for a follow-up slice.
+
+### Key findings
+- Summary emission already had deterministic ordering and baseline timing/status fields, so this slice required only metadata and writer enrichment.
+- Existing adapter package naming made deterministic version lookup straightforward from package manifest paths.
+
+### Validation loops run
+- `pnpm --filter @qwik-custom-elements/core run test`
+- `pnpm --filter @qwik-custom-elements/core run check-types`
+- `npm run typecheck`
+- `npm run test`
+- `npm run format`
+
+### Files changed
+- `packages/core/src/types.ts`
+- `packages/core/src/generator.ts`
+- `packages/core/src/cli.ts`
+- `packages/core/src/__tests__/config.test.ts`
+- `.docs/progress.md`
+
+### Blockers / notes for next iteration
+- Child #10 remains open; summary coverage still needs deterministic failed/skipped project statuses and observed error code aggregation when runs include failures.
