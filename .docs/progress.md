@@ -773,3 +773,60 @@
 
 ### Blockers / notes for next iteration
 - No blocker introduced by this cleanup; next work for child #11 can proceed on the simplified migrated app baseline.
+
+## 2026-04-06 - PRD #1 / Child #11 prep - qwik-demo startup decoupling from stale POC stencil sync path
+
+### Task completed
+- Removed stale POC coupling from `apps/qwik-demo` startup/build scripts that still required Stencil runtime copy artifacts.
+- Replaced the home route with a minimal baseline page that does not import generated Stencil wrappers.
+- Verified root startup path no longer fails on missing `packages/test-stencil-lib/dist/esm` during app boot.
+
+### Key decisions
+- Keep `apps/qwik-demo` runnable as an almost-empty baseline app while child #11 implementation work continues.
+- Treat remaining Stencil-specific files in the app as follow-up cleanup scope, not part of this immediate startup-unblock slice.
+- Preserve Turborepo root startup flow (`npm start` -> `pnpm dev:qwik-demo` -> `turbo run dev --filter=qwik-demo`).
+
+### Key findings
+- The breakage came from `apps/qwik-demo/package.json` scripts (`dev`, `build`, `preview`) chaining `sync:stencil-assets`, which executed a script that now fails after POC cleanup.
+- Home route still referenced generated Stencil wrappers (`src/components/generated/stencil`) even though the app target is currently minimal baseline.
+- After decoupling scripts and simplifying home route, the dev server starts successfully through both package-level and root-level commands.
+
+### Validation loops run
+- `pnpm --filter qwik-demo run build.types`
+- `pnpm --filter qwik-demo run dev` (confirmed Vite ready)
+- `npm start` (confirmed Turborepo starts `qwik-demo#dev` without the previous missing-Stencil-source error)
+
+### Files changed
+- `apps/qwik-demo/package.json`
+- `apps/qwik-demo/src/routes/index.tsx`
+
+### Blockers / notes for next iteration
+- No blocker for startup.
+- Additional cleanup pass is still recommended to remove remaining POC-era Stencil artifacts in `apps/qwik-demo` (unused Stencil routes/helpers, Vite Stencil defines/fs-allow, and stale env declarations) so the app baseline is fully consistent.
+
+## 2026-04-06 - PRD #1 / Child #12 planning note - open-wc custom-elements-manifest triage and issue placement
+
+### Task completed
+- Triaged potential use of `open-wc/custom-elements-manifest` against current PRD scope and active child issues.
+- Posted scoped guidance to child issue #12 and parent PRD issue #1.
+
+### Key decisions
+- Primary placement is child issue #12 because it owns Lit baseline CEM-path integration and fallback behavior.
+- Usage, if adopted, is build/test-time support for CEM generation or normalization in Lit fixture flows.
+- Explicitly out of scope for #12: adding runtime dependency coupling in adapter packages and broad cross-project schema hardening.
+
+### Key findings
+- Current architecture boundaries remain unchanged: core/generation tooling owns CEM parsing; adapters remain runtime integration plus metadata/fallback.
+- PRD text already supports this placement, so no PRD markdown edits were required for this planning update.
+
+### Validation loops run
+- `gh issue view 12 -R DmitryEfimenko/qwik-custom-elements --comments`
+- `gh issue view 1 -R DmitryEfimenko/qwik-custom-elements --comments`
+- `gh issue comment 12 -R DmitryEfimenko/qwik-custom-elements --body <multiline-note>`
+- `gh issue comment 1 -R DmitryEfimenko/qwik-custom-elements --body <multiline-note>`
+
+### Files changed
+- `.docs/progress.md`
+
+### Blockers / notes for next iteration
+- No blocker. This is a planning-only update; no implementation work was started.
