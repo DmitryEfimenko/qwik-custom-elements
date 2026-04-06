@@ -1,5 +1,37 @@
 # Progress Log
 
+## 2026-04-06 - PRD #1 / Child #12 - Lit adapter vertical slice (task slice: adapter-lit entrypoint + deterministic CEM fallback warning regression)
+
+### Task completed
+- Added the first real `@qwik-custom-elements/adapter-lit` package entrypoint (`index.js`) so core can load the adapter package in monorepo runs.
+- Implemented baseline Lit adapter SSR probe contract returning unavailable SSR (`probeSSR() -> { available: false }`) to exercise deterministic fallback-to-CEM behavior.
+- Added core generator regression coverage proving Lit adapter package loading succeeds and unsupported-SSR warning emission is deterministic.
+
+### Key decisions
+- Kept this iteration to one narrow tracer-bullet slice for child #12: make adapter-lit loadable and verify fallback warning behavior, without broadening into Lit SSR implementation.
+- Reused existing core fallback warning code contract (`QCE_SSR_UNSUPPORTED_FALLBACK`) to avoid introducing new warning semantics.
+- Added an integration-style test through `generateFromConfig(...)` to validate behavior at the public generation boundary.
+
+### Key findings
+- The new test initially failed with deterministic adapter load diagnostics (`QCE_ADAPTER_LOAD_FAILED`) because `packages/adapter-lit/index.js` did not exist.
+- Adding the adapter-lit entrypoint was sufficient to unblock package loading and make the fallback path observable for Lit.
+- Root Turbo feedback loops are available and passed for this slice (`npm run typecheck`, `npm run test`, `npm run format`).
+
+### Validation loops run
+- `pnpm --filter @qwik-custom-elements/core run test` (RED expected failure first, then GREEN pass)
+- `npm run typecheck` (passed)
+- `npm run test` (passed)
+- `npm run format` (passed)
+
+### Files changed
+- `packages/adapter-lit/index.js`
+- `packages/core/src/__tests__/generator.test.ts`
+- `.docs/progress.md`
+
+### Blockers / notes for next iteration
+- Child #12 acceptance criteria now appear satisfied by completed slices: Lit adapter contract integration for non-SSR path, deterministic fallback-to-CEM behavior, and testable warning emission.
+- Next logical step is issue state sync: leave final completion comment and close child issue #12.
+
 ## 2026-04-06 - PRD #1 / Child #11 - Stencil adapter vertical slice (task slice: demo SSR parity route wired to generated wrapper tags)
 
 ### Task completed

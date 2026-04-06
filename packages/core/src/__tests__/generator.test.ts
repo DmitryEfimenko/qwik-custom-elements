@@ -288,6 +288,30 @@ describe('generateFromConfig', () => {
     });
   });
 
+  it('loads the lit adapter package and falls back to CEM-only generation', async () => {
+    await withTempDir(async (tempDir) => {
+      await writeFile(
+        path.join(tempDir, 'custom-elements.json'),
+        JSON.stringify({
+          modules: [{ declarations: [{ tagName: 'lit-button' }] }],
+        }),
+        'utf8',
+      );
+
+      const config = createSingleProjectConfig(tempDir, true);
+      config.projects[0].adapter = 'lit';
+      config.projects[0].adapterPackage = '@qwik-custom-elements/adapter-lit';
+
+      const result = await generateFromConfig(config, { cwd: tempDir });
+
+      expect(result.projects[0].status).toBe('success');
+      expect(result.projects[0].componentTags).toEqual(['lit-button']);
+      expect(result.projects[0].observedErrorCodes).toEqual([
+        'QCE_SSR_UNSUPPORTED_FALLBACK',
+      ]);
+    });
+  });
+
   it('fails with deterministic code when CEM shape is invalid', async () => {
     await withTempDir(async (tempDir) => {
       await writeFile(
