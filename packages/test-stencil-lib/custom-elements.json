@@ -1,16 +1,217 @@
 {
-  "schemaVersion": "1.0.0",
-  "readme": "# test stencil lib",
+  "schemaVersion": "2.1.0",
   "modules": [
     {
+      "kind": "javascript-module",
+      "path": "src/components/de-alert/de-alert.tsx",
       "declarations": [
         {
-          "name": "AppRoot",
-          "tagName": "app-root"
+          "kind": "class",
+          "customElement": true,
+          "tagName": "de-alert",
+          "name": "DeAlert",
+          "attributes": [
+            {
+              "name": "heading",
+              "type": {
+                "text": "string"
+              },
+              "default": "'Alert'",
+              "fieldName": "heading"
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "heading",
+              "type": {
+                "text": "string"
+              },
+              "default": "'Alert'",
+              "readonly": true,
+              "attribute": "heading"
+            }
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "DeAlert",
+          "declaration": {
+            "name": "DeAlert"
+          }
         },
         {
-          "name": "CardPanel",
-          "tagName": "card-panel"
+          "kind": "custom-element-definition",
+          "name": "de-alert",
+          "declaration": {
+            "name": "DeAlert"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/components/de-alert-shadow/de-alert-shadow.tsx",
+      "declarations": [
+        {
+          "kind": "class",
+          "customElement": true,
+          "tagName": "de-alert-shadow",
+          "name": "DeAlertShadow",
+          "attributes": [
+            {
+              "name": "heading",
+              "type": {
+                "text": "string"
+              },
+              "default": "'Alert'",
+              "fieldName": "heading"
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "heading",
+              "type": {
+                "text": "string"
+              },
+              "default": "'Alert'",
+              "readonly": true,
+              "attribute": "heading"
+            }
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "DeAlertShadow",
+          "declaration": {
+            "name": "DeAlertShadow"
+          }
+        },
+        {
+          "kind": "custom-element-definition",
+          "name": "de-alert-shadow",
+          "declaration": {
+            "name": "DeAlertShadow"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/components/de-button/de-button.tsx",
+      "declarations": [
+        {
+          "kind": "class",
+          "customElement": true,
+          "tagName": "de-button",
+          "name": "DeButton",
+          "attributes": [
+            {
+              "name": "size",
+              "type": {
+                "text": "\"lg\" | \"md\" | \"sm\""
+              },
+              "default": "'md'",
+              "fieldName": "size"
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "size",
+              "type": {
+                "text": "\"lg\" | \"md\" | \"sm\""
+              },
+              "default": "'md'",
+              "readonly": true,
+              "attribute": "size"
+            }
+          ],
+          "events": [
+            {
+              "name": "tripleClick",
+              "type": {
+                "text": "CustomEvent<MouseEvent>",
+                "references": [
+                  {
+                    "name": "MouseEvent",
+                    "package": "global:"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "DeButton",
+          "declaration": {
+            "name": "DeButton"
+          }
+        },
+        {
+          "kind": "custom-element-definition",
+          "name": "de-button",
+          "declaration": {
+            "name": "DeButton"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
+      "path": "src/components/de-button-shadow/de-button-shadow.tsx",
+      "declarations": [
+        {
+          "kind": "class",
+          "customElement": true,
+          "tagName": "de-button-shadow",
+          "name": "DeButtonShadow",
+          "attributes": [
+            {
+              "name": "size",
+              "type": {
+                "text": "\"lg\" | \"md\" | \"sm\""
+              },
+              "default": "'md'",
+              "fieldName": "size"
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "size",
+              "type": {
+                "text": "\"lg\" | \"md\" | \"sm\""
+              },
+              "default": "'md'",
+              "readonly": true,
+              "attribute": "size"
+            }
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "DeButtonShadow",
+          "declaration": {
+            "name": "DeButtonShadow"
+          }
+        },
+        {
+          "kind": "custom-element-definition",
+          "name": "de-button-shadow",
+          "declaration": {
+            "name": "DeButtonShadow"
+          }
         }
       ]
     }

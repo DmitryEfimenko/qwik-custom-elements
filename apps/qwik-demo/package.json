@@ -1,14 +1,45 @@
 {
   "name": "qwik-demo",
-  "version": "0.0.0",
+  "description": "Blank project with routing included",
+  "engines": {
+    "node": "^18.17.0 || ^20.3.0 || >=21.0.0"
+  },
+  "engines-annotation": "Mostly required by sharp which needs a Node-API v9 compatible runtime",
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "pnpm run check-types",
-    "check-types": "tsc -p tsconfig.json --noEmit",
-    "dev": "node -e \"console.log('qwik-demo dev noop')\""
+    "build": "pnpm run sync:stencil-assets && qwik build",
+    "build.client": "vite build",
+    "build.preview": "vite build --ssr src/entry.preview.tsx",
+    "build.types": "tsc --incremental --noEmit",
+    "deploy": "echo 'Run \"pnpm run qwik add\" to install a server adapter'",
+    "dev": "pnpm run sync:stencil-assets && vite --mode ssr",
+    "dev.debug": "node --inspect-brk ./node_modules/vite/bin/vite.js --mode ssr --force",
+    "generate:stencil-wrappers": "tsx scripts/generate-qwik-from-stenciljs/index.ts",
+    "fmt": "prettier --write .",
+    "fmt.check": "prettier --check .",
+    "lint": "eslint \"src/**/*.ts*\"",
+    "preview": "pnpm run sync:stencil-assets && qwik build preview && vite preview --open --port 4173 --strictPort",
+    "sync:stencil-assets": "tsx scripts/sync-stencil-assets.ts",
+    "sync:stencil-esm": "pnpm run sync:stencil-assets",
+    "start": "vite --open --mode ssr",
+    "qwik": "qwik"
   },
   "devDependencies": {
-    "typescript": "^5.9.3"
+    "@builder.io/qwik": "^1.19.2",
+    "@builder.io/qwik-city": "^1.19.2",
+    "@eslint/js": "^9",
+    "@types/node": "20.19.0",
+    "eslint": "9.32.0",
+    "eslint-plugin-qwik": "^1.19.2",
+    "globals": "16.4.0",
+    "prettier": "3.6.2",
+    "typescript": "5.4.5",
+    "typescript-eslint": "8.38.0",
+    "typescript-plugin-css-modules": "latest",
+    "tsx": "^4.20.6",
+    "undici": "*",
+    "vite": "7.3.1",
+    "vite-tsconfig-paths": "^4.2.1"
   }
 }

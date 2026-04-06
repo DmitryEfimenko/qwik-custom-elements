@@ -1,0 +1,20 @@
+.de-button {
+  background-color: var(--de-button-bg, #007bff);
+  display: inline-block;
+  padding: 0.5em 1em;
+  border: none;
+  border-radius: 4px;
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+ 
+  &--sm {
+    font-size: 0.875rem;
+    padding: 0.25em 0.5em;
+  }
+
+  &--lg {
+    font-size: 1.25rem;
+    padding: 0.75em 1.5em;
+  }
+}

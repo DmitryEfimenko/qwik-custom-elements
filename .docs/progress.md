@@ -666,3 +666,83 @@
 ### Blockers / notes for next iteration
 - Child #9 acceptance criteria appear satisfied by completed slices (explicit parallel mode, deterministic buffered per-project logs, aggregate failure reporting with non-zero semantics).
 - Next step is verifying and closing child issue #9 if no additional scope is required.
+
+## 2026-04-05 - PRD #1 / Child #11 prep - real Stencil fixture library migration and test stabilization
+
+### Task completed
+- Replaced the placeholder `packages/test-stencil-lib` fixture with a real StencilJS library migrated from the `qwik-stenciljs/stencil-js-lib` POC.
+- Ensured the fixture package is buildable in this monorepo (`pnpm --filter @qwik-custom-elements/test-stencil-lib build`).
+- Hardened ignore rules for generated Stencil outputs and test artifacts.
+- Fixed a flaky/failing browser component test by waiting for Stencil component readiness before querying rendered internals.
+
+### Key decisions
+- Preserved monorepo package identity for fixture usage (`@qwik-custom-elements/test-stencil-lib`, private) while keeping Stencil build/test scripts.
+- Excluded transient copy artifacts during migration (`node_modules`, `.stencil`, `package-lock.json`).
+- Ignored generated outputs as authoritative build artifacts (`dist`, `loader`, `hydrate`, `www`) and added `.vitest-attachments` ignore coverage.
+
+### Key findings
+- Initial build failure was environmental (`stencil` not found) due to missing dependency install; `pnpm install` resolved it.
+- Browser test failure root cause was timing, not generator/runtime regression; `componentOnReady()` resolved null DOM query timing in browser mode.
+- Workspace regression check passed after fix (`pnpm -r --if-present test`), including:
+	- `packages/core`: 23/23 tests passed
+	- `packages/test-stencil-lib`: 5/5 tests passed
+
+### Validation loops run
+- `pnpm --filter @qwik-custom-elements/test-stencil-lib build` (failed before install, then passed)
+- `pnpm install`
+- `pnpm -r --if-present test` (revealed browser test timing failure, then passed after fix)
+- `pnpm --filter @qwik-custom-elements/test-stencil-lib exec playwright install chromium`
+- `pnpm --filter @qwik-custom-elements/test-stencil-lib exec vitest run --config vitest.config.ts --project browser src/components/de-button/de-button.cmp.test.ts`
+- `git status --short --ignored -- packages/test-stencil-lib/dist packages/test-stencil-lib/loader packages/test-stencil-lib/hydrate packages/test-stencil-lib/www`
+
+### Files changed
+- `.gitignore`
+- `packages/test-stencil-lib/.gitignore`
+- `packages/test-stencil-lib/package.json`
+- `packages/test-stencil-lib/custom-elements.json`
+- `packages/test-stencil-lib/src/components/de-button/de-button.cmp.test.ts`
+- `packages/test-stencil-lib/*` (real Stencil source/config/runtime fixture files migrated from POC)
+- `.docs/progress.md`
+
+### Blockers / notes for next iteration
+- This work is a preparatory slice for child issue #11 and de-risks upcoming adapter-stencil SSR parity work by replacing a mock fixture with a real Stencil library and verified test/build path.
+
+## 2026-04-05 - PRD #1 / Child #11 prep - real Qwik demo app migration from POC and integration verification
+
+### Task completed
+- Replaced the placeholder `apps/qwik-demo` scaffold with the real Qwik app migrated from `qwik-stenciljs/qwik-app` POC.
+- Reconciled monorepo path assumptions so the migrated app resolves runtime assets from `packages/test-stencil-lib`.
+- Updated copied npm-oriented scripts to pnpm-oriented scripts in the migrated app package.
+- Verified the migrated app builds successfully and does not regress existing workspace tests.
+
+### Key decisions
+- Used full mirror migration for `apps/qwik-demo` to ensure the destination is a true runnable Qwik app before child #11 work.
+- Kept reconciliation changes narrow to path/package-manager compatibility only:
+	- `scripts/sync-stencil-assets.ts` now reads from `../../packages/test-stencil-lib`.
+	- `vite.config.ts` now allows and resolves `../../packages/test-stencil-lib`.
+	- generator config now points `stencilPath` to `../../packages/test-stencil-lib`.
+- Preserved previous repository work-in-progress changes and did not revert unrelated modifications.
+
+### Key findings
+- The previous `apps/qwik-demo` content was a lightweight generated-wrapper harness; full mirror migration replaced that structure with a complete QwikCity-capable app layout.
+- Build succeeds after syncing stencil runtime assets from the migrated real stencil fixture package.
+- Workspace regression checks remain green after migration.
+
+### Validation loops run
+- `pnpm -C C:\Source\qwik-custom-elements install`
+- `pnpm -C C:\Source\qwik-custom-elements\packages\test-stencil-lib build`
+- `pnpm -C C:\Source\qwik-custom-elements\apps\qwik-demo build`
+- `pnpm -C C:\Source\qwik-custom-elements -r --if-present test`
+
+### Files changed
+- `apps/qwik-demo/*` (full app structure mirrored from POC and reconciled for monorepo paths)
+- `apps/qwik-demo/package.json`
+- `apps/qwik-demo/scripts/sync-stencil-assets.ts`
+- `apps/qwik-demo/scripts/generate-qwik-from-stenciljs/generator.config.json`
+- `apps/qwik-demo/vite.config.ts`
+- `pnpm-lock.yaml`
+- `.docs/progress.md`
+
+### Blockers / notes for next iteration
+- No blocker for entering child issue #11 with real app + real stencil fixture context now in place.
+- Next iteration can focus directly on adapter-stencil SSR parity behavior using this migrated baseline.

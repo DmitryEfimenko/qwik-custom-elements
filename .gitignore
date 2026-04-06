@@ -1,3 +1,12 @@
 .turbo
 node_modules
 dist
+
+# Generated outputs from the Stencil fixture library
+packages/test-stencil-lib/dist/
+packages/test-stencil-lib/loader/
+packages/test-stencil-lib/hydrate/
+packages/test-stencil-lib/www/
+
+# Vitest artifacts
+.vitest-attachments/

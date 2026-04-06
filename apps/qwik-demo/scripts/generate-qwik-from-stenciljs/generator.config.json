@@ -1,0 +1,6 @@
+{
+  "outDir": "src/components/generated/stencil",
+  "importMode": "demo",
+  "stencilPath": "../../packages/test-stencil-lib",
+  "cleanOutput": true
+}
