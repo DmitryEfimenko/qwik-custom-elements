@@ -903,3 +903,34 @@
 
 ### Blockers / notes for next iteration
 - Child #10 remains open; summary coverage still needs deterministic failed/skipped project statuses and observed error code aggregation when runs include failures.
+
+## 2026-04-06 - PRD #1 / Child #10 - Run summary artifact contract (task slice: failed-run summary emission with deterministic observed error codes)
+
+### Task completed
+- Added failed-run summary emission in core CLI when generation throws a deterministic `GenerationError`.
+- Emitted run-level `observedErrorCodes` in summary JSON from the failure code path using sorted unique normalization.
+- Added focused CLI regression coverage proving failed runs still write the configured summary artifact and include expected error code entries.
+
+### Key decisions
+- Kept this slice narrowly scoped to run-level observed error code emission on failed runs; per-project failed/skipped status modeling remains follow-up scope.
+- Reused existing summary writer with a minimal empty-project fallback payload for failure scenarios.
+- Preserved existing non-zero exit behavior for failed generation runs.
+
+### Key findings
+- Prior behavior returned non-zero on generation errors but skipped summary emission entirely, leaving machine-readable diagnostics empty.
+- Run-level error-code emission can be added without broad generator orchestration changes.
+
+### Validation loops run
+- `pnpm --filter @qwik-custom-elements/core run test` (RED expected failure first, then GREEN pass)
+- `pnpm --filter @qwik-custom-elements/core run check-types`
+- `npm run typecheck`
+- `npm run test`
+- `npm run format`
+
+### Files changed
+- `packages/core/src/cli.ts`
+- `packages/core/src/__tests__/config.test.ts`
+- `.docs/progress.md`
+
+### Blockers / notes for next iteration
+- Child #10 remains open; next smallest slice is per-project failed/skipped status representation in summary `projects[]` rather than failure-only run-level fallback.

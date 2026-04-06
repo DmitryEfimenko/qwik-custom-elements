@@ -230,6 +230,60 @@ describe('runCli', () => {
     });
   });
 
+  it('writes run summary artifact with observed error codes on failed runs', async () => {
+    await withTempDir(async (tempDir) => {
+      const previousCwd = process.cwd();
+      process.chdir(tempDir);
+
+      try {
+        const configPath = path.join(
+          tempDir,
+          'qwik-custom-elements.config.json',
+        );
+        const summaryPath = path.join(tempDir, 'summary', 'run-summary.json');
+
+        await writeFile(
+          configPath,
+          JSON.stringify(
+            {
+              dryRun: true,
+              summaryPath: './summary/run-summary.json',
+              projects: [
+                {
+                  id: 'broken-project',
+                  adapter: 'stencil',
+                  adapterPackage: '@qwik-custom-elements/adapter-stencil',
+                  source: './custom-elements-missing.json',
+                  outDir: './generated/broken',
+                },
+              ],
+            },
+            null,
+            2,
+          ),
+          'utf8',
+        );
+
+        vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+        vi.spyOn(process.stderr, 'write').mockImplementation(() => true);
+
+        const exitCode = await runCli(['--config', configPath]);
+        const summary = JSON.parse(await readFile(summaryPath, 'utf8')) as {
+          observedErrorCodes: string[];
+          projects: Array<unknown>;
+          dryRun: boolean;
+        };
+
+        expect(exitCode).toBe(1);
+        expect(summary.dryRun).toBe(true);
+        expect(summary.projects).toEqual([]);
+        expect(summary.observedErrorCodes).toEqual(['QCE_CEM_READ_FAILED']);
+      } finally {
+        process.chdir(previousCwd);
+      }
+    });
+  });
+
   it('prints buffered per-project logs in deterministic id order for parallel runs', async () => {
     await withTempDir(async (tempDir) => {
       const previousCwd = process.cwd();

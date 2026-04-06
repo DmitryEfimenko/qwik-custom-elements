@@ -98,6 +98,10 @@ export function parseCliArgs(argv: string[]): CliArgs {
 
 export async function runCli(argv: string[]): Promise<number> {
   const runStartedAtMs = Date.now();
+  let resolvedConfigPath: string | undefined;
+  let resolvedSummaryPath: string | undefined;
+  let resolvedDryRun = false;
+
   try {
     const args = parseCliArgs(argv);
 
@@ -115,6 +119,9 @@ export async function runCli(argv: string[]): Promise<number> {
     const { configPath, config } = await loadGeneratorConfig({
       configPath: args.configPath,
     });
+    resolvedConfigPath = configPath;
+    resolvedSummaryPath = config.summaryPath;
+    resolvedDryRun = config.dryRun === true;
 
     if (args.parallel) {
       config.parallel = true;
@@ -152,6 +159,21 @@ export async function runCli(argv: string[]): Promise<number> {
 
     return 0;
   } catch (error) {
+    if (resolvedConfigPath != null && error instanceof GenerationError) {
+      const runFinishedAtMs = Date.now();
+      await writeRunSummaryArtifact({
+        configPath: resolvedConfigPath,
+        summaryPath: resolvedSummaryPath,
+        generationResult: {
+          dryRun: resolvedDryRun,
+          projects: [],
+        },
+        runStartedAtMs,
+        runFinishedAtMs,
+        observedErrorCodes: [error.code],
+      });
+    }
+
     if (
       error instanceof ConfigValidationError ||
       error instanceof GenerationError
@@ -172,6 +194,7 @@ async function writeRunSummaryArtifact(params: {
   generationResult: GenerationResult;
   runStartedAtMs: number;
   runFinishedAtMs: number;
+  observedErrorCodes?: string[];
 }): Promise<void> {
   const {
     configPath,
@@ -179,6 +202,7 @@ async function writeRunSummaryArtifact(params: {
     generationResult,
     runStartedAtMs,
     runFinishedAtMs,
+    observedErrorCodes = [],
   } = params;
   const configDir = path.dirname(configPath);
   const resolvedSummaryPath = path.resolve(
@@ -190,7 +214,6 @@ async function writeRunSummaryArtifact(params: {
   );
   const adapterVersionCache = new Map<string, string>();
 
-  const observedErrorCodes: string[] = [];
   const summary: RunSummary = {
     schemaVersion: RUN_SUMMARY_SCHEMA_VERSION,
     startedAt: new Date(runStartedAtMs).toISOString(),
