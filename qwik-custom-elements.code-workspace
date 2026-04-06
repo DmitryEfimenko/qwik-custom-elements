@@ -13,6 +13,10 @@
         "approve": true,
         "matchCommandLine": true,
       },
+      "/^node packages/core/dist/cli\\.js$/": {
+        "approve": true,
+        "matchCommandLine": true,
+      },
     },
   },
 }
