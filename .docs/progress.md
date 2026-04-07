@@ -1,5 +1,52 @@
 # Progress Log
 
+## 2026-04-07 - PRD #1 / Child #23 - PACKAGE_NAME source resolution and deterministic CEM diagnostics (task slice: discovery + cemPath safety)
+
+### Task completed
+- Implemented `PACKAGE_NAME` source-mode path resolution in core generation with deterministic CEM discovery.
+- Added explicit `cemPath` override handling with strict safety guards:
+	- reject absolute `cemPath`
+	- reject `cemPath` traversal outside package root
+- Added deterministic diagnostics for unresolved and ambiguous PACKAGE_NAME discovery with remediation guidance (`Set source.cemPath ...`).
+- Updated built-in adapter capability metadata to declare PACKAGE_NAME support in:
+	- `@qwik-custom-elements/adapter-stencil`
+	- `@qwik-custom-elements/adapter-lit`
+	- `@qwik-custom-elements/adapter-lit/ssr`
+- Added integration-style generator regression coverage for:
+	- successful PACKAGE_NAME discovery
+	- no-candidate deterministic failure
+	- ambiguous-candidate deterministic failure
+	- absolute/outside-root `cemPath` safety failures
+
+### Key decisions
+- Kept this slice focused on core source-resolution behavior only; no unrelated SSR/runtime behavior changes.
+- Used deterministic discovery candidates (`custom-elements.json`, `dist/custom-elements.json`) when `cemPath` is omitted.
+- Preserved planning-time adapter/source compatibility checks and made PACKAGE_NAME usable by declaring support in built-in adapter metadata.
+
+### Key findings
+- Prior state accepted PACKAGE_NAME shape in config but hard-failed generation with `QCE_SOURCE_MODE_UNSUPPORTED`.
+- A red-first generator test extension provided direct public-boundary verification with minimal churn.
+- Root Turbo feedback loops remain green after this slice.
+
+### Validation loops run
+- `pnpm --filter @qwik-custom-elements/core run test -- generator.test.ts` (RED expected failure first, then GREEN pass)
+- `npm run typecheck` (passed)
+- `npm run test` (passed)
+- `npm run format` (passed)
+- `npm run test` (post-format pass)
+
+### Files changed
+- `.docs/progress.md`
+- `packages/core/src/generator.ts`
+- `packages/core/src/__tests__/generator.test.ts`
+- `packages/adapter-stencil/index.js`
+- `packages/adapter-lit/index.js`
+- `packages/adapter-lit/ssr.js`
+
+### Blockers / notes for next iteration
+- Child #23 acceptance criteria appear satisfied for deterministic PACKAGE_NAME discovery, override safety, and diagnostics.
+- Next logical step is issue state sync for #23 (completion comment + close), then advancing to child #24.
+
 ## 2026-04-07 - PRD #1 / Child #22 - Structured SSR project output baseline (task slice: project-level structured SSR capability fields)
 
 ### Task completed

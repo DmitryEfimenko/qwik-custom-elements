@@ -1,4 +1,6 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -22,6 +24,11 @@ export class GenerationError extends Error {
 }
 
 const SSR_UNSUPPORTED_FALLBACK_CODE = 'QCE_SSR_UNSUPPORTED_FALLBACK';
+const PACKAGE_NAME_CEM_DISCOVERY_CANDIDATES = [
+  'custom-elements.json',
+  path.join('dist', 'custom-elements.json'),
+];
+const require = createRequire(import.meta.url);
 
 export async function generateFromConfig(
   config: GeneratorConfig,
@@ -358,7 +365,7 @@ function createSkippedProjectResult(
     status: 'skipped',
     durationMs: 0,
     adapterPackage: project.adapterPackage,
-    sourcePath: resolveProjectSourcePath(project.id, project.source, cwd),
+    sourcePath: resolveSkippedProjectSourcePath(project.source, cwd),
     outDirPath,
     generatedIndexPath: path.join(outDirPath, 'index.ts'),
     componentTags: [],
@@ -373,6 +380,19 @@ function createSkippedProjectResult(
   };
 }
 
+function resolveSkippedProjectSourcePath(
+  source: GeneratorProjectSource,
+  cwd: string,
+): string {
+  if (source.type === 'CEM') {
+    return path.resolve(cwd, source.path);
+  }
+
+  return source.cemPath == null
+    ? `package:${source.packageName}`
+    : `package:${source.packageName}#${source.cemPath}`;
+}
+
 function resolveProjectSourcePath(
   projectId: string,
   source: GeneratorProjectSource,
@@ -382,9 +402,94 @@ function resolveProjectSourcePath(
     return path.resolve(cwd, source.path);
   }
 
+  const packageRoot = resolvePackageRootForProject(projectId, source, cwd);
+
+  if (source.cemPath != null) {
+    return resolvePackageNameOverrideCemPath(projectId, source, packageRoot);
+  }
+
+  return discoverPackageNameCemPath(projectId, source, packageRoot);
+}
+
+function resolvePackageRootForProject(
+  projectId: string,
+  source: Extract<GeneratorProjectSource, { type: 'PACKAGE_NAME' }>,
+  cwd: string,
+): string {
+  const packageSpecifier = `${source.packageName}/package.json`;
+
+  try {
+    const packageJsonPath = require.resolve(packageSpecifier, { paths: [cwd] });
+    return path.dirname(packageJsonPath);
+  } catch (error) {
+    throw new GenerationError(
+      'QCE_PACKAGE_NAME_RESOLVE_FAILED',
+      `Project "${projectId}" could not resolve source package "${source.packageName}" from ${cwd}: ${toErrorMessage(error)}`,
+    );
+  }
+}
+
+function resolvePackageNameOverrideCemPath(
+  projectId: string,
+  source: Extract<GeneratorProjectSource, { type: 'PACKAGE_NAME' }>,
+  packageRoot: string,
+): string {
+  const cemPath = source.cemPath as string;
+
+  if (path.isAbsolute(cemPath)) {
+    throw new GenerationError(
+      'QCE_PACKAGE_NAME_CEM_PATH_ABSOLUTE',
+      `Project "${projectId}" PACKAGE_NAME source.cemPath must be relative to package root; received absolute path "${cemPath}".`,
+    );
+  }
+
+  const resolvedCemPath = path.resolve(packageRoot, cemPath);
+  const relativeToPackageRoot = path.relative(packageRoot, resolvedCemPath);
+  const resolvesOutsidePackageRoot =
+    relativeToPackageRoot === '..' ||
+    relativeToPackageRoot.startsWith(`..${path.sep}`) ||
+    path.isAbsolute(relativeToPackageRoot);
+
+  if (resolvesOutsidePackageRoot) {
+    throw new GenerationError(
+      'QCE_PACKAGE_NAME_CEM_PATH_OUTSIDE_PACKAGE',
+      `Project "${projectId}" PACKAGE_NAME source.cemPath resolves outside package root: "${cemPath}".`,
+    );
+  }
+
+  return resolvedCemPath;
+}
+
+function discoverPackageNameCemPath(
+  projectId: string,
+  source: Extract<GeneratorProjectSource, { type: 'PACKAGE_NAME' }>,
+  packageRoot: string,
+): string {
+  const candidatePaths = PACKAGE_NAME_CEM_DISCOVERY_CANDIDATES.map(
+    (candidate) => path.resolve(packageRoot, candidate),
+  );
+
+  const existingCandidates: string[] = [];
+  for (const candidatePath of candidatePaths) {
+    if (existsSync(candidatePath)) {
+      existingCandidates.push(candidatePath);
+    }
+  }
+
+  if (existingCandidates.length === 1) {
+    return existingCandidates[0];
+  }
+
+  if (existingCandidates.length === 0) {
+    throw new GenerationError(
+      'QCE_PACKAGE_NAME_CEM_NOT_FOUND',
+      `Project "${projectId}" could not discover a CEM file for source package "${source.packageName}". Checked: ${PACKAGE_NAME_CEM_DISCOVERY_CANDIDATES.join(', ')}. Set source.cemPath to the manifest path relative to the package root.`,
+    );
+  }
+
   throw new GenerationError(
-    'QCE_SOURCE_MODE_UNSUPPORTED',
-    `Project "${projectId}" source type "${source.type}" is not yet supported by generation.`,
+    'QCE_PACKAGE_NAME_CEM_AMBIGUOUS',
+    `Project "${projectId}" discovered multiple CEM candidates for source package "${source.packageName}": ${existingCandidates.join(', ')}. Set source.cemPath to disambiguate.`,
   );
 }
 

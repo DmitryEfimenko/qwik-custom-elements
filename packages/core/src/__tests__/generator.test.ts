@@ -1,4 +1,4 @@
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
@@ -30,6 +30,25 @@ function createSingleProjectConfig(
       },
     ],
   };
+}
+
+async function createFixturePackage(
+  tempDir: string,
+  packageName: string,
+): Promise<string> {
+  const packageRoot = path.join(
+    tempDir,
+    'node_modules',
+    ...packageName.split('/'),
+  );
+  await mkdir(packageRoot, { recursive: true });
+  await writeFile(
+    path.join(packageRoot, 'package.json'),
+    JSON.stringify({ name: packageName, version: '1.0.0' }, null, 2),
+    'utf8',
+  );
+
+  return packageRoot;
 }
 describe('generateFromConfig', () => {
   it('produces deterministic planned writes in dry-run mode without mutating files', async () => {
@@ -316,6 +335,184 @@ describe('generateFromConfig', () => {
         code: 'QCE_ADAPTER_SOURCE_INCOMPATIBLE',
         message:
           'Project "demo" source type "CEM" is not supported by adapter "./adapter-package-name-only.mjs".',
+      });
+    });
+  });
+  it('discovers CEM for PACKAGE_NAME mode when one canonical candidate exists', async () => {
+    await withTempDir(async (tempDir) => {
+      const packageName = '@demo/components';
+      const packageRoot = await createFixturePackage(tempDir, packageName);
+      await writeFile(
+        path.join(packageRoot, 'custom-elements.json'),
+        JSON.stringify({
+          modules: [{ declarations: [{ tagName: 'pkg-button' }] }],
+        }),
+        'utf8',
+      );
+
+      const config = createSingleProjectConfig(tempDir, true);
+      config.projects[0].adapterPackage = './adapter-package-name-only.mjs';
+      config.projects[0].source = {
+        type: 'PACKAGE_NAME',
+        packageName,
+      };
+
+      await writeFile(
+        path.join(tempDir, 'adapter-package-name-only.mjs'),
+        [
+          'export const metadata = {',
+          "  id: 'custom-adapter',",
+          "  supportedSourceTypes: ['PACKAGE_NAME'],",
+          '};',
+          '',
+        ].join('\n'),
+        'utf8',
+      );
+
+      const result = await generateFromConfig(config, { cwd: tempDir });
+      expect(result.projects[0].componentTags).toEqual(['pkg-button']);
+      expect(result.projects[0].sourcePath).toBe(
+        path.join(packageRoot, 'custom-elements.json'),
+      );
+    });
+  });
+  it('fails with remediation guidance when PACKAGE_NAME CEM discovery finds no candidates', async () => {
+    await withTempDir(async (tempDir) => {
+      const packageName = '@demo/components';
+      await createFixturePackage(tempDir, packageName);
+
+      await writeFile(
+        path.join(tempDir, 'adapter-package-name-only.mjs'),
+        [
+          'export const metadata = {',
+          "  id: 'custom-adapter',",
+          "  supportedSourceTypes: ['PACKAGE_NAME'],",
+          '};',
+          '',
+        ].join('\n'),
+        'utf8',
+      );
+
+      const config = createSingleProjectConfig(tempDir, true);
+      config.projects[0].adapterPackage = './adapter-package-name-only.mjs';
+      config.projects[0].source = {
+        type: 'PACKAGE_NAME',
+        packageName,
+      };
+
+      await expect(
+        generateFromConfig(config, { cwd: tempDir }),
+      ).rejects.toMatchObject({
+        code: 'QCE_PACKAGE_NAME_CEM_NOT_FOUND',
+        message: expect.stringContaining('Set source.cemPath'),
+      });
+    });
+  });
+  it('fails deterministically when PACKAGE_NAME CEM discovery is ambiguous', async () => {
+    await withTempDir(async (tempDir) => {
+      const packageName = '@demo/components';
+      const packageRoot = await createFixturePackage(tempDir, packageName);
+      await writeFile(
+        path.join(packageRoot, 'custom-elements.json'),
+        JSON.stringify({ modules: [] }),
+        'utf8',
+      );
+      await mkdir(path.join(packageRoot, 'dist'), { recursive: true });
+      await writeFile(
+        path.join(packageRoot, 'dist', 'custom-elements.json'),
+        JSON.stringify({ modules: [] }),
+        'utf8',
+      );
+
+      await writeFile(
+        path.join(tempDir, 'adapter-package-name-only.mjs'),
+        [
+          'export const metadata = {',
+          "  id: 'custom-adapter',",
+          "  supportedSourceTypes: ['PACKAGE_NAME'],",
+          '};',
+          '',
+        ].join('\n'),
+        'utf8',
+      );
+
+      const config = createSingleProjectConfig(tempDir, true);
+      config.projects[0].adapterPackage = './adapter-package-name-only.mjs';
+      config.projects[0].source = {
+        type: 'PACKAGE_NAME',
+        packageName,
+      };
+
+      await expect(
+        generateFromConfig(config, { cwd: tempDir }),
+      ).rejects.toMatchObject({
+        code: 'QCE_PACKAGE_NAME_CEM_AMBIGUOUS',
+        message: expect.stringContaining('Set source.cemPath'),
+      });
+    });
+  });
+  it('rejects absolute PACKAGE_NAME cemPath override values', async () => {
+    await withTempDir(async (tempDir) => {
+      const packageName = '@demo/components';
+      const packageRoot = await createFixturePackage(tempDir, packageName);
+      const absoluteCemPath = path.join(packageRoot, 'custom-elements.json');
+
+      await writeFile(
+        path.join(tempDir, 'adapter-package-name-only.mjs'),
+        [
+          'export const metadata = {',
+          "  id: 'custom-adapter',",
+          "  supportedSourceTypes: ['PACKAGE_NAME'],",
+          '};',
+          '',
+        ].join('\n'),
+        'utf8',
+      );
+
+      const config = createSingleProjectConfig(tempDir, true);
+      config.projects[0].adapterPackage = './adapter-package-name-only.mjs';
+      config.projects[0].source = {
+        type: 'PACKAGE_NAME',
+        packageName,
+        cemPath: absoluteCemPath,
+      };
+
+      await expect(
+        generateFromConfig(config, { cwd: tempDir }),
+      ).rejects.toMatchObject({
+        code: 'QCE_PACKAGE_NAME_CEM_PATH_ABSOLUTE',
+      });
+    });
+  });
+  it('rejects PACKAGE_NAME cemPath overrides that escape package root', async () => {
+    await withTempDir(async (tempDir) => {
+      const packageName = '@demo/components';
+      await createFixturePackage(tempDir, packageName);
+
+      await writeFile(
+        path.join(tempDir, 'adapter-package-name-only.mjs'),
+        [
+          'export const metadata = {',
+          "  id: 'custom-adapter',",
+          "  supportedSourceTypes: ['PACKAGE_NAME'],",
+          '};',
+          '',
+        ].join('\n'),
+        'utf8',
+      );
+
+      const config = createSingleProjectConfig(tempDir, true);
+      config.projects[0].adapterPackage = './adapter-package-name-only.mjs';
+      config.projects[0].source = {
+        type: 'PACKAGE_NAME',
+        packageName,
+        cemPath: '../outside/custom-elements.json',
+      };
+
+      await expect(
+        generateFromConfig(config, { cwd: tempDir }),
+      ).rejects.toMatchObject({
+        code: 'QCE_PACKAGE_NAME_CEM_PATH_OUTSIDE_PACKAGE',
       });
     });
   });

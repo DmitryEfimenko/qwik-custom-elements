@@ -1,6 +1,6 @@
 export const metadata = {
   adapterId: 'lit',
-  supportedSourceTypes: ['CEM'],
+  supportedSourceTypes: ['CEM', 'PACKAGE_NAME'],
   supportsSsrProbe: true,
   ssrRuntimeSubpath: './ssr',
 };
