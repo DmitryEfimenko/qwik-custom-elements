@@ -69,11 +69,24 @@ If all tasks are complete, output "ALL TASKS COMPLETE" and stop. Do not start an
 
 Explore the repo and fill your context window with relevant information that will allow you to complete the issue.
 
+- First, refresh canonical PRD decision context (do not rely on stale memory):
+  - Re-read the current parent PRD issue body and extract only decisions relevant to this child issue/slice.
+  - Re-read repository decision artifacts (for example `.docs/qwik-custom-elements-decisions.md`) and treat PRD issue text as canonical if conflicts exist.
+  - If the selected child issue narrows or overrides wording, capture that as part of the decision context.
+- Create a short "decision snapshot" before coding:
+  - List the 3-7 highest-impact constraints that must hold for this slice.
+  - Include explicit "must" and "must not" statements derived from PRD decisions.
+  - Include contract-shape constraints (types/interfaces/config schema) when applicable.
 - Use Explore subagents to quickly locate:
-- Current implementations affected by the task
-- Prior art patterns for similar code
-- Any build/lint/typecheck constraints
-- Read only what is necessary to complete this ONE issue.
+  - Current implementations affected by the task.
+  - Prior art patterns for similar code.
+  - Any build/lint/typecheck constraints.
+  - Existing tests that should fail first for the selected behavior.
+- Perform a pre-implementation decision check:
+  - Compare the planned code change against the decision snapshot.
+  - If any planned change conflicts with PRD decisions, revise the slice before editing code.
+  - If decisions are ambiguous, pause and ask a clarifying question before implementation.
+- Read only what is necessary to complete this ONE issue, but always include the latest PRD decision sources above.
 
 # REQUIRED SKILL LOADING
 
