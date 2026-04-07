@@ -1,5 +1,45 @@
 # Progress Log
 
+## 2026-04-07 - PRD #1 / Child #22 - Structured SSR project output baseline (task slice: project-level structured SSR capability fields)
+
+### Task completed
+- Added structured SSR capability fields to core project generation output (`ssrCapabilities`) with deterministic shape.
+- Added structured SSR capability fields to run summary project entries so machine consumers can assert SSR behavior without parsing warning text.
+- Preserved deterministic SSR fallback diagnostics (`QCE_SSR_UNSUPPORTED_FALLBACK`) while enriching output structure.
+- Added/updated integration-style regression assertions for generator and CLI summary outputs across success, fallback, failed, and skipped project scenarios.
+
+### Key decisions
+- Kept this slice narrowly scoped to structured SSR capability output only; no PACKAGE_NAME source resolution behavior was added.
+- Used one canonical structured shape for both generation results and run-summary project entries:
+	- `available`
+	- `supportsSsrProbe`
+	- `ssrRuntimeSubpath`
+- For synthetic failed/skipped summary entries (where adapter probe does not run), emitted deterministic default SSR capability values.
+
+### Key findings
+- Existing #22 fallback diagnostics and SSR probing paths were sufficient; the main gap was result/summary contract shape, not probe logic.
+- A red-first extension of existing SSR integration tests provided direct public-boundary verification with minimal churn.
+- Root Turbo loops remain green with this slice.
+
+### Validation loops run
+- `pnpm --filter @qwik-custom-elements/core run test -- generator.test.ts` (RED expected failure first)
+- `pnpm --filter @qwik-custom-elements/core run test -- generator.test.ts config.test.ts` (GREEN pass)
+- `npm run typecheck` (passed)
+- `npm run test` (passed)
+- `npm run format` (passed)
+
+### Files changed
+- `packages/core/src/types.ts`
+- `packages/core/src/generator.ts`
+- `packages/core/src/cli.ts`
+- `packages/core/src/__tests__/generator.test.ts`
+- `packages/core/src/__tests__/config.test.ts`
+- `.docs/progress.md`
+
+### Blockers / notes for next iteration
+- Child #22 acceptance criteria now appear satisfied across completed slices.
+- Next logical iteration is issue state sync for #22 (completion comment + close) and then advancing to child #23.
+
 ## 2026-04-07 - PRD #1 / Child #22 - Adapter/source planning-time compatibility baseline (task slice: adapter capability metadata source-type checks)
 
 ### Task completed

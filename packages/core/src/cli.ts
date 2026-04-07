@@ -214,6 +214,11 @@ export async function runCli(argv: string[]): Promise<number> {
             componentTags: [],
             plannedWrites: [],
             wroteFiles: false,
+            ssrCapabilities: {
+              available: false,
+              supportsSsrProbe: false,
+              ssrRuntimeSubpath: null,
+            },
             observedErrorCodes: project.isTargeted ? [error.code] : [],
           })),
         },
@@ -293,6 +298,7 @@ async function writeRunSummaryArtifact(params: {
           project.adapterPackage,
           adapterVersionCache,
         ),
+        ssrCapabilities: project.ssrCapabilities,
         observedErrorCodes: Array.from(
           new Set(project.observedErrorCodes),
         ).sort((a, b) => a.localeCompare(b)),

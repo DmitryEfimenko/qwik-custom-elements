@@ -161,6 +161,7 @@ async function generateProject(
     componentTags,
   );
   const observedErrorCodes: string[] = [];
+  const adapterSsrCapabilities = resolveAdapterSsrCapabilities(adapterModule);
   const ssrProbe = await probeProjectSsrAvailability(project, adapterModule);
 
   if (!ssrProbe.available) {
@@ -188,7 +189,35 @@ async function generateProject(
     componentTags,
     plannedWrites,
     wroteFiles: !dryRun,
+    ssrCapabilities: {
+      available: ssrProbe.available,
+      supportsSsrProbe: adapterSsrCapabilities.supportsSsrProbe,
+      ssrRuntimeSubpath: adapterSsrCapabilities.ssrRuntimeSubpath,
+    },
     observedErrorCodes,
+  };
+}
+
+function resolveAdapterSsrCapabilities(
+  adapterModule: Record<string, unknown>,
+): {
+  supportsSsrProbe: boolean;
+  ssrRuntimeSubpath: string | null;
+} {
+  const metadata =
+    adapterModule != null && typeof adapterModule.metadata === 'object'
+      ? (adapterModule.metadata as Record<string, unknown>)
+      : undefined;
+
+  const supportsSsrProbe = metadata?.supportsSsrProbe === true;
+  const ssrRuntimeSubpath =
+    typeof metadata?.ssrRuntimeSubpath === 'string'
+      ? metadata.ssrRuntimeSubpath
+      : null;
+
+  return {
+    supportsSsrProbe,
+    ssrRuntimeSubpath,
   };
 }
 
@@ -335,6 +364,11 @@ function createSkippedProjectResult(
     componentTags: [],
     plannedWrites: [],
     wroteFiles: false,
+    ssrCapabilities: {
+      available: false,
+      supportsSsrProbe: false,
+      ssrRuntimeSubpath: null,
+    },
     observedErrorCodes: [],
   };
 }

@@ -307,6 +307,11 @@ describe('runCli', () => {
             status: string;
             durationMs: number;
             generatedIndexPath: string;
+            ssrCapabilities: {
+              available: boolean;
+              supportsSsrProbe: boolean;
+              ssrRuntimeSubpath: string | null;
+            };
             observedErrorCodes: string[];
           }>;
           dryRun: boolean;
@@ -318,6 +323,11 @@ describe('runCli', () => {
         expect(summary.projects[0].status).toBe('failed');
         expect(summary.projects[0].durationMs).toBeGreaterThanOrEqual(0);
         expect(summary.projects[0].generatedIndexPath).toBe('');
+        expect(summary.projects[0].ssrCapabilities).toEqual({
+          available: false,
+          supportsSsrProbe: false,
+          ssrRuntimeSubpath: null,
+        });
         expect(summary.projects[0].observedErrorCodes).toEqual([
           'QCE_CEM_READ_FAILED',
         ]);
@@ -527,6 +537,11 @@ describe('runCli', () => {
             status: string;
             durationMs: number;
             generatedIndexPath: string;
+            ssrCapabilities: {
+              available: boolean;
+              supportsSsrProbe: boolean;
+              ssrRuntimeSubpath: string | null;
+            };
             observedErrorCodes: string[];
             resolvedCoreVersion: string;
             resolvedAdapterVersion: string;
@@ -555,6 +570,16 @@ describe('runCli', () => {
         );
         expect(summary.projects[0].observedErrorCodes).toEqual([]);
         expect(summary.projects[1].observedErrorCodes).toEqual([]);
+        expect(summary.projects[0].ssrCapabilities).toEqual({
+          available: true,
+          supportsSsrProbe: true,
+          ssrRuntimeSubpath: null,
+        });
+        expect(summary.projects[1].ssrCapabilities).toEqual({
+          available: true,
+          supportsSsrProbe: true,
+          ssrRuntimeSubpath: null,
+        });
         expect(summary.projects[0].resolvedCoreVersion).toBe('0.0.0');
         expect(summary.projects[1].resolvedCoreVersion).toBe('0.0.0');
         expect(summary.projects[0].resolvedAdapterVersion).toBe('0.0.0');
@@ -629,6 +654,11 @@ describe('runCli', () => {
             status: string;
             durationMs: number;
             generatedIndexPath: string;
+            ssrCapabilities: {
+              available: boolean;
+              supportsSsrProbe: boolean;
+              ssrRuntimeSubpath: string | null;
+            };
             observedErrorCodes: string[];
           }>;
         };
@@ -643,6 +673,11 @@ describe('runCli', () => {
         expect(summary.projects[1].generatedIndexPath).toBe(
           path.join(tempDir, 'generated', 'z', 'index.ts'),
         );
+        expect(summary.projects[1].ssrCapabilities).toEqual({
+          available: false,
+          supportsSsrProbe: false,
+          ssrRuntimeSubpath: null,
+        });
         expect(summary.projects[1].observedErrorCodes).toEqual([]);
       } finally {
         process.chdir(previousCwd);

@@ -252,6 +252,11 @@ describe('generateFromConfig', () => {
       const result = await generateFromConfig(config, { cwd: tempDir });
       expect(result.projects[0].status).toBe('success');
       expect(result.projects[0].plannedWrites).toHaveLength(2);
+      expect(result.projects[0].ssrCapabilities).toEqual({
+        available: false,
+        supportsSsrProbe: false,
+        ssrRuntimeSubpath: null,
+      });
       expect(result.projects[0].observedErrorCodes).toEqual([
         'QCE_SSR_UNSUPPORTED_FALLBACK',
       ]);
@@ -273,6 +278,11 @@ describe('generateFromConfig', () => {
       const result = await generateFromConfig(config, { cwd: tempDir });
       expect(result.projects[0].status).toBe('success');
       expect(result.projects[0].componentTags).toEqual(['lit-button']);
+      expect(result.projects[0].ssrCapabilities).toEqual({
+        available: true,
+        supportsSsrProbe: true,
+        ssrRuntimeSubpath: './ssr',
+      });
       expect(result.projects[0].observedErrorCodes).toEqual([]);
     });
   });

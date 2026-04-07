@@ -53,6 +53,12 @@ export interface PlannedWrite {
   content: string;
 }
 
+export interface ProjectSsrCapabilities {
+  available: boolean;
+  supportsSsrProbe: boolean;
+  ssrRuntimeSubpath: string | null;
+}
+
 export interface GenerationProjectResult {
   projectId: string;
   status: 'success' | 'failed' | 'skipped';
@@ -64,6 +70,7 @@ export interface GenerationProjectResult {
   componentTags: string[];
   plannedWrites: PlannedWrite[];
   wroteFiles: boolean;
+  ssrCapabilities: ProjectSsrCapabilities;
   observedErrorCodes: string[];
 }
 
@@ -74,6 +81,7 @@ export interface RunSummaryProject {
   generatedIndexPath: string;
   resolvedCoreVersion: string;
   resolvedAdapterVersion: string;
+  ssrCapabilities: ProjectSsrCapabilities;
   observedErrorCodes: string[];
 }
 
