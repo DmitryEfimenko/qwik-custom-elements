@@ -1,12 +1,9 @@
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
-
 import { afterEach, describe, expect, it, vi } from 'vitest';
-
 import { parseCliArgs, runCli } from '../cli.js';
 import { ConfigValidationError, loadGeneratorConfig } from '../config.js';
-
 async function withTempDir(
   run: (tempDir: string) => Promise<void>,
 ): Promise<void> {
@@ -17,104 +14,15 @@ async function withTempDir(
     await rm(tempDir, { recursive: true, force: true });
   }
 }
-
 const validProject = {
   id: 'demo',
   adapter: 'stencil',
   adapterPackage: '@qwik-custom-elements/adapter-stencil',
-  source: './custom-elements.json',
+  source: { type: 'CEM', path: './custom-elements.json' },
   outDir: './src/generated',
 };
-
 describe('loadGeneratorConfig', () => {
-  it('supports discriminated CEM source object contract', async () => {
-    await withTempDir(async (tempDir) => {
-      const configPath = path.join(tempDir, 'qwik-custom-elements.config.json');
-      await writeFile(
-        configPath,
-        JSON.stringify(
-          {
-            projects: [
-              {
-                ...validProject,
-                source: {
-                  type: 'CEM',
-                  path: './custom-elements.json',
-                },
-              },
-            ],
-          },
-          null,
-          2,
-        ),
-        'utf8',
-      );
-
-      const loaded = await loadGeneratorConfig({ cwd: tempDir });
-      expect(loaded.config.projects[0].source).toEqual({
-        type: 'CEM',
-        path: './custom-elements.json',
-      });
-    });
-  });
-
-  it('loads default JSON config path', async () => {
-    await withTempDir(async (tempDir) => {
-      const configPath = path.join(tempDir, 'qwik-custom-elements.config.json');
-      await writeFile(
-        configPath,
-        JSON.stringify({ projects: [validProject] }, null, 2),
-        'utf8',
-      );
-
-      const loaded = await loadGeneratorConfig({ cwd: tempDir });
-
-      expect(loaded.configPath).toBe(configPath);
-      expect(loaded.config.projects).toHaveLength(1);
-      expect(loaded.config.projects[0].id).toBe('demo');
-    });
-  });
-
-  it('supports optional JS config variant', async () => {
-    await withTempDir(async (tempDir) => {
-      const configPath = path.join(tempDir, 'custom.config.js');
-      await writeFile(
-        configPath,
-        `export default { projects: [${JSON.stringify(validProject)}] };`,
-        'utf8',
-      );
-
-      const loaded = await loadGeneratorConfig({
-        cwd: tempDir,
-        configPath: './custom.config.js',
-      });
-      expect(loaded.config.projects[0].adapter).toBe('stencil');
-    });
-  });
-
-  it('fails fast with deterministic unknown-field error', async () => {
-    await withTempDir(async (tempDir) => {
-      const configPath = path.join(tempDir, 'qwik-custom-elements.config.json');
-      await writeFile(
-        configPath,
-        JSON.stringify(
-          { projects: [validProject], unknownRootField: true },
-          null,
-          2,
-        ),
-        'utf8',
-      );
-
-      await expect(loadGeneratorConfig({ cwd: tempDir })).rejects.toMatchObject(
-        {
-          code: 'QCE_CONFIG_UNKNOWN_FIELD',
-          message: 'Unknown config field "root.unknownRootField".',
-        },
-      );
-    });
-  });
-
-  it('fails fast when required project fields are missing', async () => {
+  it('rejects legacy string source contract', async () => {
     await withTempDir(async (tempDir) => {
       const configPath = path.join(tempDir, 'qwik-custom-elements.config.json');
       await writeFile(
@@ -127,6 +35,7 @@ describe('loadGeneratorConfig', () => {
                 adapter: 'stencil',
                 adapterPackage: '@qwik-custom-elements/adapter-stencil',
                 source: './custom-elements.json',
+                outDir: './src/generated',
               },
             ],
           },
@@ -138,6 +47,112 @@ describe('loadGeneratorConfig', () => {
 
       await expect(loadGeneratorConfig({ cwd: tempDir })).rejects.toMatchObject(
         {
+          code: 'QCE_CONFIG_INVALID_TYPE',
+          message:
+            'Config field "projects[0].source" must be a source object with a valid "type" discriminator.',
+        },
+      );
+    });
+  });
+
+  it('supports discriminated CEM source object contract', async () => {
+    await withTempDir(async (tempDir) => {
+      const configPath = path.join(tempDir, 'qwik-custom-elements.config.json');
+      await writeFile(
+        configPath,
+        JSON.stringify(
+          {
+            projects: [
+              {
+                ...validProject,
+                source: { type: 'CEM', path: './custom-elements.json' },
+              },
+            ],
+          },
+          null,
+          2,
+        ),
+        'utf8',
+      );
+      const loaded = await loadGeneratorConfig({ cwd: tempDir });
+      expect(loaded.config.projects[0].source).toEqual({
+        type: 'CEM',
+        path: './custom-elements.json',
+      });
+    });
+  });
+  it('loads default JSON config path', async () => {
+    await withTempDir(async (tempDir) => {
+      const configPath = path.join(tempDir, 'qwik-custom-elements.config.json');
+      await writeFile(
+        configPath,
+        JSON.stringify({ projects: [validProject] }, null, 2),
+        'utf8',
+      );
+      const loaded = await loadGeneratorConfig({ cwd: tempDir });
+      expect(loaded.configPath).toBe(configPath);
+      expect(loaded.config.projects).toHaveLength(1);
+      expect(loaded.config.projects[0].id).toBe('demo');
+    });
+  });
+  it('supports optional JS config variant', async () => {
+    await withTempDir(async (tempDir) => {
+      const configPath = path.join(tempDir, 'custom.config.js');
+      await writeFile(
+        configPath,
+        `export default { projects: [${JSON.stringify(validProject)}] };`,
+        'utf8',
+      );
+      const loaded = await loadGeneratorConfig({
+        cwd: tempDir,
+        configPath: './custom.config.js',
+      });
+      expect(loaded.config.projects[0].adapter).toBe('stencil');
+    });
+  });
+  it('fails fast with deterministic unknown-field error', async () => {
+    await withTempDir(async (tempDir) => {
+      const configPath = path.join(tempDir, 'qwik-custom-elements.config.json');
+      await writeFile(
+        configPath,
+        JSON.stringify(
+          { projects: [validProject], unknownRootField: true },
+          null,
+          2,
+        ),
+        'utf8',
+      );
+      await expect(loadGeneratorConfig({ cwd: tempDir })).rejects.toMatchObject(
+        {
+          code: 'QCE_CONFIG_UNKNOWN_FIELD',
+          message: 'Unknown config field "root.unknownRootField".',
+        },
+      );
+    });
+  });
+  it('fails fast when required project fields are missing', async () => {
+    await withTempDir(async (tempDir) => {
+      const configPath = path.join(tempDir, 'qwik-custom-elements.config.json');
+      await writeFile(
+        configPath,
+        JSON.stringify(
+          {
+            projects: [
+              {
+                id: 'demo',
+                adapter: 'stencil',
+                adapterPackage: '@qwik-custom-elements/adapter-stencil',
+                source: { type: 'CEM', path: './custom-elements.json' },
+              },
+            ],
+          },
+          null,
+          2,
+        ),
+        'utf8',
+      );
+      await expect(loadGeneratorConfig({ cwd: tempDir })).rejects.toMatchObject(
+        {
           code: 'QCE_CONFIG_MISSING_REQUIRED',
           message:
             'Config field "projects[0].outDir" must be a non-empty string.',
@@ -146,7 +161,6 @@ describe('loadGeneratorConfig', () => {
     });
   });
 });
-
 describe('parseCliArgs', () => {
   it('parses --config and --help', () => {
     expect(parseCliArgs(['--config', './some.config.js', '--help'])).toEqual({
@@ -156,7 +170,6 @@ describe('parseCliArgs', () => {
       help: true,
     });
   });
-
   it('parses repeated --project flags in deterministic order', () => {
     expect(
       parseCliArgs([
@@ -173,7 +186,6 @@ describe('parseCliArgs', () => {
       help: false,
     });
   });
-
   it('parses --parallel as an explicit mode flag', () => {
     expect(parseCliArgs(['--project', 'demo', '--parallel'])).toEqual({
       configPath: undefined,
@@ -182,7 +194,6 @@ describe('parseCliArgs', () => {
       help: false,
     });
   });
-
   it('throws deterministic error for unknown args', () => {
     expect(() => parseCliArgs(['--wat'])).toThrowError(ConfigValidationError);
     expect(() => parseCliArgs(['--wat'])).toThrowError(
@@ -190,17 +201,14 @@ describe('parseCliArgs', () => {
     );
   });
 });
-
 describe('runCli', () => {
   afterEach(() => {
     vi.restoreAllMocks();
   });
-
   it('returns non-zero when one project fails in a multi-project run', async () => {
     await withTempDir(async (tempDir) => {
       const previousCwd = process.cwd();
       process.chdir(tempDir);
-
       try {
         const validSourcePath = './custom-elements-valid.json';
         const missingSourcePath = './custom-elements-missing.json';
@@ -208,7 +216,6 @@ describe('runCli', () => {
           tempDir,
           'qwik-custom-elements.config.json',
         );
-
         await writeFile(
           validSourcePath,
           JSON.stringify({
@@ -216,7 +223,6 @@ describe('runCli', () => {
           }),
           'utf8',
         );
-
         await writeFile(
           configPath,
           JSON.stringify(
@@ -226,14 +232,14 @@ describe('runCli', () => {
                   id: 'a-project',
                   adapter: 'stencil',
                   adapterPackage: '@qwik-custom-elements/adapter-stencil',
-                  source: validSourcePath,
+                  source: { type: 'CEM', path: validSourcePath },
                   outDir: './generated-a',
                 },
                 {
                   id: 'b-project',
                   adapter: 'stencil',
                   adapterPackage: '@qwik-custom-elements/adapter-stencil',
-                  source: missingSourcePath,
+                  source: { type: 'CEM', path: missingSourcePath },
                   outDir: './generated-b',
                 },
               ],
@@ -243,14 +249,11 @@ describe('runCli', () => {
           ),
           'utf8',
         );
-
         const stderrSpy = vi
           .spyOn(process.stderr, 'write')
           .mockImplementation(() => true);
         vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
-
         const exitCode = await runCli(['--config', configPath]);
-
         expect(exitCode).toBe(1);
         expect(stderrSpy).toHaveBeenCalledWith(
           expect.stringContaining('QCE_CEM_READ_FAILED'),
@@ -260,19 +263,16 @@ describe('runCli', () => {
       }
     });
   });
-
   it('writes run summary artifact with observed error codes on failed runs', async () => {
     await withTempDir(async (tempDir) => {
       const previousCwd = process.cwd();
       process.chdir(tempDir);
-
       try {
         const configPath = path.join(
           tempDir,
           'qwik-custom-elements.config.json',
         );
         const summaryPath = path.join(tempDir, 'summary', 'run-summary.json');
-
         await writeFile(
           configPath,
           JSON.stringify(
@@ -284,7 +284,10 @@ describe('runCli', () => {
                   id: 'broken-project',
                   adapter: 'stencil',
                   adapterPackage: '@qwik-custom-elements/adapter-stencil',
-                  source: './custom-elements-missing.json',
+                  source: {
+                    type: 'CEM',
+                    path: './custom-elements-missing.json',
+                  },
                   outDir: './generated/broken',
                 },
               ],
@@ -294,10 +297,8 @@ describe('runCli', () => {
           ),
           'utf8',
         );
-
         vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
         vi.spyOn(process.stderr, 'write').mockImplementation(() => true);
-
         const exitCode = await runCli(['--config', configPath]);
         const summary = JSON.parse(await readFile(summaryPath, 'utf8')) as {
           observedErrorCodes: string[];
@@ -310,7 +311,6 @@ describe('runCli', () => {
           }>;
           dryRun: boolean;
         };
-
         expect(exitCode).toBe(1);
         expect(summary.dryRun).toBe(true);
         expect(summary.projects).toHaveLength(1);
@@ -327,18 +327,15 @@ describe('runCli', () => {
       }
     });
   });
-
   it('emits deterministic warning when adapter SSR falls back to CEM-only', async () => {
     await withTempDir(async (tempDir) => {
       const previousCwd = process.cwd();
       process.chdir(tempDir);
-
       try {
         const configPath = path.join(
           tempDir,
           'qwik-custom-elements.config.json',
         );
-
         await writeFile(
           './custom-elements.json',
           JSON.stringify({
@@ -366,7 +363,7 @@ describe('runCli', () => {
                   id: 'demo',
                   adapter: 'stencil',
                   adapterPackage: './adapter-unsupported.mjs',
-                  source: './custom-elements.json',
+                  source: { type: 'CEM', path: './custom-elements.json' },
                   outDir: './generated/demo',
                 },
               ],
@@ -376,14 +373,11 @@ describe('runCli', () => {
           ),
           'utf8',
         );
-
         vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
         const stderrSpy = vi
           .spyOn(process.stderr, 'write')
           .mockImplementation(() => true);
-
         const exitCode = await runCli(['--config', configPath]);
-
         expect(exitCode).toBe(0);
         expect(stderrSpy).toHaveBeenCalledWith(
           expect.stringContaining('QCE_SSR_UNSUPPORTED_FALLBACK'),
@@ -393,18 +387,15 @@ describe('runCli', () => {
       }
     });
   });
-
   it('prints buffered per-project logs in deterministic id order for parallel runs', async () => {
     await withTempDir(async (tempDir) => {
       const previousCwd = process.cwd();
       process.chdir(tempDir);
-
       try {
         const configPath = path.join(
           tempDir,
           'qwik-custom-elements.config.json',
         );
-
         await writeFile(
           './custom-elements-a.json',
           JSON.stringify({
@@ -419,7 +410,6 @@ describe('runCli', () => {
           }),
           'utf8',
         );
-
         await writeFile(
           configPath,
           JSON.stringify(
@@ -431,14 +421,14 @@ describe('runCli', () => {
                   id: 'z-project',
                   adapter: 'stencil',
                   adapterPackage: '@qwik-custom-elements/adapter-stencil',
-                  source: './custom-elements-z.json',
+                  source: { type: 'CEM', path: './custom-elements-z.json' },
                   outDir: './generated/z',
                 },
                 {
                   id: 'a-project',
                   adapter: 'stencil',
                   adapterPackage: '@qwik-custom-elements/adapter-stencil',
-                  source: './custom-elements-a.json',
+                  source: { type: 'CEM', path: './custom-elements-a.json' },
                   outDir: './generated/a',
                 },
               ],
@@ -448,16 +438,12 @@ describe('runCli', () => {
           ),
           'utf8',
         );
-
         const stdoutSpy = vi
           .spyOn(process.stdout, 'write')
           .mockImplementation(() => true);
         vi.spyOn(process.stderr, 'write').mockImplementation(() => true);
-
         const exitCode = await runCli(['--config', configPath]);
-
         expect(exitCode).toBe(0);
-
         const output = stdoutSpy.mock.calls.map(([chunk]) => String(chunk));
         const aProjectLineIndex = output.findIndex((line) =>
           line.includes('[project:a-project]'),
@@ -468,7 +454,6 @@ describe('runCli', () => {
         const summaryLineIndex = output.findIndex((line) =>
           line.includes('Generation completed (dry-run)'),
         );
-
         expect(aProjectLineIndex).toBeGreaterThanOrEqual(0);
         expect(zProjectLineIndex).toBeGreaterThanOrEqual(0);
         expect(aProjectLineIndex).toBeLessThan(zProjectLineIndex);
@@ -478,19 +463,16 @@ describe('runCli', () => {
       }
     });
   });
-
   it('writes run summary artifact with required baseline fields', async () => {
     await withTempDir(async (tempDir) => {
       const previousCwd = process.cwd();
       process.chdir(tempDir);
-
       try {
         const configPath = path.join(
           tempDir,
           'qwik-custom-elements.config.json',
         );
         const summaryPath = path.join(tempDir, 'generated-run-summary.json');
-
         await writeFile(
           './custom-elements-a.json',
           JSON.stringify({
@@ -505,7 +487,6 @@ describe('runCli', () => {
           }),
           'utf8',
         );
-
         await writeFile(
           configPath,
           JSON.stringify(
@@ -516,14 +497,14 @@ describe('runCli', () => {
                   id: 'z-project',
                   adapter: 'stencil',
                   adapterPackage: '@qwik-custom-elements/adapter-stencil',
-                  source: './custom-elements-z.json',
+                  source: { type: 'CEM', path: './custom-elements-z.json' },
                   outDir: './generated/z',
                 },
                 {
                   id: 'a-project',
                   adapter: 'stencil',
                   adapterPackage: '@qwik-custom-elements/adapter-stencil',
-                  source: './custom-elements-a.json',
+                  source: { type: 'CEM', path: './custom-elements-a.json' },
                   outDir: './generated/a',
                 },
               ],
@@ -533,10 +514,8 @@ describe('runCli', () => {
           ),
           'utf8',
         );
-
         vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
         vi.spyOn(process.stderr, 'write').mockImplementation(() => true);
-
         const exitCode = await runCli(['--config', configPath]);
         const summary = JSON.parse(await readFile(summaryPath, 'utf8')) as {
           schemaVersion: string;
@@ -554,7 +533,6 @@ describe('runCli', () => {
           }>;
           observedErrorCodes: string[];
         };
-
         expect(exitCode).toBe(0);
         expect(summary.schemaVersion).toBe('1.0.0');
         expect(summary.startedAt).toMatch(/T/);
@@ -586,19 +564,16 @@ describe('runCli', () => {
       }
     });
   });
-
   it('marks non-targeted projects as skipped in summary output', async () => {
     await withTempDir(async (tempDir) => {
       const previousCwd = process.cwd();
       process.chdir(tempDir);
-
       try {
         const configPath = path.join(
           tempDir,
           'qwik-custom-elements.config.json',
         );
         const summaryPath = path.join(tempDir, 'generated-run-summary.json');
-
         await writeFile(
           './custom-elements-a.json',
           JSON.stringify({
@@ -613,7 +588,6 @@ describe('runCli', () => {
           }),
           'utf8',
         );
-
         await writeFile(
           configPath,
           JSON.stringify(
@@ -624,14 +598,14 @@ describe('runCli', () => {
                   id: 'z-project',
                   adapter: 'stencil',
                   adapterPackage: '@qwik-custom-elements/adapter-stencil',
-                  source: './custom-elements-z.json',
+                  source: { type: 'CEM', path: './custom-elements-z.json' },
                   outDir: './generated/z',
                 },
                 {
                   id: 'a-project',
                   adapter: 'stencil',
                   adapterPackage: '@qwik-custom-elements/adapter-stencil',
-                  source: './custom-elements-a.json',
+                  source: { type: 'CEM', path: './custom-elements-a.json' },
                   outDir: './generated/a',
                 },
               ],
@@ -641,10 +615,8 @@ describe('runCli', () => {
           ),
           'utf8',
         );
-
         vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
         vi.spyOn(process.stderr, 'write').mockImplementation(() => true);
-
         const exitCode = await runCli([
           '--config',
           configPath,
@@ -660,7 +632,6 @@ describe('runCli', () => {
             observedErrorCodes: string[];
           }>;
         };
-
         expect(exitCode).toBe(0);
         expect(summary.projects.map((project) => project.projectId)).toEqual([
           'a-project',

@@ -17,7 +17,7 @@ export interface GeneratorProject {
   id: string;
   adapter: string;
   adapterPackage: string;
-  source: string | GeneratorProjectSource;
+  source: GeneratorProjectSource;
   outDir: string;
   cleanOutput?: boolean;
   adapterOptions?: Record<string, unknown>;

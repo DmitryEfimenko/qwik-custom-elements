@@ -1,5 +1,45 @@
 # Progress Log
 
+## 2026-04-07 - PRD #1 / Child #22 - Source contract V2 correction (task slice: remove legacy string source contract)
+
+### Task completed
+- Aligned core project source contract with PRD by removing legacy string source support.
+- Enforced object-only discriminated `source` in core types and config validation.
+- Removed legacy string fallback branches from generator/CLI source-path resolution.
+- Updated root config and core tests to use discriminated CEM source objects.
+- Added a regression test asserting legacy string `source` is rejected.
+
+### Key decisions
+- Treated string `source` as a contract regression because PRD #1 requires discriminated object source modes only.
+- Kept this slice narrowly focused on contract correctness (no new PACKAGE_NAME resolution behavior added here).
+- Preserved deterministic error messaging for invalid source shape via `QCE_CONFIG_INVALID_TYPE`.
+
+### Key findings
+- The previous #22 baseline entry still documented temporary string backward compatibility, which conflicted with the canonical PRD issue text.
+- Fixture/test updates were required across both config and generator suites because many project definitions still used string source paths.
+- After correction, root Turbo loops remained green.
+
+### Validation loops run
+- `pnpm --filter @qwik-custom-elements/core run test -- config.test.ts generator.test.ts` (passed)
+- `pnpm --filter @qwik-custom-elements/core run check-types` (passed)
+- `npm run typecheck` (passed)
+- `npm run test` (passed)
+- `npm run format` (passed)
+
+### Files changed
+- `packages/core/src/types.ts`
+- `packages/core/src/config.ts`
+- `packages/core/src/generator.ts`
+- `packages/core/src/cli.ts`
+- `packages/core/src/__tests__/config.test.ts`
+- `packages/core/src/__tests__/generator.test.ts`
+- `qwik-custom-elements.config.json`
+- `.docs/progress.md`
+
+### Blockers / notes for next iteration
+- Child #22 remains open.
+- Next smallest #22 slice remains planning-time adapter/source compatibility checks from adapter capability metadata.
+
 ## 2026-04-07 - PRD #1 / Child #22 - Source contract V2 baseline (task slice: discriminated source object CEM mode in config + generation path support)
 
 ### Task completed

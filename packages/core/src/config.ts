@@ -4,9 +4,9 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 import type {
-  GeneratorProjectSource,
   GeneratorConfig,
   GeneratorProject,
+  GeneratorProjectSource,
   LoadConfigOptions,
   LoadedConfig,
 } from './types.js';
@@ -122,15 +122,11 @@ function validateProject(
 function readProjectSource(
   value: unknown,
   field: string,
-): string | GeneratorProjectSource {
-  if (typeof value === 'string') {
-    return readRequiredString(value, field);
-  }
-
+): GeneratorProjectSource {
   if (!isPlainObject(value)) {
     throw new ConfigValidationError(
-      'QCE_CONFIG_MISSING_REQUIRED',
-      `Config field "${field}" must be a non-empty string or source object.`,
+      'QCE_CONFIG_INVALID_TYPE',
+      `Config field "${field}" must be a source object with a valid "type" discriminator.`,
     );
   }
 

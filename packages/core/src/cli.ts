@@ -238,12 +238,8 @@ export async function runCli(argv: string[]): Promise<number> {
 }
 
 function resolveProjectSourceSummaryPath(
-  source: string | GeneratorProjectSource,
+  source: GeneratorProjectSource,
 ): string {
-  if (typeof source === 'string') {
-    return path.resolve(process.cwd(), source);
-  }
-
   if (source.type === 'CEM') {
     return path.resolve(process.cwd(), source.path);
   }

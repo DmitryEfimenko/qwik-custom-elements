@@ -312,13 +312,9 @@ function createSkippedProjectResult(
 
 function resolveProjectSourcePath(
   projectId: string,
-  source: string | GeneratorProjectSource,
+  source: GeneratorProjectSource,
   cwd: string,
 ): string {
-  if (typeof source === 'string') {
-    return path.resolve(cwd, source);
-  }
-
   if (source.type === 'CEM') {
     return path.resolve(cwd, source.path);
   }
