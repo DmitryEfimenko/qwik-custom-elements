@@ -276,6 +276,39 @@ describe('generateFromConfig', () => {
       expect(result.projects[0].observedErrorCodes).toEqual([]);
     });
   });
+  it('fails when adapter capabilities do not support the project source type', async () => {
+    await withTempDir(async (tempDir) => {
+      await writeFile(
+        path.join(tempDir, 'custom-elements.json'),
+        JSON.stringify({
+          modules: [{ declarations: [{ tagName: 'app-root' }] }],
+        }),
+        'utf8',
+      );
+      await writeFile(
+        path.join(tempDir, 'adapter-package-name-only.mjs'),
+        [
+          'export const metadata = {',
+          "  id: 'custom-adapter',",
+          "  supportedSourceTypes: ['PACKAGE_NAME'],",
+          '};',
+          '',
+        ].join('\n'),
+        'utf8',
+      );
+
+      const config = createSingleProjectConfig(tempDir, true);
+      config.projects[0].adapterPackage = './adapter-package-name-only.mjs';
+
+      await expect(
+        generateFromConfig(config, { cwd: tempDir }),
+      ).rejects.toMatchObject({
+        code: 'QCE_ADAPTER_SOURCE_INCOMPATIBLE',
+        message:
+          'Project "demo" source type "CEM" is not supported by adapter "./adapter-package-name-only.mjs".',
+      });
+    });
+  });
   it('fails with deterministic code when CEM shape is invalid', async () => {
     await withTempDir(async (tempDir) => {
       await writeFile(

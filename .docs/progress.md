@@ -1,5 +1,41 @@
 # Progress Log
 
+## 2026-04-07 - PRD #1 / Child #22 - Adapter/source planning-time compatibility baseline (task slice: adapter capability metadata source-type checks)
+
+### Task completed
+- Added planning-time adapter/source compatibility validation in core generation using adapter capability metadata.
+- Enforced deterministic failure (`QCE_ADAPTER_SOURCE_INCOMPATIBLE`) when a project's `source.type` is not declared as supported by the selected adapter package.
+- Added/updated adapter capability metadata exports (`supportedSourceTypes`) in stencil and lit adapter entrypoints (including the lit `./ssr` subpath).
+- Added a regression test proving unsupported adapter/source combinations fail deterministically before generation succeeds.
+
+### Key decisions
+- Kept this slice narrowly scoped to planning-time source compatibility checks only (no PACKAGE_NAME generation support added here).
+- Used `metadata.supportedSourceTypes` as the machine-readable capability field for source-mode support checks.
+- Preserved backward compatibility behavior by defaulting missing adapter metadata to CEM support for existing adapters.
+
+### Key findings
+- Existing generation flow loaded adapters for SSR probing but had no contract check tying adapter capabilities to project source type.
+- A single integration-style generator test was sufficient to prove the red-to-green behavior at the public generation boundary.
+- Root Turbo loops remain green with this slice.
+
+### Validation loops run
+- `pnpm --filter @qwik-custom-elements/core run test -- generator.test.ts` (RED expected failure first, then GREEN pass)
+- `npm run typecheck` (passed)
+- `npm run test` (passed)
+- `npm run format` (passed)
+
+### Files changed
+- `packages/core/src/generator.ts`
+- `packages/core/src/__tests__/generator.test.ts`
+- `packages/adapter-stencil/index.js`
+- `packages/adapter-lit/index.js`
+- `packages/adapter-lit/ssr.js`
+- `.docs/progress.md`
+
+### Blockers / notes for next iteration
+- Child #22 remains open.
+- Next smallest #22 slice is adding structured project-level SSR capability fields to generation output in addition to deterministic diagnostics.
+
 ## 2026-04-07 - PRD #1 / Child #22 - Source contract V2 correction (task slice: remove legacy string source contract)
 
 ### Task completed

@@ -148,6 +148,10 @@ async function generateProject(
   dryRun: boolean,
 ): Promise<GenerationProjectResult> {
   const startedAtMs = Date.now();
+  const adapterModule = await loadAdapterModule(project.adapterPackage, cwd);
+
+  validateAdapterSourceCompatibility(project, adapterModule);
+
   const sourcePath = resolveProjectSourcePath(project.id, project.source, cwd);
   const outDirPath = path.resolve(cwd, project.outDir);
   const componentTags = await readComponentTagsFromCem(sourcePath);
@@ -157,7 +161,7 @@ async function generateProject(
     componentTags,
   );
   const observedErrorCodes: string[] = [];
-  const ssrProbe = await probeProjectSsrAvailability(project, cwd);
+  const ssrProbe = await probeProjectSsrAvailability(project, adapterModule);
 
   if (!ssrProbe.available) {
     observedErrorCodes.push(SSR_UNSUPPORTED_FALLBACK_CODE);
@@ -190,9 +194,8 @@ async function generateProject(
 
 async function probeProjectSsrAvailability(
   project: GeneratorProject,
-  cwd: string,
+  adapterModule: Record<string, unknown>,
 ): Promise<{ available: boolean }> {
-  const adapterModule = await loadAdapterModule(project.adapterPackage, cwd);
   const probeSSR =
     adapterModule != null && typeof adapterModule.probeSSR === 'function'
       ? adapterModule.probeSSR
@@ -212,6 +215,32 @@ async function probeProjectSsrAvailability(
   }
 
   return { available: false };
+}
+
+function validateAdapterSourceCompatibility(
+  project: GeneratorProject,
+  adapterModule: Record<string, unknown>,
+): void {
+  const metadata =
+    adapterModule != null && typeof adapterModule.metadata === 'object'
+      ? (adapterModule.metadata as Record<string, unknown>)
+      : undefined;
+
+  const supportedSourceTypes =
+    metadata != null && Array.isArray(metadata.supportedSourceTypes)
+      ? metadata.supportedSourceTypes
+      : ['CEM'];
+
+  const isSourceSupported = supportedSourceTypes.some(
+    (supportedSourceType) => supportedSourceType === project.source.type,
+  );
+
+  if (!isSourceSupported) {
+    throw new GenerationError(
+      'QCE_ADAPTER_SOURCE_INCOMPATIBLE',
+      `Project "${project.id}" source type "${project.source.type}" is not supported by adapter "${project.adapterPackage}".`,
+    );
+  }
 }
 
 async function loadAdapterModule(

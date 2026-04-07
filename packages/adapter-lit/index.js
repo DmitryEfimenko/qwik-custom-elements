@@ -1,6 +1,8 @@
 export const metadata = {
-  id: 'lit',
-  displayName: '@qwik-custom-elements/adapter-lit',
+  adapterId: 'lit',
+  supportedSourceTypes: ['CEM'],
+  supportsSsrProbe: true,
+  ssrRuntimeSubpath: './ssr',
 };
 
 export async function probeSSR() {

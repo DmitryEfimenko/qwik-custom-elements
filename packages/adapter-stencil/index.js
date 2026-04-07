@@ -1,6 +1,8 @@
 export const metadata = {
-  id: 'stencil',
-  displayName: '@qwik-custom-elements/adapter-stencil',
+  adapterId: 'stencil',
+  supportedSourceTypes: ['CEM'],
+  supportsSsrProbe: true,
+  ssrRuntimeSubpath: null,
 };
 
 export async function probeSSR() {
