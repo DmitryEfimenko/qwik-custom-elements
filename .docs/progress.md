@@ -1,5 +1,42 @@
 # Progress Log
 
+## 2026-04-07 - PRD #1 refresh + tracer-bullet issue realignment
+
+### Task completed
+- Replaced parent PRD issue `#1` body with the approved full PRD rewrite from `.docs/qwik-custom-elements-prd.md`.
+- Fixed a post-update typo in the issue body (`determministic` -> `deterministic`) and re-verified the published text.
+- Created missing tracer-bullet issues for newly introduced PRD scope:
+	- `#22` Tracer Bullet 15: Source contract V2 and adapter capability metadata baseline
+	- `#23` Tracer Bullet 16: PACKAGE_NAME source resolution and CEM override diagnostics
+	- `#24` Tracer Bullet 17: Extract Stencil runtime bridge to adapter-stencil
+- Updated open issue `#13` to align with revised PRD wording and blocked it by `#22` and `#23`.
+
+### Key decisions
+- Kept parent PRD as a full canonical replacement (not an amendment append) per review direction.
+- Preserved existing downstream open issues `#14` and `#15` as still relevant under the updated PRD.
+- Chose clean dependency ordering for new work: contract baseline -> package-name resolution -> stencil runtime extraction.
+
+### Key findings
+- Existing open issues `#13/#14/#15` were still needed, but `#13` required blocker/body updates after PRD replacement.
+- Historical duplicate closed issue sets (`#16-#21`) exist from earlier PRD cycles; current active chain remains `#13/#14/#15` plus newly created `#22/#23/#24`.
+- Repository currently has no CI workflow files or CODEOWNERS yet, reinforcing that `#14/#15` remain substantive and unstarted.
+
+### Validation loops run
+- `gh issue edit 1 --body-file .docs/qwik-custom-elements-prd.md` (parent PRD update)
+- `gh issue view 1 --json body` (verification)
+- `gh issue create ...` for `#22`, `#23`, `#24` (creation links returned)
+- `gh issue edit 13 --body ...` (blocker/body realignment)
+- `gh issue view 13 --json body`
+- `gh issue view 14 --json body`
+- `gh issue view 15 --json body`
+
+### Files changed
+- `.docs/qwik-custom-elements-prd.md`
+- `.docs/progress.md`
+
+### Blockers / notes for next iteration
+- Next implementation work should start from `#22` (source contract baseline), then `#23`, then `#24`, before finishing remaining `#13` Lit SSR happy-path completion.
+
 ## 2026-04-06 - PRD #1 / Child #13 - Lit SSR happy-path POC (task slice: canonical adapter-lit/ssr subpath consumability in monorepo generation)
 
 ### Task completed
