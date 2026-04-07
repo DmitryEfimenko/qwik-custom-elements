@@ -4,6 +4,7 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 import type {
+  GeneratorProjectSource,
   GeneratorConfig,
   GeneratorProject,
   LoadConfigOptions,
@@ -105,7 +106,7 @@ function validateProject(
       rawProject.adapterPackage,
       `${pathPrefix}.adapterPackage`,
     ),
-    source: readRequiredString(rawProject.source, `${pathPrefix}.source`),
+    source: readProjectSource(rawProject.source, `${pathPrefix}.source`),
     outDir: readRequiredString(rawProject.outDir, `${pathPrefix}.outDir`),
     cleanOutput: readOptionalBoolean(
       rawProject.cleanOutput,
@@ -116,6 +117,53 @@ function validateProject(
       `${pathPrefix}.adapterOptions`,
     ),
   };
+}
+
+function readProjectSource(
+  value: unknown,
+  field: string,
+): string | GeneratorProjectSource {
+  if (typeof value === 'string') {
+    return readRequiredString(value, field);
+  }
+
+  if (!isPlainObject(value)) {
+    throw new ConfigValidationError(
+      'QCE_CONFIG_MISSING_REQUIRED',
+      `Config field "${field}" must be a non-empty string or source object.`,
+    );
+  }
+
+  const sourceType = readRequiredString(value.type, `${field}.type`);
+
+  if (sourceType === 'CEM') {
+    ensureNoUnknownKeys(value, new Set(['type', 'path']), field);
+    return {
+      type: 'CEM',
+      path: readRequiredString(value.path, `${field}.path`),
+    };
+  }
+
+  if (sourceType === 'PACKAGE_NAME') {
+    ensureNoUnknownKeys(
+      value,
+      new Set(['type', 'packageName', 'cemPath']),
+      field,
+    );
+    return {
+      type: 'PACKAGE_NAME',
+      packageName: readRequiredString(
+        value.packageName,
+        `${field}.packageName`,
+      ),
+      cemPath: readOptionalString(value.cemPath, `${field}.cemPath`),
+    };
+  }
+
+  throw new ConfigValidationError(
+    'QCE_CONFIG_INVALID_TYPE',
+    `Config field "${field}.type" must be "CEM" or "PACKAGE_NAME".`,
+  );
 }
 
 function readRequiredString(value: unknown, field: string): string {

@@ -8,6 +8,7 @@ import type {
   GenerationResult,
   GeneratorConfig,
   GeneratorProject,
+  GeneratorProjectSource,
 } from './types.js';
 
 export class GenerationError extends Error {
@@ -147,7 +148,7 @@ async function generateProject(
   dryRun: boolean,
 ): Promise<GenerationProjectResult> {
   const startedAtMs = Date.now();
-  const sourcePath = path.resolve(cwd, project.source);
+  const sourcePath = resolveProjectSourcePath(project.id, project.source, cwd);
   const outDirPath = path.resolve(cwd, project.outDir);
   const componentTags = await readComponentTagsFromCem(sourcePath);
   const plannedWrites = createPlannedWrites(
@@ -299,7 +300,7 @@ function createSkippedProjectResult(
     status: 'skipped',
     durationMs: 0,
     adapterPackage: project.adapterPackage,
-    sourcePath: path.resolve(cwd, project.source),
+    sourcePath: resolveProjectSourcePath(project.id, project.source, cwd),
     outDirPath,
     generatedIndexPath: path.join(outDirPath, 'index.ts'),
     componentTags: [],
@@ -307,6 +308,25 @@ function createSkippedProjectResult(
     wroteFiles: false,
     observedErrorCodes: [],
   };
+}
+
+function resolveProjectSourcePath(
+  projectId: string,
+  source: string | GeneratorProjectSource,
+  cwd: string,
+): string {
+  if (typeof source === 'string') {
+    return path.resolve(cwd, source);
+  }
+
+  if (source.type === 'CEM') {
+    return path.resolve(cwd, source.path);
+  }
+
+  throw new GenerationError(
+    'QCE_SOURCE_MODE_UNSUPPORTED',
+    `Project "${projectId}" source type "${source.type}" is not yet supported by generation.`,
+  );
 }
 
 function validateProjectOutputSafety(

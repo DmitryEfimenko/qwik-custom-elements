@@ -1,8 +1,23 @@
+export interface CEMProjectSource {
+  type: 'CEM';
+  path: string;
+}
+
+export interface PackageNameProjectSource {
+  type: 'PACKAGE_NAME';
+  packageName: string;
+  cemPath?: string;
+}
+
+export type GeneratorProjectSource =
+  | CEMProjectSource
+  | PackageNameProjectSource;
+
 export interface GeneratorProject {
   id: string;
   adapter: string;
   adapterPackage: string;
-  source: string;
+  source: string | GeneratorProjectSource;
   outDir: string;
   cleanOutput?: boolean;
   adapterOptions?: Record<string, unknown>;

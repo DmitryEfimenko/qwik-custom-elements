@@ -27,6 +27,37 @@ const validProject = {
 };
 
 describe('loadGeneratorConfig', () => {
+  it('supports discriminated CEM source object contract', async () => {
+    await withTempDir(async (tempDir) => {
+      const configPath = path.join(tempDir, 'qwik-custom-elements.config.json');
+      await writeFile(
+        configPath,
+        JSON.stringify(
+          {
+            projects: [
+              {
+                ...validProject,
+                source: {
+                  type: 'CEM',
+                  path: './custom-elements.json',
+                },
+              },
+            ],
+          },
+          null,
+          2,
+        ),
+        'utf8',
+      );
+
+      const loaded = await loadGeneratorConfig({ cwd: tempDir });
+      expect(loaded.config.projects[0].source).toEqual({
+        type: 'CEM',
+        path: './custom-elements.json',
+      });
+    });
+  });
+
   it('loads default JSON config path', async () => {
     await withTempDir(async (tempDir) => {
       const configPath = path.join(tempDir, 'qwik-custom-elements.config.json');

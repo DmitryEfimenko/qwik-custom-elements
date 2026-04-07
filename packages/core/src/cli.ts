@@ -4,7 +4,12 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { ConfigValidationError, loadGeneratorConfig } from './config.js';
 import { GenerationError, generateFromConfig } from './generator.js';
-import type { CliArgs, GenerationResult, RunSummary } from './types.js';
+import type {
+  CliArgs,
+  GenerationResult,
+  GeneratorProjectSource,
+  RunSummary,
+} from './types.js';
 
 const RUN_SUMMARY_SCHEMA_VERSION = '1.0.0';
 const DEFAULT_RUN_SUMMARY_PATH = './generated-run-summary.json';
@@ -137,7 +142,7 @@ export async function runCli(argv: string[]): Promise<number> {
       .map((project) => ({
         projectId: project.id,
         adapterPackage: project.adapterPackage,
-        sourcePath: path.resolve(process.cwd(), project.source),
+        sourcePath: resolveProjectSourceSummaryPath(project.source),
         outDirPath: path.resolve(process.cwd(), project.outDir),
         isTargeted:
           requestedProjectIdSet.size === 0 ||
@@ -230,6 +235,24 @@ export async function runCli(argv: string[]): Promise<number> {
     process.stderr.write(`QCE_UNEXPECTED: ${message}\n`);
     return 1;
   }
+}
+
+function resolveProjectSourceSummaryPath(
+  source: string | GeneratorProjectSource,
+): string {
+  if (typeof source === 'string') {
+    return path.resolve(process.cwd(), source);
+  }
+
+  if (source.type === 'CEM') {
+    return path.resolve(process.cwd(), source.path);
+  }
+
+  if (source.cemPath != null) {
+    return path.resolve(process.cwd(), source.cemPath);
+  }
+
+  return source.packageName;
 }
 
 async function writeRunSummaryArtifact(params: {

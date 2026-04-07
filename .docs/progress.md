@@ -1,5 +1,44 @@
 # Progress Log
 
+## 2026-04-07 - PRD #1 / Child #22 - Source contract V2 baseline (task slice: discriminated source object CEM mode in config + generation path support)
+
+### Task completed
+- Added support for discriminated project source objects in core config validation, including `type: "CEM"` with required `path`.
+- Added baseline source object typing in core types while keeping legacy string source compatibility for existing configs.
+- Updated generation/CLI source-path resolution to consume CEM source objects and keep deterministic summary/source path behavior.
+- Added a focused RED-to-GREEN config regression test that validates loading a CEM discriminated source object.
+
+### Key decisions
+- Kept this slice intentionally narrow to one tracer-bullet behavior: CEM-mode source object contract support.
+- Included `PACKAGE_NAME` source shape validation in config for forward compatibility, but deferred generation support for that mode to follow-up issue slices.
+- Preserved backward compatibility with string `source` to avoid broad config churn in one iteration.
+
+### Key findings
+- TDD RED failure was deterministic and actionable: `projects[0].source` accepted only string before this slice.
+- Introducing source unions required a small CLI summary fallback update where source paths were previously resolved as string-only.
+- Root Turbo feedback loops passed after the union-related typecheck fix (`npm run typecheck`, `npm run test`, `npm run format`).
+
+### Validation loops run
+- `pnpm --filter @qwik-custom-elements/core run test -- config.test.ts` (RED expected failure first, then GREEN pass)
+- `npm run typecheck` (passed)
+- `npm run test` (passed)
+- `npm run format` (passed)
+
+### Files changed
+- `packages/core/src/types.ts`
+- `packages/core/src/config.ts`
+- `packages/core/src/generator.ts`
+- `packages/core/src/cli.ts`
+- `packages/core/src/__tests__/config.test.ts`
+- `.docs/progress.md`
+
+### Blockers / notes for next iteration
+- Child #22 remains open.
+- Next smallest slices under #22 are:
+	- planning-time adapter/source compatibility checks using explicit adapter capability metadata,
+	- project-level structured SSR capability output fields,
+	- generation support for `PACKAGE_NAME` mode (tracked for sequencing with child #23).
+
 ## 2026-04-07 - PRD #1 refresh + tracer-bullet issue realignment
 
 ### Task completed
