@@ -295,6 +295,12 @@ describe('generateFromConfig', () => {
       config.projects[0].adapterPackage =
         '@qwik-custom-elements/adapter-lit/ssr';
       const result = await generateFromConfig(config, { cwd: tempDir });
+      const litWrapperWrite = result.projects[0].plannedWrites.find(
+        (plannedWrite) =>
+          plannedWrite.path.endsWith(
+            path.join('src', 'generated', 'lit-button.ts'),
+          ),
+      );
       expect(result.projects[0].status).toBe('success');
       expect(result.projects[0].componentTags).toEqual(['lit-button']);
       expect(result.projects[0].ssrCapabilities).toEqual({
@@ -303,6 +309,9 @@ describe('generateFromConfig', () => {
         ssrRuntimeSubpath: './ssr',
       });
       expect(result.projects[0].observedErrorCodes).toEqual([]);
+      expect(litWrapperWrite?.content).toContain(
+        'export const QwikLitButtonSsrHtml = "<lit-button></lit-button>" as const;',
+      );
     });
   });
   it('fails when adapter capabilities do not support the project source type', async () => {

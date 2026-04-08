@@ -1,5 +1,91 @@
 # Progress Log
 
+## 2026-04-07 - PRD #1 priority update (Stencil-first sequencing; Lit work blocked)
+
+### Task completed
+- Updated child issue `#13` (Lit SSR tracer bullet) to add an explicit blocker on `#24` (Stencil runtime bridge extraction).
+- Enforced requested sequencing policy: continue Stencil adapter integration work before any further Lit adapter implementation slices.
+
+### Key decisions
+- Lit adapter issue execution is now gated by open Stencil integration issue `#24`.
+- Existing blockers (`#22`, `#23`) remain in place; this change adds a Stencil-first ordering constraint.
+
+### Key findings
+- Issue `#13` and issue `#24` were both open and previously shared the same blocker set, so explicit ordering between them was not encoded until now.
+
+### Validation loops run
+- `gh issue view 13 --json number,title,body,state,url`
+- `gh issue view 24 --json number,title,body,state,url`
+- `gh issue edit 13 --body-file <temp-file>`
+- `gh issue view 13 --json number,body` (verification)
+
+### Files changed
+- `.docs/progress.md`
+
+### Blockers / notes for next iteration
+- Next implementation should target issue `#24` (Stencil runtime bridge ownership) before resuming issue `#13` Lit SSR work.
+
+## 2026-04-07 - PRD #1 / Child #13 - Lit SSR happy-path POC (task slice: core consumption of generic adapter SSR hook)
+
+### Task completed
+- Updated core generation to consume adapter-generic SSR render hook `renderComponentSsrHtml(...)` when SSR probe is available.
+- Wrapper generation now emits an additional deterministic SSR HTML export (`<WrapperName>SsrHtml`) only when adapter hook returns string markup.
+- Extended existing lit SSR subpath generator test to assert wrapper-level SSR HTML export output.
+- Removed now-unnecessary compatibility alias export from lit adapter source:
+	- removed `renderLitSsrComponent` alias after core switched to generic hook.
+
+### Key decisions
+- Kept this slice intentionally narrow: no real Lit SSR runtime implementation was added.
+- Preserved placeholder semantics in adapter hook and kept framework-specific implementation details inside adapter package.
+
+### Key findings
+- No repository references remained for `renderLitSsrComponent` once core consumption switched to the generic hook name.
+- Existing SSR probe + fallback flow in core required only a small planned-write enrichment to demonstrate contract consumption.
+
+### Validation loops run
+- `pnpm --filter @qwik-custom-elements/core run test -- generator.test.ts` (passed)
+- `pnpm --filter @qwik-custom-elements/adapter-lit run check-types` (passed)
+- `npm run typecheck` (passed)
+- `npm run test` (passed)
+
+### Files changed
+- `.docs/progress.md`
+- `packages/core/src/generator.ts`
+- `packages/core/src/__tests__/generator.test.ts`
+- `packages/adapter-lit/src/ssr.ts`
+
+### Blockers / notes for next iteration
+- Child #13 remains open for true end-to-end Lit SSR happy-path verification and explicit POC boundary documentation.
+
+## 2026-04-07 - PRD #1 / Child #13 - Lit SSR happy-path POC (task slice: placeholder generic adapter SSR hook alignment)
+
+### Task completed
+- Added a minimal, adapter-owned generic SSR hook in `@qwik-custom-elements/adapter-lit`:
+	- `renderComponentSsrHtml(options)`
+- Added concise placeholder comments clarifying that current output is tracer-bullet scaffolding, not true Lit SSR.
+- Removed the previous implicit fallback to `lit-button` for missing/invalid `tagName`; placeholder now returns `null` instead.
+- Kept temporary compatibility alias export:
+	- `renderLitSsrComponent = renderComponentSsrHtml`
+
+### Key decisions
+- Kept this slice adapter-only and intentionally small; no core generation behavior changes were introduced.
+- Used explicit TODO comments tied to child issue `#13` to make placeholder scope and follow-up intent obvious in code.
+
+### Key findings
+- Adapter-side placeholder behavior can remain useful for contract wiring while still avoiding framework-specific fallback defaults that may mask invalid inputs.
+
+### Validation loops run
+- `pnpm --filter @qwik-custom-elements/adapter-lit run check-types` (passed)
+- `npm run typecheck` (passed)
+- `npm run test` (passed)
+
+### Files changed
+- `.docs/progress.md`
+- `packages/adapter-lit/src/ssr.ts`
+
+### Blockers / notes for next iteration
+- Child #13 remains open for true end-to-end Lit SSR happy-path verification and explicit POC boundary documentation.
+
 ## 2026-04-07 - Adapter packages TypeScript migration (task slice: dist-only adapter outputs + core local-loader compatibility)
 
 ### Task completed

@@ -6,16 +6,24 @@ export const metadata = {
 };
 
 export async function probeSSR(): Promise<{ available: boolean }> {
+  // Placeholder probe for tracer-bullet wiring.
+  // TODO(#13): replace with real Lit SSR capability checks.
   return { available: true };
 }
 
-export function renderLitSsrComponent(
+export function renderComponentSsrHtml(
   options: { tagName?: unknown } = {},
-): string {
-  const tagName =
-    typeof options.tagName === 'string' && options.tagName.trim().length > 0
-      ? options.tagName.trim()
-      : 'lit-button';
+): string | null {
+  // Placeholder output for tracer-bullet contract wiring only.
+  // TODO(#13): replace tag-only output with true adapter-owned Lit SSR output.
+  if (
+    typeof options.tagName !== 'string' ||
+    options.tagName.trim().length === 0
+  ) {
+    return null;
+  }
+
+  const tagName = options.tagName.trim();
 
   return `<${tagName}></${tagName}>`;
 }
