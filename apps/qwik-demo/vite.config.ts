@@ -4,8 +4,7 @@
  */
 import { qwikCity } from '@builder.io/qwik-city/vite';
 import { qwikVite, QwikVitePluginApi } from '@builder.io/qwik/optimizer';
-import { resolve } from 'node:path';
-import { defineConfig, searchForWorkspaceRoot, type UserConfig } from 'vite';
+import { defineConfig, type UserConfig } from 'vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import pkg from './package.json';
 
@@ -22,23 +21,8 @@ errorOnDuplicatesPkgDeps(devDependencies, dependencies);
  */
 export default defineConfig(({ command, mode }): UserConfig => {
   let qwikApi: QwikVitePluginApi;
-  const stencilEsmDirFsPath = resolve(
-    __dirname,
-    '../../packages/test-stencil-lib/dist/esm',
-  ).replace(/\\/g, '/');
-  const workspaceRoot = searchForWorkspaceRoot(process.cwd());
-  const stencilLibFsAllowPath = resolve(
-    __dirname,
-    '../../packages/test-stencil-lib',
-  );
-  const stencilLoaderDevUrl = `/@fs/${stencilEsmDirFsPath}/loader.js`;
-  const stencilResourcesDevUrl = `/@fs/${stencilEsmDirFsPath}/`;
 
   return {
-    define: {
-      __STENCIL_LOADER_DEV_URL__: JSON.stringify(stencilLoaderDevUrl),
-      __STENCIL_RESOURCES_DEV_URL__: JSON.stringify(stencilResourcesDevUrl),
-    },
     plugins: [
       qwikCity(),
       qwikVite(),
@@ -88,9 +72,6 @@ export default defineConfig(({ command, mode }): UserConfig => {
     //     : undefined,
 
     server: {
-      fs: {
-        allow: [workspaceRoot, stencilLibFsAllowPath],
-      },
       headers: {
         // Don't cache the server response in dev mode
         'Cache-Control': 'public, max-age=0',

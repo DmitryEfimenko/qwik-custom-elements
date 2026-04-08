@@ -1,5 +1,42 @@
 # Progress Log
 
+## 2026-04-08 - PRD #1 / Child #24 - Demo runtime direct package consumption (task slice: remove copied stencil-runtime pathing and restore build)
+
+### Task completed
+- Replaced demo Stencil runtime loading in `apps/qwik-demo/src/components/stencil-js-utils.ts` to use direct package exports from `@qwik-custom-elements/test-stencil-lib`:
+	- `@qwik-custom-elements/test-stencil-lib/loader`
+	- `@qwik-custom-elements/test-stencil-lib/hydrate`
+- Removed copied-artifact Vite plumbing in `apps/qwik-demo/vite.config.ts` that was specific to `/public/stencil-runtime` + `@fs` runtime URL defines.
+- Moved `@qwik-custom-elements/adapter-stencil` to `devDependencies` in `apps/qwik-demo/package.json` to satisfy Qwik duplicate-dependency guard behavior.
+- Added `@qwik-custom-elements/test-stencil-lib` as a workspace `devDependency` for deterministic direct package import resolution in demo build flow.
+
+### Key decisions
+- Kept scope inside child `#24` because this gap was part of adapter-runtime ownership cutover completion, not a separate feature.
+- Kept the Vite duplicate dependency safety guard intact; fixed dependency bucket placement instead of relaxing policy.
+- Used SSR-only dynamic import with `@vite-ignore` for hydrate module to prevent client build from bundling Node-only `stream` dependency.
+
+### Key findings
+- Initial direct hydrate import attempt caused client build failure because `hydrate/index.mjs` depends on Node `stream`; static-analyzable import path was pulled into client graph.
+- Constraining hydrate module loading to SSR runtime path resolved the build while preserving direct package consumption semantics.
+
+### Validation loops run
+- `pnpm --filter qwik-demo run build` (RED -> GREEN during fix)
+- `npm run typecheck` (passed)
+- `npm run test` (passed)
+- `npm run build` (passed)
+- `npm run format` (passed)
+
+### Files changed
+- `.docs/progress.md`
+- `apps/qwik-demo/package.json`
+- `apps/qwik-demo/src/components/stencil-js-utils.ts`
+- `apps/qwik-demo/vite.config.ts`
+- `pnpm-lock.yaml`
+
+### Blockers / notes for next iteration
+- No blocker for this slice.
+- Child `#24` checklist/closure sync should now reflect direct package runtime consumption and successful demo build verification.
+
 ## 2026-04-08 - PRD #1 / Child #24 - Stencil runtime bridge ownership cutover (task slice: repository test coverage for adapter-stencil SSR bridge)
 
 ### Task completed

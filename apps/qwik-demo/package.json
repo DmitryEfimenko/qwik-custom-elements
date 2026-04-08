@@ -7,9 +7,6 @@
   "engines-annotation": "Mostly required by sharp which needs a Node-API v9 compatible runtime",
   "private": true,
   "type": "module",
-  "dependencies": {
-    "@qwik-custom-elements/adapter-stencil": "workspace:*"
-  },
   "scripts": {
     "build": "qwik build",
     "build.client": "vite build",
@@ -29,6 +26,8 @@
   "devDependencies": {
     "@builder.io/qwik": "^1.19.2",
     "@builder.io/qwik-city": "^1.19.2",
+    "@qwik-custom-elements/adapter-stencil": "workspace:*",
+    "@qwik-custom-elements/test-stencil-lib": "workspace:*",
     "@eslint/js": "^9",
     "@types/node": "20.19.0",
     "eslint": "9.32.0",

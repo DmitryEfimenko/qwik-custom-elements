@@ -34,10 +34,6 @@ importers:
         version: 8.58.0(eslint@9.39.4(jiti@2.6.1))(typescript@5.9.3)
 
   apps/qwik-demo:
-    dependencies:
-      '@qwik-custom-elements/adapter-stencil':
-        specifier: workspace:*
-        version: link:../../packages/adapter-stencil
     devDependencies:
       '@builder.io/qwik':
         specifier: ^1.19.2
@@ -48,6 +44,12 @@ importers:
       '@eslint/js':
         specifier: ^9
         version: 9.39.4
+      '@qwik-custom-elements/adapter-stencil':
+        specifier: workspace:*
+        version: link:../../packages/adapter-stencil
+      '@qwik-custom-elements/test-stencil-lib':
+        specifier: workspace:*
+        version: link:../../packages/test-stencil-lib
       '@types/node':
         specifier: 20.19.0
         version: 20.19.0
