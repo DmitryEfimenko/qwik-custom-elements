@@ -6,6 +6,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./ssr": {
+      "types": "./dist/ssr/index.d.ts",
+      "import": "./dist/ssr/index.js"
     }
   },
   "scripts": {
@@ -20,6 +24,10 @@
   "files": [
     "dist"
   ],
+  "dependencies": {
+    "@builder.io/qwik": "^1.19.2",
+    "@builder.io/qwik-city": "^1.19.2"
+  },
   "devDependencies": {
     "typescript": "^5.9.3"
   }

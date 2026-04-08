@@ -573,12 +573,12 @@ describe('runCli', () => {
         expect(summary.projects[0].ssrCapabilities).toEqual({
           available: true,
           supportsSsrProbe: true,
-          ssrRuntimeSubpath: null,
+          ssrRuntimeSubpath: './ssr',
         });
         expect(summary.projects[1].ssrCapabilities).toEqual({
           available: true,
           supportsSsrProbe: true,
-          ssrRuntimeSubpath: null,
+          ssrRuntimeSubpath: './ssr',
         });
         expect(summary.projects[0].resolvedCoreVersion).toBe('0.0.0');
         expect(summary.projects[1].resolvedCoreVersion).toBe('0.0.0');

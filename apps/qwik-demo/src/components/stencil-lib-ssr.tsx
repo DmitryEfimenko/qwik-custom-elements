@@ -2,7 +2,7 @@ import { $ } from '@builder.io/qwik';
 import {
   createStencilClientSetup,
   createStencilSSRComponent,
-} from './stencil-js-qwik-ssr';
+} from '@qwik-custom-elements/adapter-stencil/ssr';
 // in demo, there's a need to import these via some utilities
 // to avoid vite errors. In actual apps, these would typically
 // be direct imports from the Stencil package as shown below:

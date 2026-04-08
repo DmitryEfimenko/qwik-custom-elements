@@ -2,7 +2,7 @@ export const metadata = {
   adapterId: 'stencil',
   supportedSourceTypes: ['CEM', 'PACKAGE_NAME'],
   supportsSsrProbe: true,
-  ssrRuntimeSubpath: null,
+  ssrRuntimeSubpath: './ssr',
 };
 
 export async function probeSSR(): Promise<{ available: boolean }> {

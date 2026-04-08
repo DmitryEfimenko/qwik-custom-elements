@@ -1,4 +1,4 @@
-import type { StencilRenderToStringOptions } from './stencil-js-qwik-ssr/model';
+import type { StencilRenderToStringOptions } from '@qwik-custom-elements/adapter-stencil/ssr';
 
 export async function defineCustomElements() {
   // With a regular npm-installed Stencil package, this is usually much simpler:

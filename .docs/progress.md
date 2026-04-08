@@ -1,5 +1,51 @@
 # Progress Log
 
+## 2026-04-08 - PRD #1 / Child #24 - Stencil runtime bridge ownership cutover (task slice: adapter-stencil SSR subpath export + demo import switch)
+
+### Task completed
+- Moved Stencil runtime bridge API ownership into `@qwik-custom-elements/adapter-stencil` by adding a new canonical `./ssr` export surface.
+- Added adapter-owned SSR bridge module sources under `packages/adapter-stencil/src/ssr/*` and exposed them through package exports.
+- Switched demo runtime bridge consumption from app-local `stencil-js-qwik-ssr` imports to adapter-owned imports (`@qwik-custom-elements/adapter-stencil/ssr`).
+- Updated adapter metadata to declare `ssrRuntimeSubpath: './ssr'` and aligned summary-test expectations to the new contract.
+
+### Key decisions
+- Kept this iteration to one tracer-bullet ownership slice only: export/consumption cutover without changing core generation control flow.
+- Preserved existing SSR probe/fallback behavior in core and only adjusted expected structured capability output where adapter metadata now intentionally differs.
+- Added explicit app dependency on `@qwik-custom-elements/adapter-stencil` (`workspace:*`) so demo imports remain deterministic in workspace resolution.
+
+### Key findings
+- `adapter-stencil` needed Qwik-compatible TS compiler settings for TSX runtime bridge files; NodeNext extension rules were too strict for copied bridge module imports.
+- Existing core fallback semantics remained intact; the only deterministic contract update was stencil `ssrRuntimeSubpath` becoming `./ssr`.
+
+### Validation loops run
+- `pnpm install` (passed)
+- `npm run typecheck` (passed)
+- `npm run test` (passed)
+- `npm run format` (passed)
+- `npm run test` (post-format scope cleanup pass)
+- `npm run typecheck` (final pass)
+
+### Files changed
+- `.docs/progress.md`
+- `apps/qwik-demo/package.json`
+- `apps/qwik-demo/src/components/stencil-js-utils.ts`
+- `apps/qwik-demo/src/components/stencil-lib-ssr.tsx`
+- `packages/adapter-stencil/package.json`
+- `packages/adapter-stencil/tsconfig.json`
+- `packages/adapter-stencil/src/index.ts`
+- `packages/adapter-stencil/src/ssr/index.ts`
+- `packages/adapter-stencil/src/ssr/client-setup.ts`
+- `packages/adapter-stencil/src/ssr/element-props-utils.ts`
+- `packages/adapter-stencil/src/ssr/model.ts`
+- `packages/adapter-stencil/src/ssr/styles-core.ts`
+- `packages/adapter-stencil/src/ssr/stencil-ssr.tsx`
+- `packages/core/src/__tests__/config.test.ts`
+- `pnpm-lock.yaml`
+
+### Blockers / notes for next iteration
+- Child #24 acceptance criteria appear satisfied for this slice.
+- Follow-up cleanup can remove now-redundant app-local bridge source files in `apps/qwik-demo/src/components/stencil-js-qwik-ssr` once no remaining internal consumers require them.
+
 ## 2026-04-07 - PRD #1 priority update (Stencil-first sequencing; Lit work blocked)
 
 ### Task completed
