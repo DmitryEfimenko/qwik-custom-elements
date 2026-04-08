@@ -1,5 +1,42 @@
 # Progress Log
 
+## 2026-04-08 - PRD #1 / Child #24 - Stencil-events SSR optimizer regression fix (task slice: adapter SSR consumption path)
+
+### Task completed
+- Fixed boundary QRL wiring in demo adapter bridge wrapper:
+	- `apps/qwik-demo/src/components/stencil-lib-ssr.tsx`
+	- replaced module-scope wrappers with `inlinedQrl(..., symbolName)` for `renderToString` and `defineCustomElements`.
+- Added demo Vite alias so `@qwik-custom-elements/adapter-stencil/ssr` resolves to adapter source entry during demo dev/build:
+	- `apps/qwik-demo/vite.config.ts`.
+	- this ensures Qwik optimizer transforms adapter SSR `component$/$` usage for demo runtime evaluation.
+
+### Key decisions
+- Kept scope in child `#24` because regression is directly tied to runtime bridge extraction and demo consumption cutover.
+- Avoided broader adapter packaging refactor in this slice; used a demo-side alias for immediate runtime correctness and deterministic validation.
+- Kept existing route-level behavior and event-handler logic unchanged; only fixed SSR/runtime wiring paths.
+
+### Key findings
+- Initial `inlinedQrl` patch alone was insufficient: runtime error still occurred from `packages/adapter-stencil/dist/ssr/stencil-ssr.js` because plain `tsc` output is consumed unoptimized in demo dev SSR path.
+- `inlinedQrl` in this Qwik version requires explicit `symbolName`; missing second argument produced TypeScript error and optimizer panic.
+- Using `inlinedQrl` for the adapter `useOnDocument('load', ...)` callback produced a browser dynamic-import fetch failure in dev (`...client-setup.ts_stencilClientSetupLoad.js`), so that callback was reverted to optimizer-managed `$()` while keeping the source alias path.
+- With source aliasing + callback rollback, startup SSR evaluation and route load no longer emitted the original `$()` optimizer runtime error.
+
+### Validation loops run
+- `pnpm --filter @qwik-custom-elements/adapter-stencil run build` (initial RED -> GREEN after `inlinedQrl` symbol-name fix)
+- `pnpm --filter qwik-demo run build` (initial RED -> GREEN after `inlinedQrl` symbol-name fix)
+- `pnpm --filter qwik-demo run dev --host 127.0.0.1 --port 5173` (startup no longer throws stencil-events optimizer error)
+- `npm run typecheck` (passed)
+- `npm run test` (passed)
+- `npm run build` (passed)
+
+### Files changed
+- `.docs/progress.md`
+- `apps/qwik-demo/src/components/stencil-lib-ssr.tsx`
+- `apps/qwik-demo/vite.config.ts`
+
+### Blockers / notes for next iteration
+- Follow-up improvement candidate: make adapter-stencil published SSR output optimizer-safe without requiring consumer-side aliasing (separate packaging/build task).
+
 ## 2026-04-08 - PRD #1 / Child #24 - Demo runtime direct package consumption (task slice: remove copied stencil-runtime pathing and restore build)
 
 ### Task completed

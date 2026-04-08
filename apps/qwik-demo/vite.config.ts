@@ -4,6 +4,7 @@
  */
 import { qwikCity } from '@builder.io/qwik-city/vite';
 import { qwikVite, QwikVitePluginApi } from '@builder.io/qwik/optimizer';
+import { fileURLToPath, URL } from 'node:url';
 import { defineConfig, type UserConfig } from 'vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import pkg from './package.json';
@@ -52,6 +53,18 @@ export default defineConfig(({ command, mode }): UserConfig => {
       // Put problematic deps that break bundling here, mostly those with binaries.
       // For example ['better-sqlite3'] if you use that in server functions.
       exclude: [],
+    },
+    resolve: {
+      alias: {
+        // The adapter package currently publishes plain tsc output. During demo dev/build,
+        // force SSR adapter imports to source so Qwik optimizer can transform component$/$.
+        '@qwik-custom-elements/adapter-stencil/ssr': fileURLToPath(
+          new URL(
+            '../../packages/adapter-stencil/src/ssr/index.ts',
+            import.meta.url,
+          ),
+        ),
+      },
     },
 
     /**
