@@ -326,10 +326,9 @@ async function resolveAdapterVersion(
     return cached;
   }
 
-  const packageNameSegments = adapterPackage.split('/');
-  const packageDirectoryName = packageNameSegments.at(-1);
+  const packageName = resolveAdapterVersionPackageName(adapterPackage);
 
-  if (!packageDirectoryName) {
+  if (packageName == null) {
     cache.set(adapterPackage, 'unknown');
     return 'unknown';
   }
@@ -338,7 +337,7 @@ async function resolveAdapterVersion(
     path.dirname(fileURLToPath(import.meta.url)),
     '..',
     '..',
-    packageDirectoryName,
+    packageName,
     'package.json',
   );
 
@@ -347,6 +346,22 @@ async function resolveAdapterVersion(
   );
   cache.set(adapterPackage, resolvedVersion);
   return resolvedVersion;
+}
+
+function resolveAdapterVersionPackageName(
+  adapterPackage: string,
+): string | undefined {
+  if (!adapterPackage.startsWith('@qwik-custom-elements/')) {
+    return undefined;
+  }
+
+  const [scope, packageDirectoryName] = adapterPackage.split('/');
+
+  if (scope !== '@qwik-custom-elements' || !packageDirectoryName) {
+    return undefined;
+  }
+
+  return packageDirectoryName;
 }
 
 async function readVersionFromPackageJson(

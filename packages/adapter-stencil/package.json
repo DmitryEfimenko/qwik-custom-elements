@@ -2,13 +2,25 @@
   "name": "@qwik-custom-elements/adapter-stencil",
   "version": "0.0.0",
   "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
   "scripts": {
-    "build": "node -e \"console.log('adapter-stencil build noop')\"",
-    "check-types": "node -e \"console.log('adapter-stencil check-types noop')\"",
-    "dev": "node -e \"console.log('adapter-stencil dev noop')\"",
+    "build": "tsc -p tsconfig.json",
+    "check-types": "tsc -p tsconfig.json --noEmit",
+    "dev": "tsc -p tsconfig.json --watch",
     "format": "prettier --write . --config ../../.prettierrc.json --ignore-path ../../.prettierignore",
     "format:check": "prettier --check . --config ../../.prettierrc.json --ignore-path ../../.prettierignore",
     "lint": "eslint \"**/*.{js,mjs,cjs,ts,mts,cts,tsx}\" --no-error-on-unmatched-pattern",
     "test": "node -e \"console.log('adapter-stencil test noop')\""
+  },
+  "files": [
+    "dist"
+  ],
+  "devDependencies": {
+    "typescript": "^5.9.3"
   }
 }

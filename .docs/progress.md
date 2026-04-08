@@ -1,5 +1,54 @@
 # Progress Log
 
+## 2026-04-07 - Adapter packages TypeScript migration (task slice: dist-only adapter outputs + core local-loader compatibility)
+
+### Task completed
+- Migrated `@qwik-custom-elements/adapter-stencil` from root JS entrypoint to a TypeScript package layout with `src/` sources, `tsconfig.json`, and compiled `dist/` output.
+- Migrated `@qwik-custom-elements/adapter-lit` (including canonical `./ssr` subpath) to TypeScript with declaration output and `dist/`-based exports.
+- Switched both adapter package manifests to real TypeScript scripts (`build`, `check-types`, `dev`) and narrowed publish surface to `dist`.
+- Removed legacy root runtime entrypoints (`index.js`/`ssr.js`) from both adapters as part of the dist-only package contract.
+- Updated core workspace-local adapter fallback resolution so `adapterPackage` values resolve to `dist/index.js` and `dist/<subpath>.js` for scoped local packages.
+- Updated core adapter-version summary resolution so scoped subpath specifiers (for example `@qwik-custom-elements/adapter-lit/ssr`) resolve package version from the adapter package root.
+- Updated core test workflow to build both adapter packages before running vitest so dist-only fallback imports remain deterministic in local monorepo runs.
+
+### Key decisions
+- Kept the migration aligned with core package conventions: NodeNext ESM, declaration output, `src` -> `dist`, and explicit exports map entries.
+- Chose true dist-only adapter packaging (no root compatibility shims) and moved compatibility handling into core local fallback resolution.
+- Preserved canonical lit SSR subpath contract (`@qwik-custom-elements/adapter-lit/ssr`) while changing its resolved local fallback target to dist output.
+
+### Key findings
+- Core generation already uses `projects[].adapterPackage` as the loading source of truth; only workspace fallback path assumptions required adjustment for dist-only adapters.
+- Without adapter prebuild in the core test loop, local fallback imports would fail because legacy root JS files no longer exist.
+- Root Turbo feedback loops remained green after migration and compatibility updates.
+
+### Validation loops run
+- `pnpm --filter @qwik-custom-elements/adapter-stencil run build` (passed)
+- `pnpm --filter @qwik-custom-elements/adapter-lit run build` (passed)
+- `pnpm --filter @qwik-custom-elements/core run check-types` (passed)
+- `pnpm --filter @qwik-custom-elements/core run test` (passed)
+- `npm run typecheck` (passed)
+- `npm run test` (passed)
+
+### Files changed
+- `.docs/progress.md`
+- `packages/adapter-stencil/package.json`
+- `packages/adapter-stencil/tsconfig.json`
+- `packages/adapter-stencil/src/index.ts`
+- `packages/adapter-stencil/index.js` (deleted)
+- `packages/adapter-lit/package.json`
+- `packages/adapter-lit/tsconfig.json`
+- `packages/adapter-lit/src/index.ts`
+- `packages/adapter-lit/src/ssr.ts`
+- `packages/adapter-lit/index.js` (deleted)
+- `packages/adapter-lit/ssr.js` (deleted)
+- `packages/core/src/generator.ts`
+- `packages/core/src/cli.ts`
+- `packages/core/package.json`
+
+### Blockers / notes for next iteration
+- No blocker for this migration slice.
+- Follow-up hardening could add an explicit regression test that exercises local fallback resolution against dist-only adapter paths without prior manual package import warmup.
+
 ## 2026-04-07 - PRD #1 / Child #23 - PACKAGE_NAME source resolution and deterministic CEM diagnostics (task slice: discovery + cemPath safety)
 
 ### Task completed

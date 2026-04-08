@@ -341,7 +341,9 @@ function resolveWorkspaceLocalAdapterPath(
   }
 
   const subpath =
-    subpathSegments.length === 0 ? 'index.js' : subpathSegments.join('/');
+    subpathSegments.length === 0
+      ? path.join('dist', 'index.js')
+      : path.join('dist', subpathSegments.join('/'));
   const subpathWithExtension =
     path.extname(subpath) === '' ? `${subpath}.js` : subpath;
 

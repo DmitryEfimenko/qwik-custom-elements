@@ -3,16 +3,28 @@
   "version": "0.0.0",
   "type": "module",
   "exports": {
-    ".": "./index.js",
-    "./ssr": "./ssr.js"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./ssr": {
+      "types": "./dist/ssr.d.ts",
+      "import": "./dist/ssr.js"
+    }
   },
   "scripts": {
-    "build": "node -e \"console.log('adapter-lit build noop')\"",
-    "check-types": "node -e \"console.log('adapter-lit check-types noop')\"",
-    "dev": "node -e \"console.log('adapter-lit dev noop')\"",
+    "build": "tsc -p tsconfig.json",
+    "check-types": "tsc -p tsconfig.json --noEmit",
+    "dev": "tsc -p tsconfig.json --watch",
     "format": "prettier --write . --config ../../.prettierrc.json --ignore-path ../../.prettierignore",
     "format:check": "prettier --check . --config ../../.prettierrc.json --ignore-path ../../.prettierignore",
     "lint": "eslint \"**/*.{js,mjs,cjs,ts,mts,cts,tsx}\" --no-error-on-unmatched-pattern",
     "test": "node -e \"console.log('adapter-lit test noop')\""
+  },
+  "files": [
+    "dist"
+  ],
+  "devDependencies": {
+    "typescript": "^5.9.3"
   }
 }

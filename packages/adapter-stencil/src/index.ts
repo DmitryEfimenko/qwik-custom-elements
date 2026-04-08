@@ -5,6 +5,6 @@ export const metadata = {
   ssrRuntimeSubpath: null,
 };
 
-export async function probeSSR() {
+export async function probeSSR(): Promise<{ available: boolean }> {
   return { available: true };
 }
