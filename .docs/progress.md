@@ -1,5 +1,43 @@
 # Progress Log
 
+## 2026-04-08 - PRD #1 / Child #24 - Stencil runtime bridge ownership cutover (task slice: repository test coverage for adapter-stencil SSR bridge)
+
+### Task completed
+- Replaced `@qwik-custom-elements/adapter-stencil` test noop script with real test execution (`vitest run`).
+- Added adapter-level regression tests covering the new runtime bridge ownership surface introduced for child #24:
+	- metadata/probe contract validation (`src/index.test.ts`)
+	- runtime prop-sync behavior (`src/ssr/element-props-utils.test.ts`)
+	- SSR style-store behavior and deterministic keying (`src/ssr/styles-core.test.ts`)
+- Updated child issue `#24` acceptance criteria to explicitly require repository regression tests for the new adapter-stencil runtime bridge functionality.
+
+### Key decisions
+- Kept this iteration strictly scoped to test coverage hardening for already-migrated adapter-stencil bridge behavior (no runtime logic changes).
+- Focused tests on public/observable adapter contracts and deterministic utility behavior, avoiding fragile internal implementation assertions.
+- Treated issue-state sync as body update only (no issue comments), per current workflow direction.
+
+### Key findings
+- Adapter-stencil test coverage gap was real: prior package script was still a noop despite new runtime bridge ownership work landing.
+- A single failing styles-core assertion during RED phase exposed brittle length-coupled fallback-key expectations; stabilized with deterministic pattern assertions.
+
+### Validation loops run
+- `pnpm install` (passed)
+- `pnpm --filter @qwik-custom-elements/adapter-stencil run test` (RED -> GREEN)
+- `npm run typecheck` (passed)
+- `npm run test` (passed)
+- `npm run format` (passed)
+
+### Files changed
+- `.docs/progress.md`
+- `packages/adapter-stencil/package.json`
+- `packages/adapter-stencil/src/index.test.ts`
+- `packages/adapter-stencil/src/ssr/element-props-utils.test.ts`
+- `packages/adapter-stencil/src/ssr/styles-core.test.ts`
+- `pnpm-lock.yaml`
+
+### Blockers / notes for next iteration
+- No blocker for this slice.
+- Remaining #24 closeout can proceed once desired issue-state workflow (comment/close timing) is confirmed.
+
 ## 2026-04-08 - PRD #1 / Child #24 - Stencil runtime bridge ownership cutover (task slice: adapter-stencil SSR subpath export + demo import switch)
 
 ### Task completed
