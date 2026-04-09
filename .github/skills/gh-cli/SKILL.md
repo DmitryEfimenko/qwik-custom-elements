@@ -807,35 +807,6 @@ gh issue close 123 --comment "Fixed in PR #456"
 gh issue reopen 123
 ```
 
-### Multiline Close Comments (PowerShell)
-
-For multiline close comments in PowerShell, use a here-string variable.
-
-```powershell
-# Option 1: close with multiline comment
-$comment = @"
-Completed implementation for this issue.
-
-Validation run:
-- npm run typecheck
-- npm run test
-"@
-
-gh issue close 123 --repo owner/repo --comment "$comment"
-
-# Option 2: comment first, then close without --comment
-$body = @"
-Completed implementation for this issue.
-
-Validation run:
-- npm run typecheck
-- npm run test
-"@
-
-gh issue comment 123 --repo owner/repo --body "$body"
-gh issue close 123 --repo owner/repo
-```
-
 ### Comment on Issue
 
 ```bash
@@ -847,27 +818,6 @@ gh issue comment 123 --edit 456789 --body "Updated comment"
 
 # Delete comment
 gh issue comment 123 --delete 456789
-```
-
-### Multiline Issue Comments (PowerShell)
-
-In PowerShell, `\n` inside a normal quoted string is literal text, not a newline.
-Use a here-string or `--body-file` for multiline comments.
-
-```powershell
-# Preferred: here-string body
-$body = @"
-Follow-up update for this issue.
-
-Delivered:
-- Item 1
-- Item 2
-"@
-
-gh issue comment 123 --repo owner/repo --body "$body"
-
-# Alternative: body from file
-gh issue comment 123 --repo owner/repo --body-file .github/issue-comment.md
 ```
 
 ### Issue Status
@@ -1189,25 +1139,6 @@ gh pr comment 123 --edit 456789 --body "Updated"
 
 # Delete comment
 gh pr comment 123 --delete 456789
-```
-
-### Multiline PR Comments (PowerShell)
-
-Use the same approach for pull requests to avoid literal `\n` in posted comments.
-
-```powershell
-$body = @"
-PR review summary:
-
-- Verified build
-- Verified tests
-- Requested one follow-up change
-"@
-
-gh pr comment 123 --repo owner/repo --body "$body"
-
-# Alternative
-gh pr comment 123 --repo owner/repo --body-file .github/pr-comment.md
 ```
 
 ### Review Pull Request

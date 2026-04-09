@@ -30,32 +30,33 @@ Optional:
 
 ## Deterministic Selection Rules
 
-1. Query issues with state all.
-2. Find child issues whose body has a Parent PRD section and references the parent issue number or URL.
+1. Query issues with state all and label `prd-<parent-issue-number>`.
+2. Find child issues whose body has a Parent PRD section containing exact URL `https://github.com/<owner>/<repo>/issues/<parent-issue-number>`.
 3. Restrict to open child issues.
-4. Parse each child issue Blocked by section for blocker issue numbers.
-5. Keep only children where every blocker is closed.
-6. Select the lowest issue number among unblocked open children.
+4. Parse each child issue Blocked by section using canonical dependency bullets only.
+5. Resolve blocker states, including targeted lookups for blockers outside the initial query set.
+6. Keep only children where every blocker is closed.
+7. Select the lowest issue number among unblocked open children.
 
 If there is no unblocked open child issue, return no next issue.
+
+Canonical blocker format for new issues:
+
+- `- Blocked by #<issue-number>: <short reason>`
 
 ## Procedure
 
 1. Run the script:
-   [select-next-child-issue.ps1](./scripts/select-next-child-issue.ps1)
+   [select-next-child-issue.js](./scripts/select-next-child-issue.js)
 2. Read JSON output.
 3. Use next.number as the issue to implement.
 4. If next is null, output ALL TASKS COMPLETE and stop.
 
+The selector requires `gh` and `node`.
+
 ## Command
 
-Windows PowerShell:
-
-powershell -File ./.github/skills/select-next-prd-issue/scripts/select-next-child-issue.ps1 -Repo DmitryEfimenko/qwik-custom-elements -ParentIssueNumber 1
-
-PowerShell 7:
-
-pwsh -File ./.github/skills/select-next-prd-issue/scripts/select-next-child-issue.ps1 -Repo DmitryEfimenko/qwik-custom-elements -ParentIssueNumber 1
+node ./.github/skills/select-next-prd-issue/scripts/select-next-child-issue.js --repo <repo> --parent-issue-number <number>
 
 ## Output Contract
 
@@ -68,12 +69,15 @@ The script prints JSON with:
 
 ## Quality Checks
 
-- Child detection only matches issues that explicitly declare Parent PRD linkage.
+- Child detection requires both matching PRD label and exact Parent PRD URL.
 - Blocker evaluation is based on actual issue state from GitHub.
+- Malformed `## Blocked by` lines fail the run; they are not ignored.
 - Sorting is numeric ascending by issue number.
 - Same input and same GitHub state yield same output.
 
 ## Notes
 
-- Requires GitHub CLI authentication.
-- This skill is workspace scoped and designed for repositories that model PRD parent and child issues with Parent PRD and Blocked by sections.
+- Requires [GitHub CLI](https://cli.github.com/) authentication.
+- Requires Node.js (available via `node --version`).
+- External blocker states are resolved in parallel via `Promise.all`.
+- This skill is workspace scoped and designed for repositories that model PRD parent and child issues with Parent PRD, Blocked by sections, and `prd-<number>` labels.

@@ -10,3 +10,6 @@ packages/test-stencil-lib/www/
 
 # Vitest artifacts
 .vitest-attachments/
+
+# Local PRD execution logs
+.prd/progress/

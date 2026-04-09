@@ -1,6 +1,7 @@
 ---
 name: prd-to-issues
 description: Break a PRD into independently-grabbable GitHub issues using tracer-bullet vertical slices. Use when user wants to convert a PRD to issues, create implementation tickets, or break down a PRD into work items.
+
 ---
 
 # PRD to Issues
@@ -22,6 +23,8 @@ If you have not already explored the codebase, do so to understand the current s
 ### 3. Draft vertical slices
 
 Break the PRD into **tracer bullet** issues. Each issue is a thin vertical slice that cuts through ALL integration layers end-to-end, NOT a horizontal slice of one layer.
+
+Tracer bullets comes from the Pragmatic Programmer. When building systems, you want to write code that gets you feedback as quickly as possible. Tracer bullets are small slices of functionality that go through all layers of the system, allowing you to test and validate your approach early. This helps in identifying potential problems and ensures that the overall architecture is sound before investing significant time in development.
 
 Slices may be 'HITL' or 'AFK'. HITL slices require human interaction, such as an architectural decision or a design review. AFK slices can be implemented and merged without human interaction. Prefer AFK over HITL where possible.
 
@@ -55,10 +58,21 @@ For each approved slice, create a GitHub issue using `gh issue create`. Use the 
 
 Create issues in dependency order (blockers first) so you can reference real issue numbers in the "Blocked by" field.
 
+Use this issue title convention unless the user specifies otherwise: [PRD-<prd-issue-number>] - <slice title>.
+
+When creating each child issue, add label `prd-<prd-issue-number>` so downstream tooling can deterministically scope children to one PRD.
+
+Example:
+
+`gh issue create --title "[PRD-12] - Add login shell" --label "prd-12" --body-file /tmp/issue.md`
+
+
 <issue-template>
 ## Parent PRD
 
-#<prd-issue-number>
+https://github.com/<owner>/<repo>/issues/<prd-issue-number>
+
+This URL is required. Number-only references are intentionally unsupported.
 
 ## What to build
 
@@ -72,9 +86,11 @@ A concise description of this vertical slice. Describe the end-to-end behavior, 
 
 ## Blocked by
 
-- Blocked by #<issue-number> (if any)
+- Blocked by #<issue-number>: <short reason> (if any)
 
 Or "None - can start immediately" if no blockers.
+
+Only explicit bullet dependencies are valid blockers. Incidental # references in prose are not treated as blockers by the selector.
 
 ## User stories addressed
 
@@ -85,4 +101,15 @@ Reference by number from the parent PRD:
 
 </issue-template>
 
+### Blocker formatting rules
+
+- Use one blocker per bullet.
+- Use canonical format:
+	- `- Blocked by #<issue-number>: <short reason>`
+- Do not mix blocker declarations with explanatory prose in the same line.
+
 Do NOT close or modify the parent PRD issue.
+
+### 6. Create progress.md
+
+Create a file in the `.prd/progress` directory. Name the file `progress-for-prd-<number>.md` where `<number>` is the original PRD issue number. This is the canonical local progress file consumed by `prd-task-runner` and `sync-to-system-prd`.

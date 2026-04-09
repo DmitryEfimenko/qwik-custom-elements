@@ -9,4 +9,15 @@ Ask the questions one at a time.
 
 If a question can be answered by exploring the codebase, explore the codebase instead.
 
+Before asking questions, check for system-level planning artifacts under `docs/SYSTEM/` and load them when present:
+
+- `docs/SYSTEM/prd.md`
+- `docs/SYSTEM/api-contracts.md`
+- `docs/SYSTEM/decisions.md`
+- `docs/SYSTEM/findings-log.md`
+
+Use these as prior constraints so you avoid re-asking already settled decisions.
+
+When proposing recommendations, prefer consistency with existing system decisions unless the user explicitly wants to revisit them.
+
 IMPORTANT: Use askQuestions tool to ask questions.

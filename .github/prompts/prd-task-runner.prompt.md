@@ -1,7 +1,7 @@
 ---
 name: 'PRD Task Runner'
-description: 'Complete exactly one GitHub child issue under a PRD parent issue, while updating local progress.md.'
-argument-hint: 'Path to progress.md, parent PRD issue number/URL, child issue number (or "next"), and constraints'
+description: 'Advance exactly one GitHub child issue under a PRD parent issue by one task, while updating the canonical local progress file.'
+argument-hint: 'Parent PRD issue URL/number, child issue number (or "next"), and constraints. Progress path is inferred when possible.'
 agent: 'agent'
 ---
 
@@ -11,26 +11,33 @@ The issue model is:
 
 - One parent PRD issue
 - Multiple child tracer-bullet issues linked by body content:
-  - Parent PRD section points to the parent issue
-  - Blocked by section references dependency issue numbers
+  - Child issues are labeled `prd-<parent-issue-number>`
+  - Parent PRD section contains exact parent issue URL
+  - Blocked by section uses explicit dependency bullets
 
 Local file tracking:
 
-- `progress.md` is required and remains the local execution log of what was started/completed/blocked.
-- `progress.md` does not replace GitHub issue state. Keep both in sync.
+- `.prd/progress/progress-for-prd-<parent-issue-number>.md` is the canonical local execution log for what was started, completed, or blocked.
+- GitHub issues remain the source of truth for issue execution state. The progress file does not replace GitHub state.
 
 ## Inputs
 
 Required:
 
-- Path to `progress.md` (or its full contents)
-- Parent PRD issue number or URL
+- Parent PRD issue URL
 
 Optional:
 
+- Path to `.prd/progress/progress-for-prd-<number>.md`
 - A specific child issue number to work on (for example `13`)
 - Or `next` to pick the next unblocked open child issue
 - Any constraints (deadline, files to avoid, no-refactor, etc.)
+
+Progress file handling:
+
+- Treat `.prd/progress/progress-for-prd-<parent-issue-number>.md` as required workflow input.
+- If the path is not explicitly provided, infer it from the parent PRD issue number and continue.
+- Stop and ask the user only when the parent issue number is unavailable or the progress file path cannot be inferred.
 
 # ISSUES
 
@@ -38,16 +45,18 @@ If the user did not specify a child issue number, determine the next issue by:
 
 Use skill: `../skills/select-next-prd-issue/SKILL.md` to run deterministic next-issue selection.
 
-1. Query open child issues for the parent PRD issue.
-2. Parse each candidate issue's Blocked by section.
-3. Keep issues whose blockers are all closed.
-4. Select the lowest-number unblocked open issue.
+Do not re-implement selector logic in this prompt. The selector skill is the single source of truth for:
+
+- How child issues are discovered
+- How parent linkage is validated
+- How blockers are parsed and evaluated
+- How the next issue is selected deterministically
 
 # TASK BREAKDOWN
 
 Break down the issues into tasks. An issue may contain a single task (a small bugfix or visual tweak) or many, many tasks (a PRD or a large refactor).
 
-Make each task the smallest possible unit of work. We don't want to outrun our headlights. Aim for one small change per task.
+Make each task the smallest possible unit of work. We don't want to outrun our headlights. Aim for one small change per task, and complete only one task from the selected child issue in a single run.
 
 # TASK SELECTION
 
@@ -71,7 +80,7 @@ Explore the repo and fill your context window with relevant information that wil
 
 - First, refresh canonical PRD decision context (do not rely on stale memory):
   - Re-read the current parent PRD issue body and extract only decisions relevant to this child issue/slice.
-  - Re-read repository decision artifacts (for example `.docs/qwik-custom-elements-decisions.md`) and treat PRD issue text as canonical if conflicts exist.
+  - Re-read repository decision artifacts (for example `docs/qwik-custom-elements-decisions.md`, files under `docs/SYSTEM/*`) and treat PRD issue text as canonical for feature intent if conflicts exist.
   - If the selected child issue narrows or overrides wording, capture that as part of the decision context.
 - Create a short "decision snapshot" before coding:
   - List the 3-7 highest-impact constraints that must hold for this slice.
@@ -125,6 +134,7 @@ Before considering the task complete, run the feedback loops:
 - `npm run typecheck` to run the type checker
 - `npm run test` to run the tests
 - `npm run build` to run the build
+- `npm run lint` to run the linter
 
 This repository may use `pnpm`. If `npm run typecheck` / `npm run test` do not exist, run the closest equivalents (for example `pnpm build.types` for typechecking).
 
@@ -138,22 +148,25 @@ Before committing, format all changed files.
 
 # PROGRESS
 
-After completing, update `progress.md`:
+After completing:
 
-- Task completed and PRD reference
-- Key decisions made
-- Key findings or learnings
-- Files changed
-- Blockers or notes for next iteration...
-- Ensure progress.md would be committed with the changed code
+- update `.prd/progress/progress-for-prd-<number>.md`:
+  - Task completed and PRD reference
+  - Key decisions made
+  - Key findings or learnings
+  - Files changed
+  - Blockers or notes for next iteration...
+- use [sync-to-system-prd](../skills/sync-to-system-prd/SKILL.md) after every run to sync only durable decisions and findings to system-level documentation
 
 # COMMIT
 
-Make a git commit with a clear message referencing the issue.
+If the selected task resulted in code or docs changes, make a git commit with a clear message referencing the issue.
+
+Use the format: `feat(<domain>): PRD-<parent-issue-number> #<child-issue-number> - <short description of the change>`.
 
 # THE ISSUE
 
-If the task is complete, close the original GitHub issue.
+If the selected task completes the child issue's acceptance criteria, close the original GitHub issue after syncing and committing.
 
 Reference for GitHub CLI usage and PowerShell multiline comment safety:
 
@@ -161,7 +174,7 @@ Reference for GitHub CLI usage and PowerShell multiline comment safety:
 
 When adding multiline close/comment text in PowerShell, use a here-string or `--body-file` approach. Do not rely on escaped newline sequences inside a single quoted command argument.
 
-If the task is not complete, leave a comment on the GitHub issue with what was done.
+If the selected task does not complete the child issue, leave the issue open and comment with what was done, what remains, and any new blockers.
 
 # FINAL RULES
 
