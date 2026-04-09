@@ -40,6 +40,7 @@
     "format:check": "prettier --check . --config ../../.prettierrc.json --ignore-path ../../.prettierignore",
     "start": "stencil build --dev --watch --serve",
     "lint": "eslint \"src/**/*.{ts,tsx}\" stencil.config.ts vitest.config.ts vitest-setup.ts --ignore-pattern \"**/*.d.ts\" --no-error-on-unmatched-pattern",
+    "e2e": "node -e \"console.log('test-stencil-lib e2e noop')\"",
     "test": "stencil-test",
     "test:watch": "stencil-test --watch",
     "generate": "stencil generate"

@@ -19,6 +19,7 @@
     "format": "prettier --write . --config ../../.prettierrc.json --ignore-path ../../.prettierignore",
     "format:check": "prettier --check . --config ../../.prettierrc.json --ignore-path ../../.prettierignore",
     "lint": "eslint \"**/*.{js,mjs,cjs,ts,mts,cts,tsx}\" --no-error-on-unmatched-pattern",
+    "e2e": "node -e \"console.log('adapter-stencil e2e noop')\"",
     "test": "vitest run"
   },
   "files": [

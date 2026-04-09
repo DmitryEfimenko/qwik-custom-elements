@@ -17,6 +17,12 @@
     "test": {
       "dependsOn": ["^test"]
     },
+    "e2e": {
+      "cache": false
+    },
+    "e2e:install": {
+      "cache": false
+    },
     "lint": {
       "dependsOn": ["^lint"]
     },

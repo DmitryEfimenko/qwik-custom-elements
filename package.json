@@ -4,6 +4,8 @@
     "build": "turbo run build",
     "typecheck": "turbo run check-types",
     "test": "turbo run test",
+    "e2e": "turbo run e2e",
+    "e2e:install": "turbo run e2e:install",
     "lint": "turbo run lint",
     "format": "turbo run format",
     "format:check": "turbo run format:check",
