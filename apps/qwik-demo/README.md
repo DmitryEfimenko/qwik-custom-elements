@@ -70,6 +70,11 @@ Run the local smoke e2e suite against the preview-style server:
 pnpm --filter qwik-demo run e2e
 ```
 
+Scope for this phase:
+
+- E2E is currently a local contributor workflow.
+- CI gating for E2E is intentionally deferred until a follow-up phase.
+
 Troubleshoot failures with Playwright artifacts:
 
 - Open the HTML report after a run:
