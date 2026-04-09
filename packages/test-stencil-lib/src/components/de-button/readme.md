@@ -2,11 +2,13 @@
 
 <!-- Auto Generated Below -->
 
+
 ## Properties
 
 | Property | Attribute | Description | Type                   | Default |
 | -------- | --------- | ----------- | ---------------------- | ------- |
 | `size`   | `size`    |             | `"lg" \| "md" \| "sm"` | `'md'`  |
+
 
 ## Events
 
@@ -14,6 +16,7 @@
 | ------------- | ----------- | ------------------------- |
 | `tripleClick` |             | `CustomEvent<MouseEvent>` |
 
----
 
-_Built with [StencilJS](https://stenciljs.com/)_
+----------------------------------------------
+
+*Built with [StencilJS](https://stenciljs.com/)*

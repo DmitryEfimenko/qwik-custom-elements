@@ -14,13 +14,9 @@
       "import": "./dist/stencil-js-lib/stencil-js-lib.esm.js",
       "require": "./dist/stencil-js-lib/stencil-js-lib.cjs.js"
     },
-    "./my-component": {
-      "types": "./dist/components/my-component.d.ts",
-      "import": "./dist/components/my-component.js"
-    },
     "./loader": {
-      "types": "./loader-bundler/index.d.ts",
-      "import": "./loader-bundler/index.js"
+      "types": "./dist/components/index.d.ts",
+      "import": "./dist/components/index.js"
     },
     "./hydrate": {
       "types": "./hydrate/index.d.ts",
@@ -34,7 +30,6 @@
   },
   "files": [
     "dist/",
-    "loader-bundler/",
     "hydrate/"
   ],
   "scripts": {
