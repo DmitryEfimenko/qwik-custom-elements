@@ -135,6 +135,7 @@ Before considering the task complete, run the feedback loops:
 - `npm run test` to run the tests
 - `npm run build` to run the build
 - `npm run lint` to run the linter
+- `npm run e2e` to run the root-level end-to-end suite
 
 This repository may use `pnpm`. If `npm run typecheck` / `npm run test` do not exist, run the closest equivalents (for example `pnpm build.types` for typechecking).
 
