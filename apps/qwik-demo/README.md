@@ -70,6 +70,18 @@ Run the local smoke e2e suite against the preview-style server:
 pnpm --filter qwik-demo run e2e
 ```
 
+Troubleshoot failures with Playwright artifacts:
+
+- Open the HTML report after a run:
+
+```shell
+pnpm --filter qwik-demo exec playwright show-report
+```
+
+- Inspect trace/video/screenshot files under:
+  - `apps/qwik-demo/test-results/`
+  - `apps/qwik-demo/playwright-report/`
+
 ## Production
 
 The production build will generate client and server modules by running both client and server build commands. The build command will use Typescript to run a type check on the source code.
