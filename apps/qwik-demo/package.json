@@ -19,11 +19,15 @@
     "format:check": "prettier --check . --config ../../.prettierrc.json --ignore-path ../../.prettierignore",
     "lint": "eslint \"src/**/*.ts*\"",
     "preview": "qwik build preview && vite preview --open --port 4173 --strictPort",
+    "preview:e2e": "qwik build preview && vite preview --host 127.0.0.1 --port 4173 --strictPort",
     "start": "vite --open --mode ssr",
+    "e2e:install": "playwright install chromium",
+    "e2e": "playwright test",
     "test": "node -e \"console.log('qwik-demo test noop')\"",
     "qwik": "qwik"
   },
   "devDependencies": {
+    "@playwright/test": "^1.53.2",
     "@builder.io/qwik": "^1.19.2",
     "@builder.io/qwik-city": "^1.19.2",
     "@qwik-custom-elements/adapter-stencil": "workspace:*",

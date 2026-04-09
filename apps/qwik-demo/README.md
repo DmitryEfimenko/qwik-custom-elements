@@ -56,6 +56,20 @@ The preview command will create a production build of the client modules, a prod
 npm run preview # or `yarn preview`
 ```
 
+## E2E (Playwright)
+
+Install Chromium once per machine:
+
+```shell
+pnpm --filter qwik-demo run e2e:install
+```
+
+Run the local smoke e2e suite against the preview-style server:
+
+```shell
+pnpm --filter qwik-demo run e2e
+```
+
 ## Production
 
 The production build will generate client and server modules by running both client and server build commands. The build command will use Typescript to run a type check on the source code.
