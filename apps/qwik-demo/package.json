@@ -19,7 +19,7 @@
     "format:check": "prettier --check . --config ../../.prettierrc.json --ignore-path ../../.prettierignore",
     "lint": "eslint \"src/**/*.ts*\"",
     "preview": "qwik build preview && vite preview --open --port 4173 --strictPort",
-    "preview:e2e": "qwik build preview && vite preview --host 127.0.0.1 --port 4173 --strictPort",
+    "preview:e2e": "pnpm --filter @qwik-custom-elements/test-stencil-lib run build && qwik build preview && vite preview --host 127.0.0.1 --port 4173 --strictPort",
     "start": "vite --open --mode ssr",
     "e2e:install": "playwright install chromium",
     "e2e": "playwright test",

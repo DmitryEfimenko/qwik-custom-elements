@@ -1,7 +1,6 @@
 import type { StencilRenderToStringOptions } from '@qwik-custom-elements/adapter-stencil/ssr';
 
 export async function defineCustomElements() {
-  // Use the package export directly from the local workspace fixture library.
   const { defineCustomElements: defineCustomElementsFromLoader } = await import(
     '@qwik-custom-elements/test-stencil-lib/loader'
   );
