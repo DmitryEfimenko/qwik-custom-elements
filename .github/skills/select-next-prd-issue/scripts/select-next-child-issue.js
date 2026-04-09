@@ -7,13 +7,14 @@ const BLOCKER_PATTERN = /^[-*]\s+Blocked\s+by\s+#(\d+)(\s|:|$)/;
 const NONE_PATTERN = /^None\s*-\s*can\s+start\s+immediately$/;
 
 function extractSection(body, headingPattern) {
-  const headingRe = new RegExp('^##\\s*' + headingPattern + '\\s*$');
-  const nextSectionRe = /^##\s+/;
+  const headingRe = new RegExp('^\\s*##\\s*' + headingPattern + '\\s*$', 'i');
+  const nextSectionRe = /^\s*##\s+/;
   const lines = body.split('\n');
   const result = [];
   let inSection = false;
 
-  for (const line of lines) {
+  for (const rawLine of lines) {
+    const line = rawLine.replace(/\r$/, '');
     if (headingRe.test(line)) {
       inSection = true;
       continue;

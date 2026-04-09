@@ -100,6 +100,14 @@ test('extractSection: stops at next h2 heading', () => {
   assert.ok(!result.includes('should not appear'));
 });
 
+test('extractSection: handles CRLF headings and content', () => {
+  const body =
+    '## Parent PRD\r\n\r\nhttps://github.com/org/repo/issues/25\r\n## Blocked by\r\nNone - can start immediately\r\n';
+  const result = extractSection(body, 'Parent\\s*PRD');
+  assert.ok(result.includes('https://github.com/org/repo/issues/25'));
+  assert.ok(!result.includes('Blocked by'));
+});
+
 // parseGitHubIssueNumberFromUrl
 
 test('parseGitHubIssueNumberFromUrl: parses canonical issue URL', () => {
