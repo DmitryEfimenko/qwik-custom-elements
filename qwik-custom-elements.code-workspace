@@ -18,6 +18,7 @@
         "matchCommandLine": true,
       },
       "Set-Content": true,
+      "Out-Null": true,
     },
   },
 }

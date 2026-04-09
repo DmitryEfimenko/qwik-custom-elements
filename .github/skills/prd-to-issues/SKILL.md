@@ -1,7 +1,6 @@
 ---
 name: prd-to-issues
 description: Break a PRD into independently-grabbable GitHub issues using tracer-bullet vertical slices. Use when user wants to convert a PRD to issues, create implementation tickets, or break down a PRD into work items.
-
 ---
 
 # PRD to Issues
@@ -66,13 +65,10 @@ Example:
 
 `gh issue create --title "[PRD-12] - Add login shell" --label "prd-12" --body-file /tmp/issue.md`
 
-
 <issue-template>
 ## Parent PRD
 
 https://github.com/<owner>/<repo>/issues/<prd-issue-number>
-
-This URL is required. Number-only references are intentionally unsupported.
 
 ## What to build
 
@@ -105,7 +101,7 @@ Reference by number from the parent PRD:
 
 - Use one blocker per bullet.
 - Use canonical format:
-	- `- Blocked by #<issue-number>: <short reason>`
+  - `- Blocked by #<issue-number>: <short reason>`
 - Do not mix blocker declarations with explanatory prose in the same line.
 
 Do NOT close or modify the parent PRD issue.
