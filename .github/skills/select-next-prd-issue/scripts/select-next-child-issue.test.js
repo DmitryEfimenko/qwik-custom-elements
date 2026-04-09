@@ -1,14 +1,12 @@
-'use strict';
-
-const { test } = require('node:test');
-const assert = require('node:assert/strict');
-const {
-  extractSection,
+import assert from 'node:assert/strict';
+import { test } from 'node:test';
+import {
   extractBlockerNumbers,
-  validateBlockedBySection,
-  parseGitHubIssueNumberFromUrl,
+  extractSection,
   hasMatchingParentReference,
-} = require('./select-next-child-issue.js');
+  parseGitHubIssueNumberFromUrl,
+  validateBlockedBySection,
+} from './select-next-child-issue.js';
 
 // extractBlockerNumbers
 

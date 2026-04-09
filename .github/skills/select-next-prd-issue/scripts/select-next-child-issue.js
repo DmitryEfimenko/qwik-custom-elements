@@ -1,7 +1,6 @@
 #!/usr/bin/env node
-'use strict';
-
-const { spawnSync, spawn } = require('child_process');
+import { spawn, spawnSync } from 'node:child_process';
+import { pathToFileURL } from 'node:url';
 
 const BLOCKER_PATTERN = /^[-*]\s+Blocked\s+by\s+#(\d+)(\s|:|$)/;
 const NONE_PATTERN = /^None\s*-\s*can\s+start\s+immediately$/;
@@ -309,17 +308,24 @@ async function main(argv) {
   process.exit(next === null ? 2 : 0);
 }
 
-if (require.main === module) {
+function isMainModule() {
+  return (
+    Boolean(process.argv[1]) &&
+    import.meta.url === pathToFileURL(process.argv[1]).href
+  );
+}
+
+if (isMainModule()) {
   main(process.argv).catch((err) => {
     process.stderr.write(`${err.message}\n`);
     process.exit(1);
   });
 }
 
-module.exports = {
-  extractSection,
+export {
   extractBlockerNumbers,
-  validateBlockedBySection,
-  parseGitHubIssueNumberFromUrl,
+  extractSection,
   hasMatchingParentReference,
+  parseGitHubIssueNumberFromUrl,
+  validateBlockedBySection,
 };
