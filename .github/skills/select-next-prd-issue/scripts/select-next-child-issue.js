@@ -57,9 +57,48 @@ function validateBlockedBySection(content, issueNumber) {
 
     throw new Error(
       `Error: issue #${issueNumber} has invalid Blocked by line: ${trimmed}\n` +
-        'Expected format: - Blocked by #<issue-number>: <short reason>'
+        'Expected format: - Blocked by #<issue-number>: <short reason>',
     );
   }
+}
+
+function parseGitHubIssueNumberFromUrl(url) {
+  const match =
+    /^https:\/\/github\.com\/[^/\s]+\/[^/\s]+\/issues\/(\d+)(?:[/?#].*)?$/i.exec(
+      url.trim(),
+    );
+  if (!match) return null;
+  return parseInt(match[1], 10);
+}
+
+function hasMatchingParentReference(parentSection, parentUrl, parentIssueNum) {
+  const lines = parentSection
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  for (const line of lines) {
+    if (line === parentUrl) {
+      return true;
+    }
+
+    const directIssueNum = parseGitHubIssueNumberFromUrl(line);
+    if (directIssueNum === parentIssueNum) {
+      return true;
+    }
+
+    const markdownLinkMatch = /\((https:\/\/github\.com\/[^)]+)\)/i.exec(line);
+    if (markdownLinkMatch) {
+      const markdownIssueNum = parseGitHubIssueNumberFromUrl(
+        markdownLinkMatch[1],
+      );
+      if (markdownIssueNum === parentIssueNum) {
+        return true;
+      }
+    }
+  }
+
+  return false;
 }
 
 function ghSync(args) {
@@ -71,13 +110,19 @@ function ghSync(args) {
 function fetchBlockerState(repo, number) {
   return new Promise((resolve) => {
     const child = spawn('gh', [
-      'issue', 'view', String(number),
-      '--repo', repo,
-      '--json', 'state,number',
+      'issue',
+      'view',
+      String(number),
+      '--repo',
+      repo,
+      '--json',
+      'state,number',
     ]);
 
     let stdout = '';
-    child.stdout.on('data', (d) => { stdout += d.toString('utf8'); });
+    child.stdout.on('data', (d) => {
+      stdout += d.toString('utf8');
+    });
     child.on('close', (code) => {
       if (code === 0) {
         try {
@@ -130,13 +175,17 @@ async function main(argv) {
         process.exit(0);
         break;
       default:
-        process.stderr.write(`Error: unknown argument: ${args[i]}\n${usage()}\n`);
+        process.stderr.write(
+          `Error: unknown argument: ${args[i]}\n${usage()}\n`,
+        );
         process.exit(1);
     }
   }
 
   if (!repo || !parentIssueNumber) {
-    process.stderr.write(`Error: --repo and --parent-issue-number are required\n${usage()}\n`);
+    process.stderr.write(
+      `Error: --repo and --parent-issue-number are required\n${usage()}\n`,
+    );
     process.exit(1);
   }
 
@@ -152,7 +201,9 @@ async function main(argv) {
 
   const authCheck = ghSync(['auth', 'status']);
   if (authCheck.status !== 0) {
-    process.stderr.write('Error: gh is not authenticated. Run: gh auth login\n');
+    process.stderr.write(
+      'Error: gh is not authenticated. Run: gh auth login\n',
+    );
     process.exit(1);
   }
 
@@ -161,12 +212,18 @@ async function main(argv) {
   const label = `prd-${parentIssueNum}`;
 
   const listResult = ghSync([
-    'issue', 'list',
-    '--repo', repo,
-    '--state', 'all',
-    '--label', label,
-    '--limit', limit,
-    '--json', 'number,title,state,body,url',
+    'issue',
+    'list',
+    '--repo',
+    repo,
+    '--state',
+    'all',
+    '--label',
+    label,
+    '--limit',
+    limit,
+    '--json',
+    'number,title,state,body,url',
   ]);
 
   let rawIssues = [];
@@ -185,9 +242,11 @@ async function main(argv) {
 
     const body = issue.body ?? '';
     const parentSection = extractSection(body, 'Parent\\s*PRD');
-    const hasParentUrl = parentSection
-      .split('\n')
-      .some((line) => line.trim() === parentUrl);
+    const hasParentUrl = hasMatchingParentReference(
+      parentSection,
+      parentUrl,
+      parentIssueNum,
+    );
 
     if (!hasParentUrl) continue;
 
@@ -204,14 +263,16 @@ async function main(argv) {
     });
   }
 
-  const allBlockerNumbers = [...new Set(children.flatMap((c) => c.blockerNumbers))];
+  const allBlockerNumbers = [
+    ...new Set(children.flatMap((c) => c.blockerNumbers)),
+  ];
   const externalBlockers = allBlockerNumbers.filter(
-    (n) => !(String(n) in issueStateMap)
+    (n) => !(String(n) in issueStateMap),
   );
 
   if (externalBlockers.length > 0) {
     const states = await Promise.all(
-      externalBlockers.map((n) => fetchBlockerState(repo, n))
+      externalBlockers.map((n) => fetchBlockerState(repo, n)),
     );
     for (let i = 0; i < externalBlockers.length; i++) {
       issueStateMap[String(externalBlockers[i])] = states[i];
@@ -225,7 +286,7 @@ async function main(argv) {
       state: issueStateMap[String(n)] ?? 'MISSING',
     })),
     unblocked: child.blockerNumbers.every(
-      (n) => (issueStateMap[String(n)] ?? 'MISSING') === 'CLOSED'
+      (n) => (issueStateMap[String(n)] ?? 'MISSING') === 'CLOSED',
     ),
   }));
 
@@ -254,4 +315,10 @@ if (require.main === module) {
   });
 }
 
-module.exports = { extractSection, extractBlockerNumbers, validateBlockedBySection };
+module.exports = {
+  extractSection,
+  extractBlockerNumbers,
+  validateBlockedBySection,
+  parseGitHubIssueNumberFromUrl,
+  hasMatchingParentReference,
+};
