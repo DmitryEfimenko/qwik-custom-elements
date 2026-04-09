@@ -9,6 +9,7 @@
 - Durable guidance:
   - Keep Stencil hydrate loading behind SSR-only dynamic import boundaries in demo/runtime bridge code.
   - Direct top-level imports are safe for `@qwik-custom-elements/test-stencil-lib/loader` in client bootstrap paths.
+  - If removing `isServer` guards from client-reachable bridge modules, use a Vite-ignored module-id dynamic import (`await import(/* @vite-ignore */ moduleId)`) so hydrate is not traversed in client build.
 
 ## 2026-04-09 - Repo-wide format touches generated artifacts
 - Sources:

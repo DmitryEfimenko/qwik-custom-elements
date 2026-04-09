@@ -1,4 +1,4 @@
-import { inlinedQrl, isServer } from '@builder.io/qwik';
+import { inlinedQrl } from '@builder.io/qwik';
 import {
   createStencilClientSetup,
   createStencilSSRComponent,
@@ -10,14 +10,9 @@ async function renderToString(
   input: string,
   options?: StencilRenderToStringOptions,
 ) {
-  // `hydrate` depends on Node built-ins (e.g. `stream`), so keep it out
-  // of the client graph by loading it only when SSR executes.
-  if (!isServer) {
-    return { html: input };
-  }
-
+  const hydrateModuleId = '@qwik-custom-elements/test-stencil-lib/hydrate';
   const { renderToString: stencilRenderToString } = await import(
-    '@qwik-custom-elements/test-stencil-lib/hydrate'
+    /* @vite-ignore */ hydrateModuleId
   );
 
   const result = await stencilRenderToString(input, options);
