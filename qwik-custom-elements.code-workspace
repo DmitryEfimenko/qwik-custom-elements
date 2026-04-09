@@ -19,6 +19,10 @@
       },
       "Set-Content": true,
       "Out-Null": true,
+      "/^node \\./\\.github/skills/select-next-prd-issue/scripts/select-next-child-issue\\.js --repo DmitryEfimenko/qwik-custom-elements --parent-issue-number \\d+$/": {
+        "approve": true,
+        "matchCommandLine": true,
+      },
     },
   },
 }
