@@ -1,5 +1,55 @@
 # Progress Log
 
+## 2026-04-12 - PRD #1 / Child #24 - Narrow adapter packaging to stencil-only Qwik library mode
+
+### Task completed
+- Re-evaluated whether both adapter packages need Qwik-library packaging based on their actual runtime role and consumer surfaces.
+- Kept `@qwik-custom-elements/adapter-stencil` on Qwik-library packaging because it publishes Qwik runtime code through:
+	- `@qwik-custom-elements/adapter-stencil/client`
+	- `@qwik-custom-elements/adapter-stencil/ssr`
+- Reverted `@qwik-custom-elements/adapter-lit` to a plain TypeScript package because its current surface is metadata plus placeholder SSR string generation, not published Qwik runtime APIs.
+- Added package-export-aware workspace fallback loading in core so local adapter resolution no longer assumes legacy `dist/index.js` paths.
+- Fixed `createStencilClientSetup(...)` to avoid capturing non-serializable function inputs inside a QRL closure by storing inputs behind a serializable registry id.
+- Updated adapter-stencil client setup tests to execute the real resolved QRL callback path used after Qwik transform.
+
+### Key decisions
+- Treated adapter packaging as capability-driven, not package-name-driven: only packages that publish Qwik runtime entrypoints should use Qwik library output.
+- Kept the stencil adapter Qwik-library build narrow to the package that actually exports `$`/`component$`/`useTask$`-based runtime surfaces.
+- Avoided converting lit prematurely; defer Qwik-library packaging there until it exposes real Qwik runtime APIs rather than placeholder SSR helpers.
+- Fixed the stencil client setup issue at the runtime boundary instead of loosening tests around non-serializable closure capture.
+
+### Key findings
+- `adapter-stencil` truly needs optimizer-recognized output because its published client/SSR subpaths are consumed as Qwik runtime code.
+- `adapter-lit` does not currently need a `qwik` field or `.qwik.mjs` entry because consumers only use plain metadata and string-based SSR placeholder helpers.
+- Core workspace-local adapter loading needed to resolve package exports, otherwise local monorepo fallback logic remained coupled to stale dist-path assumptions.
+- The stencil client setup implementation had a real Qwik serialization bug: capturing a direct async callback inside `$()` fails once the package is built/tested in Qwik-library mode.
+
+### Validation loops run
+- `pnpm --filter @qwik-custom-elements/adapter-lit run build` (passed)
+- `pnpm --filter @qwik-custom-elements/adapter-stencil run build` (passed)
+- `pnpm --filter @qwik-custom-elements/adapter-stencil run test` (RED -> GREEN during fix)
+- `pnpm --filter @qwik-custom-elements/core run test` (passed)
+- `npm run typecheck` (passed)
+- `npm run build` (passed)
+- `npm run test` (passed)
+- `npm run lint` (passed)
+- `npm run format` (passed)
+- `npm run e2e` (passed)
+
+### Files changed
+- `.prd/progress/progress-for-prd-1.md`
+- `packages/adapter-lit/package.json`
+- `packages/adapter-stencil/package.json`
+- `packages/adapter-stencil/src/client/client-setup.ts`
+- `packages/adapter-stencil/src/client/client-setup.test.ts`
+- `packages/adapter-stencil/vite.config.ts`
+- `packages/core/src/generator.ts`
+- `pnpm-lock.yaml`
+
+### Blockers / notes for next iteration
+- No blockers for this slice.
+- Turbo still warns that some build tasks do not declare outputs; that is separate follow-up cleanup and was left unchanged here.
+
 ## 2026-04-12 - PRD #1 / Child #24 - Move adapter-stencil client runtime into dedicated client directory
 
 ### Task completed

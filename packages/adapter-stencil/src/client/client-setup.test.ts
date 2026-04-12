@@ -2,9 +2,11 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const useOnDocumentMock = vi.fn();
 
-vi.mock('@builder.io/qwik', () => {
+vi.mock('@builder.io/qwik', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@builder.io/qwik')>();
+
   return {
-    $: <T extends (...args: any[]) => any>(fn: T) => fn,
+    ...actual,
     useOnDocument: useOnDocumentMock,
   };
 });
@@ -50,11 +52,12 @@ describe('createStencilClientSetup', () => {
       expect.any(Function),
     );
 
-    const loadHandler = useOnDocumentMock.mock.calls[0]?.[1] as
-      | (() => Promise<void>)
+    const loadQrl = useOnDocumentMock.mock.calls[0]?.[1] as
+      | { resolve: () => Promise<() => Promise<void>> }
       | undefined;
+    const loadHandler = await loadQrl?.resolve();
 
-    expect(loadHandler).toBeTypeOf('function');
+    expect(loadQrl?.resolve).toBeTypeOf('function');
 
     await loadHandler?.();
     await loadHandler?.();
@@ -76,9 +79,10 @@ describe('createStencilClientSetup', () => {
 
     useStencilClientSetup();
 
-    const loadHandler = useOnDocumentMock.mock.calls[0]?.[1] as
-      | (() => Promise<void>)
+    const loadQrl = useOnDocumentMock.mock.calls[0]?.[1] as
+      | { resolve: () => Promise<() => Promise<void>> }
       | undefined;
+    const loadHandler = await loadQrl?.resolve();
 
     await loadHandler?.();
     await loadHandler?.();
@@ -94,9 +98,10 @@ describe('createStencilClientSetup', () => {
 
     useStencilClientSetup();
 
-    const loadHandler = useOnDocumentMock.mock.calls[0]?.[1] as
-      | (() => Promise<void>)
+    const loadQrl = useOnDocumentMock.mock.calls[0]?.[1] as
+      | { resolve: () => Promise<() => Promise<void>> }
       | undefined;
+    const loadHandler = await loadQrl?.resolve();
 
     await expect(loadHandler?.()).resolves.toBeUndefined();
   });

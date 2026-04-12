@@ -2,22 +2,29 @@
   "name": "@qwik-custom-elements/adapter-stencil",
   "version": "0.0.0",
   "type": "module",
+  "main": "./dist/index.qwik.cjs",
+  "module": "./dist/index.qwik.mjs",
+  "types": "./dist/index.d.ts",
+  "qwik": "./dist/index.qwik.mjs",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "import": "./dist/index.qwik.mjs",
+      "require": "./dist/index.qwik.cjs"
     },
     "./client": {
       "types": "./dist/client/index.d.ts",
-      "import": "./dist/client/index.js"
+      "import": "./dist/client/index.js",
+      "require": "./dist/client/index.cjs"
     },
     "./ssr": {
       "types": "./dist/ssr/index.d.ts",
-      "import": "./dist/ssr/index.js"
+      "import": "./dist/ssr/index.js",
+      "require": "./dist/ssr/index.cjs"
     }
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "vite build && tsc -p tsconfig.json --emitDeclarationOnly",
     "check-types": "tsc -p tsconfig.json --noEmit",
     "dev": "tsc -p tsconfig.json --watch",
     "format": "prettier --write . --config ../../.prettierrc.json --ignore-path ../../.prettierignore",
@@ -29,12 +36,15 @@
   "files": [
     "dist"
   ],
-  "dependencies": {
+  "peerDependencies": {
     "@builder.io/qwik": "^1.19.2",
     "@builder.io/qwik-city": "^1.19.2"
   },
   "devDependencies": {
+    "@builder.io/qwik": "^1.19.2",
+    "@builder.io/qwik-city": "^1.19.2",
     "typescript": "^5.9.3",
+    "vite": "^7.3.1",
     "vitest": "^3.2.4"
   }
 }

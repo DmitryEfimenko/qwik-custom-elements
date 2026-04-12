@@ -342,6 +342,33 @@ function resolveWorkspaceLocalAdapterPath(
     return undefined;
   }
 
+  const packageRoot = path.resolve(
+    path.dirname(fileURLToPath(import.meta.url)),
+    '..',
+    '..',
+    packageDirectoryName,
+  );
+  const packageJsonPath = path.join(packageRoot, 'package.json');
+  const exportKey =
+    subpathSegments.length === 0 ? '.' : `./${subpathSegments.join('/')}`;
+
+  try {
+    const packageJson = JSON.parse(
+      require('node:fs').readFileSync(packageJsonPath, 'utf8'),
+    ) as {
+      exports?: Record<string, unknown>;
+    };
+    const exportTarget = resolvePackageExportImportTarget(
+      packageJson.exports?.[exportKey],
+    );
+
+    if (typeof exportTarget === 'string') {
+      return path.resolve(packageRoot, exportTarget);
+    }
+  } catch {
+    // Fall through to legacy dist-path heuristics.
+  }
+
   const subpath =
     subpathSegments.length === 0
       ? path.join('dist', 'index.js')
@@ -349,13 +376,31 @@ function resolveWorkspaceLocalAdapterPath(
   const subpathWithExtension =
     path.extname(subpath) === '' ? `${subpath}.js` : subpath;
 
-  return path.resolve(
-    path.dirname(fileURLToPath(import.meta.url)),
-    '..',
-    '..',
-    packageDirectoryName,
-    subpathWithExtension,
-  );
+  return path.resolve(packageRoot, subpathWithExtension);
+}
+
+function resolvePackageExportImportTarget(
+  exportValue: unknown,
+): string | undefined {
+  if (typeof exportValue === 'string') {
+    return exportValue;
+  }
+
+  if (exportValue == null || typeof exportValue !== 'object') {
+    return undefined;
+  }
+
+  const exportRecord = exportValue as Record<string, unknown>;
+
+  if (typeof exportRecord.import === 'string') {
+    return exportRecord.import;
+  }
+
+  if (typeof exportRecord.default === 'string') {
+    return exportRecord.default;
+  }
+
+  return undefined;
 }
 
 function createSkippedProjectResult(

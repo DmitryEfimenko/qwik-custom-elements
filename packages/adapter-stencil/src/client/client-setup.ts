@@ -1,10 +1,27 @@
 import { $, useOnDocument, type QRL } from '@builder.io/qwik';
 
 const STENCIL_CLIENT_SETUP_DONE = '__qce_stencil_client_setup_done__';
+const DEFINE_CUSTOM_ELEMENTS_INPUTS = new Map<
+  string,
+  DefineCustomElementsInput | undefined
+>();
+let defineCustomElementsInputIdCounter = 0;
 
 type DefineCustomElementsInput =
   | QRL<() => Promise<void>>
   | (() => Promise<void>);
+
+function registerDefineCustomElementsInput(
+  input?: DefineCustomElementsInput,
+): string | undefined {
+  if (!input) {
+    return undefined;
+  }
+
+  const inputId = `stencil-client-setup-${++defineCustomElementsInputIdCounter}`;
+  DEFINE_CUSTOM_ELEMENTS_INPUTS.set(inputId, input);
+  return inputId;
+}
 
 async function resolveDefineCustomElements(
   input?: DefineCustomElementsInput,
@@ -86,8 +103,17 @@ function ensureStencilClientSetup(
 export function createStencilClientSetup(
   defineCustomElementsInput?: DefineCustomElementsInput,
 ) {
+  const defineCustomElementsInputId = registerDefineCustomElementsInput(
+    defineCustomElementsInput,
+  );
+
   const runSetup$ = $(async () => {
-    await ensureStencilClientSetup(defineCustomElementsInput).catch((error) => {
+    const registeredInput =
+      defineCustomElementsInputId == null
+        ? undefined
+        : DEFINE_CUSTOM_ELEMENTS_INPUTS.get(defineCustomElementsInputId);
+
+    await ensureStencilClientSetup(registeredInput).catch((error) => {
       console.error(error);
     });
   });

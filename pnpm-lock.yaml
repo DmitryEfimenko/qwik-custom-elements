@@ -103,14 +103,13 @@ importers:
         version: 7.3.1(@types/node@24.12.2)(jiti@2.6.1)(less@4.6.4)(sass-embedded@1.99.0)(sass@1.99.0)(stylus@0.62.0)(tsx@4.21.0)
 
   packages/adapter-stencil:
-    dependencies:
+    devDependencies:
       '@builder.io/qwik':
         specifier: ^1.19.2
         version: 1.19.2(vite@7.3.1(@types/node@24.12.2)(jiti@2.6.1)(less@4.6.4)(sass-embedded@1.99.0)(sass@1.99.0)(stylus@0.62.0)(tsx@4.21.0))
       '@builder.io/qwik-city':
         specifier: ^1.19.2
         version: 1.19.2(@types/node@24.12.2)(jiti@2.6.1)(less@4.6.4)(rollup@4.60.1)(sass-embedded@1.99.0)(sass@1.99.0)(stylus@0.62.0)(tsx@4.21.0)(typescript@5.9.3)
-    devDependencies:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
