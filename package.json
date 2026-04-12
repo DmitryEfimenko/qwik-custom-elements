@@ -9,8 +9,9 @@
     "lint": "turbo run lint",
     "format": "turbo run format",
     "format:check": "turbo run format:check",
-    "start": "pnpm dev:qwik-demo",
-    "dev:qwik-demo": "turbo run dev --filter=qwik-demo"
+    "start": "pnpm qwik-demo:dev",
+    "qwik-demo:dev": "turbo run dev --filter=qwik-demo",
+    "qwik-demo:preview": "turbo run preview --filter=qwik-demo"
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",

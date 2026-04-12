@@ -25,6 +25,7 @@ function createDocumentStub() {
   return {
     head,
     querySelectorAll,
+    readyState: 'loading',
   };
 }
 
@@ -34,6 +35,26 @@ describe('createStencilClientSetup', () => {
     delete (globalThis as Record<string, unknown>)[setupDoneMarker];
     (globalThis as Record<string, unknown>).document =
       createDocumentStub() as unknown as Document;
+  });
+
+  it('runs setup immediately when document is already loaded', async () => {
+    const { createStencilClientSetup } = await import('./client-setup');
+
+    const defineCustomElements = vi.fn(async () => {});
+    const useStencilClientSetup =
+      createStencilClientSetup(defineCustomElements);
+
+    Object.defineProperty(document, 'readyState', {
+      configurable: true,
+      value: 'complete',
+    });
+
+    useStencilClientSetup();
+
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(defineCustomElements).toHaveBeenCalledTimes(1);
   });
 
   it('registers load listener and executes setup once across repeated callbacks', async () => {

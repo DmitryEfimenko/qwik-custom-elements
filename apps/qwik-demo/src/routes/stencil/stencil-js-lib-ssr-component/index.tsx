@@ -18,7 +18,6 @@ export default component$(() => {
   useStencilClientSetup();
 
   const handleFirstAlpha$ = $(() => {
-    console.log('handleFirstAlpha$');
     firstAlphaCount.value += 1;
   });
 

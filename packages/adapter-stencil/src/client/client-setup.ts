@@ -81,19 +81,55 @@ function ensureStencilClientSetup(
   defineCustomElementsInput?: DefineCustomElementsInput,
 ): Promise<void> {
   const markerTarget = globalThis as Record<string, unknown>;
-  if (markerTarget[STENCIL_CLIENT_SETUP_DONE] === true) {
+  const existingMarker = markerTarget[STENCIL_CLIENT_SETUP_DONE];
+
+  if (existingMarker === true) {
     return Promise.resolve();
   }
-  markerTarget[STENCIL_CLIENT_SETUP_DONE] = true;
-  console.log('stencilClientSetup:executedOnce');
 
-  return (async () => {
+  if (
+    typeof existingMarker === 'object' &&
+    existingMarker !== null &&
+    'then' in existingMarker &&
+    typeof (existingMarker as { then?: unknown }).then === 'function'
+  ) {
+    return existingMarker as Promise<void>;
+  }
+
+  const setupPromise = (async () => {
     const defineCustomElements = await resolveDefineCustomElements(
       defineCustomElementsInput,
     );
 
     await runStencilClientSetup(defineCustomElements);
   })();
+
+  markerTarget[STENCIL_CLIENT_SETUP_DONE] = setupPromise;
+
+  return setupPromise
+    .then(() => {
+      markerTarget[STENCIL_CLIENT_SETUP_DONE] = true;
+    })
+    .catch((error) => {
+      delete markerTarget[STENCIL_CLIENT_SETUP_DONE];
+      throw error;
+    });
+}
+
+async function executeStencilClientSetup(
+  defineCustomElementsInputId?: string,
+  fallbackInput?: DefineCustomElementsInput,
+): Promise<void> {
+  const registeredInput =
+    defineCustomElementsInputId == null
+      ? undefined
+      : DEFINE_CUSTOM_ELEMENTS_INPUTS.get(defineCustomElementsInputId);
+
+  const resolvedInput = registeredInput ?? fallbackInput;
+
+  await ensureStencilClientSetup(resolvedInput).catch((error) => {
+    console.error(error);
+  });
 }
 
 /**
@@ -106,22 +142,30 @@ export function createStencilClientSetup(
   const defineCustomElementsInputId = registerDefineCustomElementsInput(
     defineCustomElementsInput,
   );
+  const qrlFallbackInput =
+    defineCustomElementsInput != null &&
+    '$symbol$' in Object(defineCustomElementsInput)
+      ? (defineCustomElementsInput as QRL<() => Promise<void>>)
+      : undefined;
 
   const runSetup$ = $(async () => {
-    const registeredInput =
-      defineCustomElementsInputId == null
-        ? undefined
-        : DEFINE_CUSTOM_ELEMENTS_INPUTS.get(defineCustomElementsInputId);
-
-    await ensureStencilClientSetup(registeredInput).catch((error) => {
-      console.error(error);
-    });
+    await executeStencilClientSetup(
+      defineCustomElementsInputId,
+      qrlFallbackInput,
+    );
   });
 
   const useStencilClientSetup = () => {
-    // Use a single listener for full page loads.
-    // The global marker still guarantees setup work runs once.
+    // Register for full page loads and also run immediately when mounted
+    // after the load event has already fired (client navigation/dev timing).
     useOnDocument('load', runSetup$);
+
+    if (typeof document !== 'undefined' && document.readyState !== 'loading') {
+      void executeStencilClientSetup(
+        defineCustomElementsInputId,
+        qrlFallbackInput,
+      );
+    }
   };
 
   return useStencilClientSetup;

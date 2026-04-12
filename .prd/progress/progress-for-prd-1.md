@@ -1,5 +1,56 @@
 # Progress Log
 
+## 2026-04-12 - PRD #1 / Child #24 - Remove useVisibleTask$ fallback from Stencil client setup (task slice: dev-mode timing reliability without useVisibleTask)
+
+### Task completed
+- Removed `useVisibleTask$` fallback from demo Stencil client hook in `apps/qwik-demo/src/components/stencil-lib-client.tsx`.
+- Hardened `createStencilClientSetup()` in `packages/adapter-stencil/src/client/client-setup.ts` to reliably execute setup in dev mode by:
+  - Making setup one-time guard promise-aware (track setup progress, not just completion).
+  - Running setup immediately if document is already loaded (`document.readyState !== 'loading'`).
+  - Fixing QRL fallback detection to correctly identify callable QRL objects via `$symbol$` marker.
+  - Registering callable inputs behind a serializable registry ID to avoid non-serializable closure capture in QRL.
+- Added corresponding unit test coverage proving immediate-execution path in `createStencilClientSetup.test.ts`.
+- Updated demo app scripts to enable explicit dev-mode E2E (`e2e:dev`, `dev:e2e`) and preview-mode E2E (`e2e:preview`, `preview:e2e`) targeting.
+- Updated Playwright config to branch webserver command based on `PLAYWRIGHT_RUNTIME` environment variable.
+- Updated root `package.json` scripts for consistency (renamed `dev:qwik-demo` → `qwik-demo:dev`, added `qwik-demo:preview`).
+- Removed debug logging (`console.log('handleFirstAlpha$')`) from demo route handler for cleaner test output.
+
+### Key decisions
+- Removed `useVisibleTask$` entirely rather than gating it behind a dev flag because adapter-side hardening proved sufficient for both runtimes.
+- Used QRL marker detection (`$symbol$ in Object(...)`) as the safest fallback path check instead of broad type coercion.
+- Kept setup as a single per-page initialization contract (one global marker, one promise that resolves to true).
+- Preserved no-config dev/preview E2E split by using environment variable routing in Playwright instead of separate project definitions.
+
+### Key findings
+- Dev-mode timing race was caused by setup promise-state not being visible to repeated load-event callbacks; tracking the pending promise solved this.
+- QRL objects carry a `$symbol$` property that uniquely identifies them; using this instead of property-checking on unions avoids type errors.
+- App-side fallback was masking a real adapter issue: registry-based input storage and immediate-execution branch made the adapter sufficient without useVisibleTask.
+- Direct async function input (without QRL wrapping) also works but QRL input is more robust for Qwik serialization, so kept QRL as primary path.
+
+### Validation loops run
+- `pnpm --filter qwik-demo run e2e:dev` (GREEN before/after changes)
+- `pnpm --filter qwik-demo run e2e:preview` (GREEN before/after changes)
+- `npm run typecheck` (passed)
+- `npm run test` (passed)
+- `npm run build` (passed)
+- `npm run lint` (passed)
+- `npm run format` (passed)
+- `npm run e2e` (passed)
+
+### Files changed
+- `apps/qwik-demo/package.json`
+- `apps/qwik-demo/playwright.config.ts`
+- `apps/qwik-demo/src/components/stencil-lib-client.tsx`
+- `apps/qwik-demo/src/routes/stencil/stencil-js-lib-ssr-component/index.tsx`
+- `package.json`
+- `packages/adapter-stencil/src/client/client-setup.ts`
+- `packages/adapter-stencil/src/client/client-setup.test.ts`
+- `turbo.json`
+
+### Blockers / notes for next iteration
+- No blockers for this slice.
+- Dev-mode and preview-mode E2E validation are now part of the standard feedback loop and can be run explicitly via `pnpm --filter qwik-demo run e2e:dev` and `pnpm --filter qwik-demo run e2e:preview`.
+
 ## 2026-04-12 - PRD #1 / Child #24 - Narrow adapter packaging to stencil-only Qwik library mode
 
 ### Task completed
