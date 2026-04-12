@@ -56,6 +56,12 @@ export default defineConfig(({ command, mode }): UserConfig => {
     },
     resolve: {
       alias: {
+        '@qwik-custom-elements/adapter-stencil/client': fileURLToPath(
+          new URL(
+            '../../packages/adapter-stencil/src/client/index.ts',
+            import.meta.url,
+          ),
+        ),
         // The adapter package currently publishes plain tsc output. During demo dev/build,
         // force SSR adapter imports to source so Qwik optimizer can transform component$/$.
         '@qwik-custom-elements/adapter-stencil/ssr': fileURLToPath(

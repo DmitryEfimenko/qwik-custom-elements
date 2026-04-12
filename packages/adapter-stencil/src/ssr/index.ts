@@ -1,4 +1,3 @@
-export * from './client-setup';
 export * from './element-props-utils';
 export * from './model';
 export * from './stencil-ssr';

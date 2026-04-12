@@ -17,7 +17,13 @@
     "outDir": "tmp",
     "noEmit": true,
     "paths": {
-      "~/*": ["./src/*"]
+      "~/*": ["./src/*"],
+      "@qwik-custom-elements/adapter-stencil/client": [
+        "../../packages/adapter-stencil/src/client/index.ts"
+      ],
+      "@qwik-custom-elements/adapter-stencil/ssr": [
+        "../../packages/adapter-stencil/src/ssr/index.ts"
+      ]
     },
     /* if you do not use CSS modules, remove this line and delete the typescript-plugin-css-modules module from package.json */
     "plugins": [{ "name": "typescript-plugin-css-modules" }]

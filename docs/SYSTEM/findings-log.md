@@ -1,5 +1,15 @@
 # Findings Log
 
+## 2026-04-12 - Adapter subpath type resolution should not depend on prebuilt dist during app typecheck
+- Sources:
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/24
+- Finding:
+  - After moving adapter-stencil entrypoints to nested subpaths (for example `src/client/index.ts`), downstream app `check-types` can fail when TypeScript resolves package subpath types only via non-built `dist` artifacts.
+- Durable guidance:
+  - In workspace apps that consume local adapter subpaths, add explicit `tsconfig` `paths` mappings to source entrypoints (for example `@qwik-custom-elements/adapter-stencil/client` and `/ssr`) so local typecheck is stable independent of prebuilt package outputs.
+  - Keep Vite aliasing aligned with the same source entrypoints to avoid runtime/typecheck divergence.
+
 ## 2026-04-09 - Stencil hydrate import must stay server-only in Qwik demo bridge
 - Sources:
   - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
