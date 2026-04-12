@@ -186,12 +186,12 @@ function collectSlotEntries(html: string, namedSlots: string[]): SlotEntry[] {
  * Creates a Qwik component that renders a Stencil component with SSR support.
  * Handles slot projection, prop synchronization, and style deduplication.
  *
- * @param stencilRenderToStringQrl - QRL reference to Stencil's renderToString function
+ * @param stencilRenderToString$ - QRL reference to Stencil's renderToString function
  * @param options - Optional callbacks for SSR lifecycle events
  * @returns A Qwik component that can be used like any other Qwik component
  */
 export function createStencilSSRComponent(
-  stencilRenderToStringQrl: QRL<StencilRenderToString>,
+  stencilRenderToString$: QRL<StencilRenderToString>,
   options?: {
     onSsrRenderResultQrl?: QRL<
       (
@@ -207,11 +207,12 @@ export function createStencilSSRComponent(
       const wrapperId = useId();
       const namedSlots = slots ?? [];
 
-      const markClientReady$ = $(() => {
-        clientReady.value = true;
-      });
-
-      useOnDocument('qinit', markClientReady$);
+      useOnDocument(
+        'qinit',
+        $(() => {
+          clientReady.value = true;
+        }),
+      );
 
       // Keeps the Stencil element's props in sync with Qwik signals on the client.
       // On the server, props are applied via `beforeHydrate` inside the SSRStream.
@@ -226,11 +227,13 @@ export function createStencilSSRComponent(
       useTask$(({ cleanup, track }) => {
         const ready = track(() => clientReady.value);
         const eventsDependencyKey = track(() => getEventsDependencyKey(events));
+
         if (!isBrowser || !ready) return;
 
         const wrapper = getWrapperElement(wrapperId) ?? wrapperRef.value;
         const stencilEl = getStencilElement(wrapper, tagName);
         const eventEntries = getEventEntries(events);
+
         if (!stencilEl || eventEntries.length === 0) {
           return;
         }
@@ -284,7 +287,7 @@ export function createStencilSSRComponent(
           >
             <SSRStream>
               {async function* () {
-                const renderToString = await stencilRenderToStringQrl.resolve();
+                const renderToString = await stencilRenderToString$.resolve();
 
                 const renderResult = await renderToString(
                   buildInputHtml(tagName, namedSlots),
@@ -297,7 +300,7 @@ export function createStencilSSRComponent(
                     },
                   },
                 );
-                const { html } = renderResult;
+                const html = renderResult.html ?? '';
                 if (options?.onSsrRenderResultQrl) {
                   const onSsrRenderResult =
                     await options.onSsrRenderResultQrl.resolve();

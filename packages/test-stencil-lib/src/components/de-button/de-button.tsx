@@ -11,17 +11,8 @@ export class DeButton {
   @Event() tripleClick!: EventEmitter<MouseEvent>;
 
   private clicks = 0;
-  private lastClickTime = 0;
 
   private handleClick(event: MouseEvent) {
-    const now = Date.now();
-    const timeBetweenClicks = now - this.lastClickTime;
-    this.lastClickTime = now;
-
-    if (timeBetweenClicks > 500) {
-      this.clicks = 0;
-    }
-
     this.clicks += 1;
 
     if (this.clicks === 3) {

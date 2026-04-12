@@ -92,9 +92,15 @@ importers:
 
   packages/adapter-lit:
     devDependencies:
+      '@builder.io/qwik':
+        specifier: ^1.19.2
+        version: 1.19.2(vite@7.3.1(@types/node@24.12.2)(jiti@2.6.1)(less@4.6.4)(sass-embedded@1.99.0)(sass@1.99.0)(stylus@0.62.0)(tsx@4.21.0))
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
+      vite:
+        specifier: ^7.3.1
+        version: 7.3.1(@types/node@24.12.2)(jiti@2.6.1)(less@4.6.4)(sass-embedded@1.99.0)(sass@1.99.0)(stylus@0.62.0)(tsx@4.21.0)
 
   packages/adapter-stencil:
     dependencies:
@@ -108,6 +114,9 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
+      vite:
+        specifier: ^7.3.1
+        version: 7.3.1(@types/node@24.12.2)(jiti@2.6.1)(less@4.6.4)(sass-embedded@1.99.0)(sass@1.99.0)(stylus@0.62.0)(tsx@4.21.0)
       vitest:
         specifier: ^3.2.4
         version: 3.2.4(@types/debug@4.1.13)(@types/node@24.12.2)(jiti@2.6.1)(less@4.6.4)(sass-embedded@1.99.0)(sass@1.99.0)(stylus@0.62.0)(tsx@4.21.0)

@@ -1,36 +1,15 @@
 import { inlinedQrl } from '@builder.io/qwik';
 import {
-  createStencilClientSetup,
   createStencilSSRComponent,
-  type StencilRenderToStringOptions,
+  type StencilRenderToString,
 } from '@qwik-custom-elements/adapter-stencil/ssr';
-import { defineCustomElements } from '@qwik-custom-elements/test-stencil-lib/loader';
 
-async function renderToString(
-  input: string,
-  options?: StencilRenderToStringOptions,
-) {
+const stencilRenderToString: StencilRenderToString = async (input, options) => {
   const hydrateModuleId = '@qwik-custom-elements/test-stencil-lib/hydrate';
-  const { renderToString: stencilRenderToString } = await import(
-    /* @vite-ignore */ hydrateModuleId
-  );
-
-  const result = await stencilRenderToString(input, options);
-  return {
-    html: result.html ?? '',
-    styles: result.styles,
-    components: result.components,
-  };
-}
-
-async function defineCustomElementsAsync() {
-  await Promise.resolve(defineCustomElements());
-}
+  const { renderToString } = await import(/* @vite-ignore */ hydrateModuleId);
+  return renderToString(input, options);
+};
 
 export const StencilJsLibSSRComponent = createStencilSSRComponent(
-  inlinedQrl(renderToString, 'renderToString'),
-);
-
-export const useStencilClientSetup = createStencilClientSetup(
-  inlinedQrl(defineCustomElementsAsync, 'defineCustomElementsAsync'),
+  inlinedQrl(stencilRenderToString, 'stencilRenderToString'),
 );

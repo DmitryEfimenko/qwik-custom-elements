@@ -44,8 +44,9 @@ name: 'Turborepo Workflow Conventions'
 
 - After script or task changes, run:
   - root `typecheck`
+  - root `build`
   - root `test`
   - root `lint`
   - root `format`
-  - root `build`
+  - root `e2e`
 - If a command fails, prefer fixing package script coverage or task mapping over adding one-off command exceptions.

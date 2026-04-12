@@ -2,10 +2,11 @@ import { $, component$, useSignal } from '@builder.io/qwik';
 import type { DocumentHead } from '@builder.io/qwik-city';
 
 import {
-  StencilJsLibSSRComponent,
+  // StencilJsLibSSRComponent,
   useStencilClientSetup,
-} from '../../components/stencil-lib-ssr';
-import { QwikDeAlert, QwikDeButton } from '../../generated';
+} from '../../../components/stencil-lib-client';
+import { StencilJsLibSSRComponent } from '../../../components/stencil-lib-ssr';
+import { QwikDeAlert, QwikDeButton } from '../../../generated';
 
 export default component$(() => {
   const buttonSize = useSignal<'md' | 'lg'>('md');
@@ -17,6 +18,7 @@ export default component$(() => {
   useStencilClientSetup();
 
   const handleFirstAlpha$ = $(() => {
+    console.log('handleFirstAlpha$');
     firstAlphaCount.value += 1;
   });
 

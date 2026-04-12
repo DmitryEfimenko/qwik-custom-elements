@@ -33,7 +33,7 @@ export interface StencilHydrateComponent {
 }
 
 export interface StencilRenderToStringResult {
-  html: string;
+  html: string | null;
   styles?: StencilHydrateStyleElement[];
   components?: StencilHydrateComponent[];
 }
