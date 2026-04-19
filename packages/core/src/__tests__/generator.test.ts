@@ -4,6 +4,13 @@ import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { GenerationError, generateFromConfig } from '../generator.js';
 import type { GeneratorConfig } from '../types.js';
+
+const validStencilAdapterOptions = {
+  runtime: {
+    loaderImport: '@acme/stencil-lib/loader',
+  },
+};
+
 async function withTempDir(
   run: (tempDir: string) => Promise<void>,
 ): Promise<void> {
@@ -26,6 +33,7 @@ function createSingleProjectConfig(
         adapter: 'stencil',
         adapterPackage: '@qwik-custom-elements/adapter-stencil',
         source: { type: 'CEM', path: './custom-elements.json' },
+        adapterOptions: validStencilAdapterOptions,
         outDir: './src/generated',
       },
     ],
@@ -245,6 +253,54 @@ describe('generateFromConfig', () => {
       await expect(
         generateFromConfig(config, { cwd: tempDir }),
       ).rejects.toBeInstanceOf(GenerationError);
+    });
+  });
+  it('fails when the adapter rejects a stencil CEM project without loaderImport', async () => {
+    await withTempDir(async (tempDir) => {
+      await writeFile(
+        path.join(tempDir, 'custom-elements.json'),
+        JSON.stringify({
+          modules: [{ declarations: [{ tagName: 'app-root' }] }],
+        }),
+        'utf8',
+      );
+      await writeFile(
+        path.join(tempDir, 'adapter-validating.mjs'),
+        [
+          'export const metadata = {',
+          "  supportedSourceTypes: ['CEM', 'PACKAGE_NAME'],",
+          '  supportsSsrProbe: true,',
+          "  ssrRuntimeSubpath: './ssr',",
+          '};',
+          '',
+          'export function validateProject({ source, adapterOptions }) {',
+          "  if (source.type !== 'CEM') return;",
+          '  const loaderImport = adapterOptions?.runtime?.loaderImport;',
+          "  if (typeof loaderImport === 'string' && loaderImport.trim() !== '') return;",
+          "  throw Object.assign(new Error('Stencil CEM projects must provide adapterOptions.runtime.loaderImport.'), {",
+          "    code: 'QCE_STENCIL_RUNTIME_LOADER_REQUIRED',",
+          '  });',
+          '}',
+          '',
+          'export async function probeSSR() {',
+          '  return { available: true };',
+          '}',
+          '',
+        ].join('\n'),
+        'utf8',
+      );
+
+      const config = createSingleProjectConfig(tempDir, true);
+      config.projects[0].adapterPackage = './adapter-validating.mjs';
+      config.projects[0].adapterOptions = {};
+
+      await expect(
+        generateFromConfig(config, { cwd: tempDir }),
+      ).rejects.toMatchObject({
+        code: 'QCE_STENCIL_RUNTIME_LOADER_REQUIRED',
+        message:
+          'Stencil CEM projects must provide adapterOptions.runtime.loaderImport.',
+      });
     });
   });
   it('falls back to CEM-only generation when adapter SSR is unavailable', async () => {
@@ -628,6 +684,7 @@ describe('generateFromConfig', () => {
             adapter: 'stencil',
             adapterPackage: '@qwik-custom-elements/adapter-stencil',
             source: { type: 'CEM', path: './custom-elements-z.json' },
+            adapterOptions: validStencilAdapterOptions,
             outDir: './src/generated/z',
           },
           {
@@ -635,6 +692,7 @@ describe('generateFromConfig', () => {
             adapter: 'stencil',
             adapterPackage: '@qwik-custom-elements/adapter-stencil',
             source: { type: 'CEM', path: './custom-elements-a.json' },
+            adapterOptions: validStencilAdapterOptions,
             outDir: './src/generated/a',
           },
         ],
@@ -673,6 +731,7 @@ describe('generateFromConfig', () => {
             adapter: 'stencil',
             adapterPackage: '@qwik-custom-elements/adapter-stencil',
             source: { type: 'CEM', path: './custom-elements-z.json' },
+            adapterOptions: validStencilAdapterOptions,
             outDir: './src/generated/z',
           },
           {
@@ -680,6 +739,7 @@ describe('generateFromConfig', () => {
             adapter: 'stencil',
             adapterPackage: '@qwik-custom-elements/adapter-stencil',
             source: { type: 'CEM', path: './custom-elements-a.json' },
+            adapterOptions: validStencilAdapterOptions,
             outDir: './src/generated/a',
           },
         ],
@@ -711,6 +771,7 @@ describe('generateFromConfig', () => {
             adapter: 'stencil',
             adapterPackage: '@qwik-custom-elements/adapter-stencil',
             source: { type: 'CEM', path: './custom-elements-missing-b.json' },
+            adapterOptions: validStencilAdapterOptions,
             outDir: './src/generated/b',
           },
           {
@@ -718,6 +779,7 @@ describe('generateFromConfig', () => {
             adapter: 'stencil',
             adapterPackage: '@qwik-custom-elements/adapter-stencil',
             source: { type: 'CEM', path: './custom-elements-valid.json' },
+            adapterOptions: validStencilAdapterOptions,
             outDir: './src/generated/a',
           },
           {
@@ -725,6 +787,7 @@ describe('generateFromConfig', () => {
             adapter: 'stencil',
             adapterPackage: '@qwik-custom-elements/adapter-stencil',
             source: { type: 'CEM', path: './custom-elements-missing-c.json' },
+            adapterOptions: validStencilAdapterOptions,
             outDir: './src/generated/c',
           },
         ],

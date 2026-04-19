@@ -9,7 +9,6 @@ import type {
   GeneratorProjectSource,
   LoadConfigOptions,
   LoadedConfig,
-  StencilAdapterOptions,
 } from './types.js';
 
 const DEFAULT_JSON_CONFIG = 'qwik-custom-elements.config.json';
@@ -100,94 +99,24 @@ function validateProject(
 
   ensureNoUnknownKeys(rawProject, PROJECT_ALLOWED_KEYS, pathPrefix);
 
-  const adapter = readRequiredString(
-    rawProject.adapter,
-    `${pathPrefix}.adapter`,
-  );
-  const adapterPackage = readRequiredString(
-    rawProject.adapterPackage,
-    `${pathPrefix}.adapterPackage`,
-  );
-  const source = readProjectSource(rawProject.source, `${pathPrefix}.source`);
-
   return {
     id: readRequiredString(rawProject.id, `${pathPrefix}.id`),
-    adapter,
-    adapterPackage,
-    source,
+    adapter: readRequiredString(rawProject.adapter, `${pathPrefix}.adapter`),
+    adapterPackage: readRequiredString(
+      rawProject.adapterPackage,
+      `${pathPrefix}.adapterPackage`,
+    ),
+    source: readProjectSource(rawProject.source, `${pathPrefix}.source`),
     outDir: readRequiredString(rawProject.outDir, `${pathPrefix}.outDir`),
     cleanOutput: readOptionalBoolean(
       rawProject.cleanOutput,
       `${pathPrefix}.cleanOutput`,
     ),
-    adapterOptions: readProjectAdapterOptions(
+    adapterOptions: readOptionalObject(
       rawProject.adapterOptions,
       `${pathPrefix}.adapterOptions`,
-      {
-        adapter,
-        adapterPackage,
-        source,
-      },
     ),
   };
-}
-
-function readProjectAdapterOptions(
-  value: unknown,
-  field: string,
-  project: Pick<GeneratorProject, 'adapter' | 'adapterPackage' | 'source'>,
-): Record<string, unknown> | StencilAdapterOptions | undefined {
-  const adapterOptions = readOptionalObject(value, field);
-
-  if (!isStencilProject(project)) {
-    return adapterOptions;
-  }
-
-  return readStencilAdapterOptions(adapterOptions, field, project.source);
-}
-
-function readStencilAdapterOptions(
-  value: Record<string, unknown> | undefined,
-  field: string,
-  source: GeneratorProjectSource,
-): StencilAdapterOptions | undefined {
-  const runtime = readOptionalObject(value?.runtime, `${field}.runtime`);
-  const loaderImport = readOptionalString(
-    runtime?.loaderImport,
-    `${field}.runtime.loaderImport`,
-  );
-  const hydrateImport = readOptionalString(
-    runtime?.hydrateImport,
-    `${field}.runtime.hydrateImport`,
-  );
-
-  if (source.type === 'CEM' && loaderImport == null) {
-    throw new ConfigValidationError(
-      'QCE_CONFIG_MISSING_REQUIRED',
-      `Config field "${field}.runtime.loaderImport" must be a non-empty string for stencil CEM projects.`,
-    );
-  }
-
-  if (runtime == null) {
-    return value;
-  }
-
-  return {
-    ...(value ?? {}),
-    runtime: {
-      ...(loaderImport == null ? {} : { loaderImport }),
-      ...(hydrateImport == null ? {} : { hydrateImport }),
-    },
-  };
-}
-
-function isStencilProject(
-  project: Pick<GeneratorProject, 'adapter' | 'adapterPackage'>,
-): boolean {
-  return (
-    project.adapter === 'stencil' ||
-    project.adapterPackage === '@qwik-custom-elements/adapter-stencil'
-  );
 }
 
 function readProjectSource(

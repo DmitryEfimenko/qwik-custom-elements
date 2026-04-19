@@ -13,15 +13,6 @@ export type GeneratorProjectSource =
   | CEMProjectSource
   | PackageNameProjectSource;
 
-export interface StencilRuntimeOptions {
-  loaderImport?: string;
-  hydrateImport?: string;
-}
-
-export interface StencilAdapterOptions extends Record<string, unknown> {
-  runtime?: StencilRuntimeOptions;
-}
-
 export interface GeneratorProject {
   id: string;
   adapter: string;
@@ -29,7 +20,7 @@ export interface GeneratorProject {
   source: GeneratorProjectSource;
   outDir: string;
   cleanOutput?: boolean;
-  adapterOptions?: Record<string, unknown> | StencilAdapterOptions;
+  adapterOptions?: Record<string, unknown>;
 }
 
 export interface GeneratorConfig {

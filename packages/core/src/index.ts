@@ -15,7 +15,5 @@ export type {
   LoadConfigOptions,
   LoadedConfig,
   PlannedWrite,
-  StencilAdapterOptions,
-  StencilRuntimeOptions,
   RunSummary,
 } from './types.js';

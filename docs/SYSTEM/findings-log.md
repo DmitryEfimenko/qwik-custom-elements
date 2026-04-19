@@ -6,10 +6,11 @@
   - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
   - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/31
 - Finding:
-  - For `@qwik-custom-elements/adapter-stencil`, `CEM` source mode does not provide enough package context to infer the client runtime import safely, so config loading must require `adapterOptions.runtime.loaderImport` before generation begins.
+  - For `@qwik-custom-elements/adapter-stencil`, `CEM` source mode does not provide enough package context to infer the client runtime import safely, so the adapter must validate `adapterOptions.runtime.loaderImport` through a generation-time adapter hook before generation work begins.
 - Durable guidance:
   - Require `adapterOptions.runtime.loaderImport` for Stencil `CEM` projects.
   - Allow `adapterOptions.runtime.hydrateImport` to remain optional so loader-only and SSR-fallback flows stay valid.
+  - Keep core config loading adapter-agnostic and treat `adapterOptions` as opaque outside adapter-owned validation hooks.
   - Keep `PACKAGE_NAME` runtime fields as optional overrides on top of package-aware defaults rather than making them universally required.
 
 ## 2026-04-12 - Adapter subpath type resolution should not depend on prebuilt dist during app typecheck

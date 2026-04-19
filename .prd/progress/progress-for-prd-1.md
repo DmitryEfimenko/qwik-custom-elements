@@ -5,19 +5,22 @@
 - Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
 - Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/31
 - Task completed:
-  - Added generator-facing Stencil runtime option types in core.
-  - Enforced `adapterOptions.runtime.loaderImport` for Stencil `CEM` projects during config load.
+  - Added a generic adapter validation hook in core generation.
+  - Enforced `adapterOptions.runtime.loaderImport` for Stencil `CEM` projects in `@qwik-custom-elements/adapter-stencil`.
   - Kept `adapterOptions.runtime.hydrateImport` optional so loader-only configurations stay valid.
   - Updated the checked-in demo config and adapter-stencil README to match the enforced contract.
 - Key decisions made:
-  - Validate the Stencil runtime contract at the config boundary, before generation starts.
+  - Keep core config loading adapter-agnostic and treat `adapterOptions` as opaque.
+  - Validate the Stencil runtime contract through an adapter-owned hook during generation.
   - Treat the runtime contract as Stencil-specific adapter data under `adapterOptions`, not under `source`.
   - Keep `PACKAGE_NAME` runtime defaults for a later slice; this run only codified the `CEM` requirement and optional hydrate behavior.
 - Files changed:
-  - `packages/core/src/types.ts`
-  - `packages/core/src/index.ts`
   - `packages/core/src/config.ts`
+  - `packages/core/src/generator.ts`
   - `packages/core/src/__tests__/config.test.ts`
+  - `packages/core/src/__tests__/generator.test.ts`
+  - `packages/adapter-stencil/src/index.ts`
+  - `packages/adapter-stencil/src/index.test.ts`
   - `packages/adapter-stencil/README.md`
   - `qwik-custom-elements.config.json`
 - Validation:
@@ -29,7 +32,35 @@
 - Remaining for issue #31:
   - Codify `PACKAGE_NAME` runtime override behavior in validation and tests.
   - Expand consumer-facing documentation and examples for both source types.
-  - Update any generation/output behavior once the runtime contract is consumed beyond config parsing.# Progress Log
+  - Update any generation/output behavior once the runtime contract is consumed beyond adapter validation.
+
+## 2026-04-19 - Issue #31 follow-up: restore adapter-owned validation boundary
+
+- Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+- Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/31
+- Task completed:
+  - Removed adapter-specific option types and exports from core.
+  - Restored opaque `adapterOptions` handling in core config loading.
+  - Kept the generic generation-time adapter validation hook in core.
+  - Added Stencil-owned `validateProject(...)` coverage and repaired core generator/config fixtures around the new boundary.
+- Key decisions made:
+  - Core may orchestrate adapter validation, but must not understand adapter-specific option shapes.
+  - Adapter-owned validation belongs at generation time, after adapter loading and before generation work.
+- Files changed in this follow-up:
+  - `packages/core/src/types.ts`
+  - `packages/core/src/index.ts`
+  - `packages/core/src/config.ts`
+  - `packages/core/src/generator.ts`
+  - `packages/core/src/__tests__/config.test.ts`
+  - `packages/core/src/__tests__/generator.test.ts`
+  - `packages/adapter-stencil/src/index.ts`
+  - `packages/adapter-stencil/src/index.test.ts`
+  - `docs/SYSTEM/findings-log.md`
+- Validation:
+  - `pnpm --filter @qwik-custom-elements/core check-types`
+  - `pnpm --filter @qwik-custom-elements/core exec vitest run src/__tests__/config.test.ts src/__tests__/generator.test.ts`
+  - `pnpm --filter @qwik-custom-elements/adapter-stencil check-types`
+  - `pnpm --filter @qwik-custom-elements/adapter-stencil test`
 
 ## 2026-04-12 - PRD #1 / Child #24 - Remove useVisibleTask$ fallback from Stencil client setup (task slice: dev-mode timing reliability without useVisibleTask)
 

@@ -158,6 +158,7 @@ async function generateProject(
   const adapterModule = await loadAdapterModule(project.adapterPackage, cwd);
 
   validateAdapterSourceCompatibility(project, adapterModule);
+  await validateAdapterProject(project, adapterModule);
 
   const sourcePath = resolveProjectSourcePath(project.id, project.source, cwd);
   const outDirPath = path.resolve(cwd, project.outDir);
@@ -278,6 +279,42 @@ function validateAdapterSourceCompatibility(
       'QCE_ADAPTER_SOURCE_INCOMPATIBLE',
       `Project "${project.id}" source type "${project.source.type}" is not supported by adapter "${project.adapterPackage}".`,
     );
+  }
+}
+
+async function validateAdapterProject(
+  project: GeneratorProject,
+  adapterModule: Record<string, unknown>,
+): Promise<void> {
+  const validateProject =
+    adapterModule != null && typeof adapterModule.validateProject === 'function'
+      ? adapterModule.validateProject
+      : undefined;
+
+  if (validateProject == null) {
+    return;
+  }
+
+  try {
+    await validateProject({
+      projectId: project.id,
+      source: project.source,
+      adapterOptions: project.adapterOptions ?? {},
+    });
+  } catch (error) {
+    if (error instanceof GenerationError) {
+      throw error;
+    }
+
+    const errorCode =
+      typeof error === 'object' &&
+      error !== null &&
+      'code' in error &&
+      typeof error.code === 'string'
+        ? error.code
+        : 'QCE_ADAPTER_PROJECT_INVALID';
+
+    throw new GenerationError(errorCode, toErrorMessage(error));
   }
 }
 
