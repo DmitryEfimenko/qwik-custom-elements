@@ -1,5 +1,16 @@
 # Findings Log
 
+## 2026-04-19 - Generated Stencil client bootstrap should depend on resolved loader imports, not source type
+
+- Sources:
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/32
+- Finding:
+  - The generated Stencil client bootstrap is valid whenever the adapter has a resolved `loaderImport`, regardless of whether that import came from `PACKAGE_NAME` defaults or the explicit `CEM` runtime contract.
+- Durable guidance:
+  - Gate `runtime.generated.ts` emission on the presence of a resolved loader import, not on the source type.
+  - Keep `PACKAGE_NAME` and `CEM` client bootstrap output aligned when they resolve to equivalent runtime imports.
+
 ## 2026-04-19 - Adapter-specific generated runtime modules should use a generic core planned-write hook
 
 - Sources:

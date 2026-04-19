@@ -1,5 +1,29 @@
 # PRD-1 Progress Log
 
+## 2026-04-19 - Issue #32 partial: generate CEM client runtime bootstrap from explicit loader imports
+
+- Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+- Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/32
+- Task completed:
+  - Extended the adapter-owned Stencil planned-write hook so `runtime.generated.ts` is emitted for `CEM` projects when `adapterOptions.runtime.loaderImport` resolves successfully.
+  - Added core generator coverage proving `CEM` projects now emit the same generated client bootstrap shape already used by `PACKAGE_NAME` projects.
+  - Updated adapter documentation to describe generated client bootstrap emission in terms of resolved loader imports rather than source type.
+- Key decisions made:
+  - Reuse the existing resolved-runtime contract for generated client bootstrap emission instead of introducing a second CEM-specific output path.
+  - Treat generated client bootstrap emission as loader-driven behavior; hydrate remains optional and continues to affect only SSR availability.
+- Files changed:
+  - `packages/adapter-stencil/src/index.ts`
+  - `packages/adapter-stencil/README.md`
+  - `packages/core/src/__tests__/generator.test.ts`
+  - `docs/SYSTEM/findings-log.md`
+  - `.prd/progress/progress-for-prd-1.md`
+- Validation:
+  - `pnpm --filter @qwik-custom-elements/adapter-stencil run build`
+  - `pnpm --filter @qwik-custom-elements/core exec vitest run src/__tests__/generator.test.ts`
+- Remaining for issue #32:
+  - Consume resolved runtime imports in the remaining Stencil SSR bridge generation paths where runtime imports still remain implicit.
+  - Update demo integration only if later runtime-import consumption changes the expected consumer path.
+
 ## 2026-04-19 - Issue #32 partial: generate PACKAGE_NAME client runtime bootstrap from resolved loader imports
 
 - Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1

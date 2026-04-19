@@ -206,7 +206,7 @@ This keeps `PACKAGE_NAME` ergonomic while preserving `CEM` as an explicit-contro
 
 ## Generated Client Bootstrap
 
-For `PACKAGE_NAME` projects with a valid resolved loader import, generation now emits `runtime.generated.ts` alongside the component wrappers.
+For Stencil projects with a valid resolved loader import, generation now emits `runtime.generated.ts` alongside the component wrappers.
 
 That generated module currently provides:
 
@@ -214,7 +214,7 @@ That generated module currently provides:
 - `defineCustomElementsQrl`
 - `useGeneratedStencilClientSetup`
 
-This keeps the client bootstrap aligned with the same resolved runtime import contract already used for validation and SSR probing. When hydrate resolution fails, the client runtime module is still generated from the loader import so loader-only fallback flows remain usable.
+For `PACKAGE_NAME`, that loader import may come from package-aware defaults or explicit overrides. For `CEM`, it comes from the explicit `adapterOptions.runtime.loaderImport` contract. This keeps the client bootstrap aligned with the same resolved runtime import contract already used for validation and SSR probing. When hydrate resolution fails, the client runtime module is still generated from the loader import so loader-only fallback flows remain usable.
 
 ## Planned SSR Fallback Behavior
 

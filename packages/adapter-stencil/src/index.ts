@@ -173,16 +173,11 @@ export async function probeSSR({
 
 export function createAdditionalPlannedWrites({
   projectId,
-  source,
   runtimeImports,
 }: CreateAdditionalPlannedWritesInput): Array<{
   relativePath: string;
   content: string;
 }> {
-  if (source.type !== 'PACKAGE_NAME') {
-    return [];
-  }
-
   if (!isNonEmptyString(runtimeImports?.loaderImport)) {
     return [];
   }

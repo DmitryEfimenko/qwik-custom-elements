@@ -88,9 +88,15 @@ describe('generateFromConfig', () => {
       expect(result.projects).toHaveLength(1);
       expect(result.projects[0].wroteFiles).toBe(false);
       expect(result.projects[0].componentTags).toEqual(['a-button', 'z-card']);
-      expect(result.projects[0].plannedWrites).toHaveLength(3);
+      expect(result.projects[0].plannedWrites).toHaveLength(4);
       const indexWrite = result.projects[0].plannedWrites.find((plannedWrite) =>
         plannedWrite.path.endsWith(path.join('src', 'generated', 'index.ts')),
+      );
+      const runtimeWrite = result.projects[0].plannedWrites.find(
+        (plannedWrite) =>
+          plannedWrite.path.endsWith(
+            path.join('src', 'generated', 'runtime.generated.ts'),
+          ),
       );
       const buttonWrite = result.projects[0].plannedWrites.find(
         (plannedWrite) =>
@@ -119,7 +125,11 @@ describe('generateFromConfig', () => {
       expect(cardWrite?.content).toContain(
         'export const QwikZCard = "z-card" as const;',
       );
+      expect(runtimeWrite?.content).toContain(
+        "import { defineCustomElements as runtimeDefineCustomElements } from '@acme/stencil-lib/loader';",
+      );
       await expect(readFile(indexWrite!.path, 'utf8')).rejects.toThrow();
+      await expect(readFile(runtimeWrite!.path, 'utf8')).rejects.toThrow();
       await expect(readFile(buttonWrite!.path, 'utf8')).rejects.toThrow();
       await expect(readFile(cardWrite!.path, 'utf8')).rejects.toThrow();
     });
@@ -146,11 +156,19 @@ describe('generateFromConfig', () => {
             path.join('src', 'generated', 'app-root.ts'),
           ),
       );
+      const runtimeWrite = result.projects[0].plannedWrites.find(
+        (plannedWrite) =>
+          plannedWrite.path.endsWith(
+            path.join('src', 'generated', 'runtime.generated.ts'),
+          ),
+      );
       const indexDiskContent = await readFile(indexWrite!.path, 'utf8');
+      const runtimeDiskContent = await readFile(runtimeWrite!.path, 'utf8');
       const wrapperDiskContent = await readFile(wrapperWrite!.path, 'utf8');
       expect(result.projects[0].wroteFiles).toBe(true);
-      expect(result.projects[0].plannedWrites).toHaveLength(2);
+      expect(result.projects[0].plannedWrites).toHaveLength(3);
       expect(indexDiskContent).toBe(indexWrite!.content);
+      expect(runtimeDiskContent).toBe(runtimeWrite!.content);
       expect(wrapperDiskContent).toBe(wrapperWrite!.content);
     });
   });
@@ -547,6 +565,55 @@ describe('generateFromConfig', () => {
       );
       expect(runtimeWrite!.content).toContain(
         'createStencilClientSetup(defineCustomElementsQrl);',
+      );
+    });
+  });
+
+  it('generates a client runtime bootstrap from explicit CEM loader imports', async () => {
+    await withTempDir(async (tempDir) => {
+      await writeFile(
+        path.join(tempDir, 'custom-elements.json'),
+        JSON.stringify({
+          modules: [{ declarations: [{ tagName: 'app-root' }] }],
+        }),
+        'utf8',
+      );
+
+      const config: GeneratorConfig = {
+        dryRun: true,
+        projects: [
+          {
+            id: 'demo',
+            adapter: 'stencil',
+            adapterPackage: '@qwik-custom-elements/adapter-stencil',
+            source: {
+              type: 'CEM',
+              path: './custom-elements.json',
+            },
+            outDir: './src/generated',
+            adapterOptions: {
+              runtime: {
+                loaderImport: './runtime/acme-loader',
+              },
+            },
+          },
+        ],
+      };
+
+      const result = await generateFromConfig(config, { cwd: tempDir });
+      const runtimeWrite = result.projects[0].plannedWrites.find(
+        (plannedWrite) =>
+          plannedWrite.path.endsWith(
+            path.join('src', 'generated', 'runtime.generated.ts'),
+          ),
+      );
+
+      expect(runtimeWrite).toBeDefined();
+      expect(runtimeWrite!.content).toContain(
+        "import { defineCustomElements as runtimeDefineCustomElements } from './runtime/acme-loader';",
+      );
+      expect(runtimeWrite!.content).toContain(
+        'export const useGeneratedStencilClientSetup =',
       );
     });
   });
