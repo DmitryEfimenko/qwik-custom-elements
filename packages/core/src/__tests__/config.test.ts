@@ -20,6 +20,11 @@ const validProject = {
   adapterPackage: '@qwik-custom-elements/adapter-stencil',
   source: { type: 'CEM', path: './custom-elements.json' },
   outDir: './src/generated',
+  adapterOptions: {
+    runtime: {
+      loaderImport: '@acme/stencil-lib/loader',
+    },
+  },
 };
 describe('loadGeneratorConfig', () => {
   it('rejects legacy string source contract', async () => {
@@ -78,6 +83,73 @@ describe('loadGeneratorConfig', () => {
       expect(loaded.config.projects[0].source).toEqual({
         type: 'CEM',
         path: './custom-elements.json',
+      });
+    });
+  });
+  it('requires stencil CEM projects to declare runtime loader import', async () => {
+    await withTempDir(async (tempDir) => {
+      const configPath = path.join(tempDir, 'qwik-custom-elements.config.json');
+      await writeFile(
+        configPath,
+        JSON.stringify(
+          {
+            projects: [
+              {
+                ...validProject,
+                source: { type: 'CEM', path: './custom-elements.json' },
+                adapterOptions: {
+                  runtime: {
+                    hydrateImport: '@acme/stencil-lib/hydrate',
+                  },
+                },
+              },
+            ],
+          },
+          null,
+          2,
+        ),
+        'utf8',
+      );
+
+      await expect(loadGeneratorConfig({ cwd: tempDir })).rejects.toMatchObject(
+        {
+          code: 'QCE_CONFIG_MISSING_REQUIRED',
+          message:
+            'Config field "projects[0].adapterOptions.runtime.loaderImport" must be a non-empty string for stencil CEM projects.',
+        },
+      );
+    });
+  });
+  it('allows stencil CEM projects to omit runtime hydrate import', async () => {
+    await withTempDir(async (tempDir) => {
+      const configPath = path.join(tempDir, 'qwik-custom-elements.config.json');
+      await writeFile(
+        configPath,
+        JSON.stringify(
+          {
+            projects: [
+              {
+                ...validProject,
+                source: { type: 'CEM', path: './custom-elements.json' },
+                adapterOptions: {
+                  runtime: {
+                    loaderImport: '@acme/stencil-lib/loader',
+                  },
+                },
+              },
+            ],
+          },
+          null,
+          2,
+        ),
+        'utf8',
+      );
+
+      const loaded = await loadGeneratorConfig({ cwd: tempDir });
+      expect(loaded.config.projects[0].adapterOptions).toEqual({
+        runtime: {
+          loaderImport: '@acme/stencil-lib/loader',
+        },
       });
     });
   });
@@ -234,6 +306,7 @@ describe('runCli', () => {
                   adapterPackage: '@qwik-custom-elements/adapter-stencil',
                   source: { type: 'CEM', path: validSourcePath },
                   outDir: './generated-a',
+                  adapterOptions: validProject.adapterOptions,
                 },
                 {
                   id: 'b-project',
@@ -241,6 +314,7 @@ describe('runCli', () => {
                   adapterPackage: '@qwik-custom-elements/adapter-stencil',
                   source: { type: 'CEM', path: missingSourcePath },
                   outDir: './generated-b',
+                  adapterOptions: validProject.adapterOptions,
                 },
               ],
             },
@@ -289,6 +363,7 @@ describe('runCli', () => {
                     path: './custom-elements-missing.json',
                   },
                   outDir: './generated/broken',
+                  adapterOptions: validProject.adapterOptions,
                 },
               ],
             },
@@ -375,6 +450,7 @@ describe('runCli', () => {
                   adapterPackage: './adapter-unsupported.mjs',
                   source: { type: 'CEM', path: './custom-elements.json' },
                   outDir: './generated/demo',
+                  adapterOptions: validProject.adapterOptions,
                 },
               ],
             },
@@ -433,6 +509,7 @@ describe('runCli', () => {
                   adapterPackage: '@qwik-custom-elements/adapter-stencil',
                   source: { type: 'CEM', path: './custom-elements-z.json' },
                   outDir: './generated/z',
+                  adapterOptions: validProject.adapterOptions,
                 },
                 {
                   id: 'a-project',
@@ -440,6 +517,7 @@ describe('runCli', () => {
                   adapterPackage: '@qwik-custom-elements/adapter-stencil',
                   source: { type: 'CEM', path: './custom-elements-a.json' },
                   outDir: './generated/a',
+                  adapterOptions: validProject.adapterOptions,
                 },
               ],
             },
@@ -509,6 +587,7 @@ describe('runCli', () => {
                   adapterPackage: '@qwik-custom-elements/adapter-stencil',
                   source: { type: 'CEM', path: './custom-elements-z.json' },
                   outDir: './generated/z',
+                  adapterOptions: validProject.adapterOptions,
                 },
                 {
                   id: 'a-project',
@@ -516,6 +595,7 @@ describe('runCli', () => {
                   adapterPackage: '@qwik-custom-elements/adapter-stencil',
                   source: { type: 'CEM', path: './custom-elements-a.json' },
                   outDir: './generated/a',
+                  adapterOptions: validProject.adapterOptions,
                 },
               ],
             },
@@ -625,6 +705,7 @@ describe('runCli', () => {
                   adapterPackage: '@qwik-custom-elements/adapter-stencil',
                   source: { type: 'CEM', path: './custom-elements-z.json' },
                   outDir: './generated/z',
+                  adapterOptions: validProject.adapterOptions,
                 },
                 {
                   id: 'a-project',
@@ -632,6 +713,7 @@ describe('runCli', () => {
                   adapterPackage: '@qwik-custom-elements/adapter-stencil',
                   source: { type: 'CEM', path: './custom-elements-a.json' },
                   outDir: './generated/a',
+                  adapterOptions: validProject.adapterOptions,
                 },
               ],
             },

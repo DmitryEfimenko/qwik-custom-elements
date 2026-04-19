@@ -8,6 +8,12 @@
         "type": "CEM",
         "path": "./packages/test-stencil-lib/custom-elements.json"
       },
+      "adapterOptions": {
+        "runtime": {
+          "loaderImport": "@qwik-custom-elements/test-stencil-lib/loader",
+          "hydrateImport": "@qwik-custom-elements/test-stencil-lib/hydrate"
+        }
+      },
       "outDir": "./apps/qwik-demo/src/generated",
       "cleanOutput": true
     }

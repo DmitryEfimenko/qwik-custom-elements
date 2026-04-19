@@ -38,7 +38,9 @@ export const useAcmeClientSetup = createStencilClientSetup(
   }),
 );
 
-export const AcmeStencilComponent = createStencilSSRComponent($(renderToString));
+export const AcmeStencilComponent = createStencilSSRComponent(
+  $(renderToString),
+);
 ```
 
 ## Source Types For Generation
@@ -185,15 +187,16 @@ Why use `CEM`:
 
 ## Planned Runtime Discovery Rules
 
-For Stencil generation, the runtime needs two inputs in addition to component metadata:
+For Stencil generation, the runtime can use two imports in addition to component metadata:
 
 - a loader import used on the client (`defineCustomElements`)
 - a hydrate import used for SSR (`renderToString`)
 
-The intended direction is:
+The current contract is:
 
-- `PACKAGE_NAME` can use conventional package subpaths such as `<packageName>/loader` and `<packageName>/hydrate`, with `adapterOptions.runtime.*` available as explicit overrides.
-- `CEM` requires explicit runtime imports via `adapterOptions.runtime.loaderImport` and `adapterOptions.runtime.hydrateImport`.
+- `PACKAGE_NAME` can use conventional package subpaths such as `<packageName>/loader` and `<packageName>/hydrate`, with `adapterOptions.runtime.loaderImport` and `adapterOptions.runtime.hydrateImport` available as explicit overrides.
+- `CEM` requires `adapterOptions.runtime.loaderImport`.
+- `CEM` may omit `adapterOptions.runtime.hydrateImport` when SSR hydrate support is unavailable or intentionally deferred.
 
 This keeps `PACKAGE_NAME` ergonomic while preserving `CEM` as an explicit-control mode for advanced or nonstandard setups.
 
