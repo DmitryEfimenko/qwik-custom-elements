@@ -204,17 +204,26 @@ The current contract is:
 
 This keeps `PACKAGE_NAME` ergonomic while preserving `CEM` as an explicit-control mode for advanced or nonstandard setups.
 
-## Generated Client Bootstrap
+## Generated Runtime Modules
 
 For Stencil projects with a valid resolved loader import, generation now emits `runtime.generated.ts` alongside the component wrappers.
 
-That generated module currently provides:
+That generated client module provides:
 
 - a resolved `defineCustomElements` wrapper bound to the package-aware loader import
 - `defineCustomElementsQrl`
 - `useGeneratedStencilClientSetup`
 
-For `PACKAGE_NAME`, that loader import may come from package-aware defaults or explicit overrides. For `CEM`, it comes from the explicit `adapterOptions.runtime.loaderImport` contract. This keeps the client bootstrap aligned with the same resolved runtime import contract already used for validation and SSR probing. When hydrate resolution fails, the client runtime module is still generated from the loader import so loader-only fallback flows remain usable.
+When a resolved hydrate import is also available, generation additionally emits `runtime-ssr.generated.ts` with a typed `renderToString` export that loads the resolved hydrate runtime through the same Vite-ignored dynamic import boundary used for SSR-safe demo integration.
+
+For `PACKAGE_NAME`, those runtime imports may come from package-aware defaults or explicit overrides. For `CEM`, they come from the explicit `adapterOptions.runtime` contract. This keeps generated runtime modules aligned with the same resolved runtime import contract already used for validation and SSR probing.
+
+Keep the split intentional:
+
+- `runtime.generated.ts` is client-reachable and must remain loader-only.
+- `runtime-ssr.generated.ts` owns the hydrate-backed `renderToString` bridge and keeps hydrate loading behind a dynamic import boundary.
+
+When hydrate resolution fails, the client runtime module is still generated from the loader import so loader-only fallback flows remain usable.
 
 ## Planned SSR Fallback Behavior
 

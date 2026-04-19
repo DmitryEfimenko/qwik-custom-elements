@@ -569,6 +569,74 @@ describe('generateFromConfig', () => {
     });
   });
 
+  it('generates a server runtime bridge from resolved PACKAGE_NAME hydrate imports', async () => {
+    await withTempDir(async (tempDir) => {
+      const fixturePackageRoot = await createFixturePackage(
+        tempDir,
+        '@acme/stencil-lib',
+      );
+      await writeFile(
+        path.join(fixturePackageRoot, 'custom-elements.json'),
+        JSON.stringify({
+          modules: [{ declarations: [{ tagName: 'app-root' }] }],
+        }),
+        'utf8',
+      );
+      await mkdir(path.join(fixturePackageRoot, 'loader'), { recursive: true });
+      await writeFile(
+        path.join(fixturePackageRoot, 'loader', 'index.js'),
+        'export const defineCustomElements = () => undefined;\n',
+        'utf8',
+      );
+      await mkdir(path.join(fixturePackageRoot, 'hydrate'), {
+        recursive: true,
+      });
+      await writeFile(
+        path.join(fixturePackageRoot, 'hydrate', 'index.js'),
+        'export const renderToString = async () => ({ html: "<app-root></app-root>" });\n',
+        'utf8',
+      );
+
+      const config: GeneratorConfig = {
+        dryRun: true,
+        projects: [
+          {
+            id: 'demo',
+            adapter: 'stencil',
+            adapterPackage: '@qwik-custom-elements/adapter-stencil',
+            source: {
+              type: 'PACKAGE_NAME',
+              packageName: '@acme/stencil-lib',
+            },
+            outDir: './src/generated',
+          },
+        ],
+      };
+
+      const result = await generateFromConfig(config, { cwd: tempDir });
+      const runtimeWrite = result.projects[0].plannedWrites.find(
+        (plannedWrite) =>
+          plannedWrite.path.endsWith(
+            path.join('src', 'generated', 'runtime-ssr.generated.ts'),
+          ),
+      );
+
+      expect(runtimeWrite).toBeDefined();
+      expect(runtimeWrite!.content).toContain(
+        "const hydrateModuleId = '@acme/stencil-lib/hydrate';",
+      );
+      expect(runtimeWrite!.content).toContain(
+        'export const renderToString: StencilRenderToString = async (input, options) => {',
+      );
+      expect(runtimeWrite!.content).toContain(
+        '/* @vite-ignore */ hydrateModuleId',
+      );
+      expect(runtimeWrite!.content).toContain(
+        'return runtimeRenderToString(input, options);',
+      );
+    });
+  });
+
   it('generates a client runtime bootstrap from explicit CEM loader imports', async () => {
     await withTempDir(async (tempDir) => {
       await writeFile(

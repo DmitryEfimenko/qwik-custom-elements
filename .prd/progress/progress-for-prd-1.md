@@ -1,5 +1,41 @@
 # PRD-1 Progress Log
 
+## 2026-04-19 - Issue #32 partial: generate SSR runtime bridge from resolved hydrate imports
+
+- Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+- Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/32
+- Task completed:
+  - Extended the adapter-owned Stencil planned-write hook to emit `runtime-ssr.generated.ts` whenever a resolved hydrate import is available.
+  - Kept the generated SSR bridge on a Vite-ignored dynamic import boundary so client builds do not traverse the Node-only hydrate runtime.
+  - Updated the demo SSR component to consume the generated bridge instead of hardcoding the hydrate module id.
+  - Documented the split between generated client and SSR runtime modules.
+- Key decisions made:
+  - Keep `runtime.generated.ts` loader-only because it is client-reachable.
+  - Use a separate generated SSR bridge file for hydrate-backed `renderToString` behavior.
+  - Preserve the existing dynamic-import safety pattern in generated SSR output instead of switching to a top-level hydrate import.
+- Files changed:
+  - `packages/adapter-stencil/src/index.ts`
+  - `packages/adapter-stencil/README.md`
+  - `packages/core/src/__tests__/generator.test.ts`
+  - `apps/qwik-demo/src/components/stencil-lib-ssr.tsx`
+  - `apps/qwik-demo/src/generated/runtime.generated.ts`
+  - `apps/qwik-demo/src/generated/runtime-ssr.generated.ts`
+  - `docs/SYSTEM/findings-log.md`
+  - `.prd/progress/progress-for-prd-1.md`
+- Validation:
+  - `pnpm --filter @qwik-custom-elements/adapter-stencil run build`
+  - `node packages/core/dist/cli.js --config qwik-custom-elements.config.json`
+  - `pnpm --filter @qwik-custom-elements/core exec vitest run src/__tests__/generator.test.ts -t "generates a server runtime bridge from resolved PACKAGE_NAME hydrate imports"`
+  - `pnpm format`
+  - `pnpm typecheck`
+  - `pnpm test`
+  - `pnpm build`
+  - `pnpm lint`
+  - `pnpm e2e`
+- Remaining for issue #32:
+  - Audit whether any remaining consumer-facing runtime integration paths should move from manual demo helpers to generated runtime modules.
+  - Decide whether the generated barrel should intentionally expose runtime helpers or keep them as explicit deep imports.
+
 ## 2026-04-19 - Issue #32 partial: generate CEM client runtime bootstrap from explicit loader imports
 
 - Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1

@@ -67,11 +67,13 @@
 - Sources:
   - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
   - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/24
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/32
 - Finding:
-  - `@qwik-custom-elements/test-stencil-lib/hydrate` statically imports Node `stream`, so top-level imports from client-reachable demo modules cause Vite browser externalization failures.
+  - `@qwik-custom-elements/test-stencil-lib/hydrate` statically imports Node `stream`, so client-reachable code must not use a top-level hydrate import, even when the hydrate path is generated from resolved runtime metadata.
 - Durable guidance:
   - Keep Stencil hydrate loading behind SSR-only dynamic import boundaries in demo/runtime bridge code.
   - Direct top-level imports are safe for `@qwik-custom-elements/test-stencil-lib/loader` in client bootstrap paths.
+  - Generated SSR bridge modules (for example `runtime-ssr.generated.ts`) must preserve the same `import(/* @vite-ignore */ moduleId)` pattern instead of converting hydrate resolution into a static import.
   - If removing `isServer` guards from client-reachable bridge modules, use a Vite-ignored module-id dynamic import (`await import(/* @vite-ignore */ moduleId)`) so hydrate is not traversed in client build.
 
 ## 2026-04-09 - Repo-wide format touches generated artifacts

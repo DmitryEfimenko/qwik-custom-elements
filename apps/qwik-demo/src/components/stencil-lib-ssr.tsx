@@ -3,12 +3,9 @@ import {
   createStencilSSRComponent,
   type StencilRenderToString,
 } from '@qwik-custom-elements/adapter-stencil/ssr';
+import { renderToString } from '../generated/runtime-ssr.generated';
 
-const stencilRenderToString: StencilRenderToString = async (input, options) => {
-  const hydrateModuleId = '@qwik-custom-elements/test-stencil-lib/hydrate';
-  const { renderToString } = await import(/* @vite-ignore */ hydrateModuleId);
-  return renderToString(input, options);
-};
+const stencilRenderToString: StencilRenderToString = renderToString;
 
 export const StencilJsLibSSRComponent = createStencilSSRComponent(
   inlinedQrl(stencilRenderToString, 'stencilRenderToString'),
