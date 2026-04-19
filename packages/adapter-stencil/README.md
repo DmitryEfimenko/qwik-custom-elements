@@ -196,6 +196,8 @@ The current contract is:
 
 - `PACKAGE_NAME` resolves runtime imports to `<packageName>/loader` and `<packageName>/hydrate` by default.
 - For `PACKAGE_NAME`, explicit `adapterOptions.runtime.loaderImport` and `adapterOptions.runtime.hydrateImport` overrides take precedence over those defaults. When an override is set, it must be a non-empty string.
+- For `PACKAGE_NAME`, the resolved loader import must be package-resolvable before generation proceeds. Loader resolution failures stop the run with a deterministic loader-specific error.
+- For `PACKAGE_NAME`, the resolved hydrate import is validated when provided or inferred. Hydrate resolution failures downgrade SSR availability and emit a hydrate-specific diagnostic instead of aborting loader-only generation.
 - `CEM` requires `adapterOptions.runtime.loaderImport`.
 - `CEM` may omit `adapterOptions.runtime.hydrateImport` when SSR hydrate support is unavailable or intentionally deferred.
 - Core consumes the adapter-resolved runtime imports when invoking adapter SSR probing, so runtime resolution and SSR capability checks use the same resolved inputs.

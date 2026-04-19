@@ -159,10 +159,12 @@ async function generateProject(
 
   validateAdapterSourceCompatibility(project, adapterModule);
   await validateAdapterProject(project, adapterModule);
-  const runtimeImports = await resolveAdapterRuntimeImports(
+  const runtimeImportResult = await resolveAdapterRuntimeImports(
     project,
     adapterModule,
+    cwd,
   );
+  const { runtimeImports } = runtimeImportResult;
 
   const sourcePath = resolveProjectSourcePath(project.id, project.source, cwd);
   const outDirPath = path.resolve(cwd, project.outDir);
@@ -180,11 +182,13 @@ async function generateProject(
     adapterModule,
     ssrProbe.available,
   );
-  const observedErrorCodes: string[] = [];
+  const observedErrorCodes = [...runtimeImportResult.observedErrorCodes];
 
   if (!ssrProbe.available) {
     observedErrorCodes.push(SSR_UNSUPPORTED_FALLBACK_CODE);
   }
+
+  observedErrorCodes.sort((a, b) => a.localeCompare(b));
 
   if (!dryRun) {
     await mkdir(outDirPath, { recursive: true });
@@ -270,7 +274,11 @@ async function probeProjectSsrAvailability(
 async function resolveAdapterRuntimeImports(
   project: GeneratorProject,
   adapterModule: Record<string, unknown>,
-): Promise<Record<string, unknown> | undefined> {
+  cwd: string,
+): Promise<{
+  runtimeImports: Record<string, unknown> | undefined;
+  observedErrorCodes: string[];
+}> {
   const resolveRuntimeImports =
     adapterModule != null &&
     typeof adapterModule.resolveRuntimeImports === 'function'
@@ -278,19 +286,41 @@ async function resolveAdapterRuntimeImports(
       : undefined;
 
   if (resolveRuntimeImports == null) {
-    return undefined;
+    return {
+      runtimeImports: undefined,
+      observedErrorCodes: [],
+    };
   }
 
   try {
-    const runtimeImports = await resolveRuntimeImports({
+    const resolvedRuntimeImports = await resolveRuntimeImports({
       projectId: project.id,
+      cwd,
+      runtimeResolution: {
+        resolveSourcePackageRoot: (packageName: string) =>
+          resolvePackageRootForProject(
+            project.id,
+            { type: 'PACKAGE_NAME', packageName },
+            cwd,
+          ),
+        resolveImportSpecifier: (specifier: string, packageRoot?: string) =>
+          resolveRuntimeImportSpecifier(specifier, cwd, packageRoot),
+      },
       source: project.source,
       adapterOptions: project.adapterOptions ?? {},
     });
 
-    return runtimeImports != null && typeof runtimeImports === 'object'
-      ? (runtimeImports as Record<string, unknown>)
-      : undefined;
+    const observedErrorCodes = extractObservedRuntimeImportErrorCodes(
+      resolvedRuntimeImports,
+    );
+    const runtimeImports = extractResolvedRuntimeImports(
+      resolvedRuntimeImports,
+    );
+
+    return {
+      runtimeImports,
+      observedErrorCodes,
+    };
   } catch (error) {
     if (error instanceof GenerationError) {
       throw error;
@@ -306,6 +336,44 @@ async function resolveAdapterRuntimeImports(
 
     throw new GenerationError(errorCode, toErrorMessage(error));
   }
+}
+
+function extractObservedRuntimeImportErrorCodes(
+  resolvedRuntimeImports: unknown,
+): string[] {
+  if (
+    resolvedRuntimeImports == null ||
+    typeof resolvedRuntimeImports !== 'object' ||
+    !('observedErrorCodes' in resolvedRuntimeImports) ||
+    !Array.isArray(resolvedRuntimeImports.observedErrorCodes)
+  ) {
+    return [];
+  }
+
+  return resolvedRuntimeImports.observedErrorCodes.filter(
+    (errorCode): errorCode is string => typeof errorCode === 'string',
+  );
+}
+
+function extractResolvedRuntimeImports(
+  resolvedRuntimeImports: unknown,
+): Record<string, unknown> | undefined {
+  if (
+    resolvedRuntimeImports == null ||
+    typeof resolvedRuntimeImports !== 'object'
+  ) {
+    return undefined;
+  }
+
+  if (
+    'runtimeImports' in resolvedRuntimeImports &&
+    resolvedRuntimeImports.runtimeImports != null &&
+    typeof resolvedRuntimeImports.runtimeImports === 'object'
+  ) {
+    return resolvedRuntimeImports.runtimeImports as Record<string, unknown>;
+  }
+
+  return resolvedRuntimeImports as Record<string, unknown>;
 }
 
 function validateAdapterSourceCompatibility(
@@ -629,6 +697,19 @@ function discoverPackageNameCemPath(
     'QCE_PACKAGE_NAME_CEM_AMBIGUOUS',
     `Project "${projectId}" discovered multiple CEM candidates for source package "${source.packageName}": ${existingCandidates.join(', ')}. Set source.cemPath to disambiguate.`,
   );
+}
+
+function resolveRuntimeImportSpecifier(
+  specifier: string,
+  cwd: string,
+  packageRoot?: string,
+): string {
+  const resolver =
+    specifier.startsWith('.') && packageRoot != null
+      ? createRequire(path.join(packageRoot, 'package.json'))
+      : createRequire(path.resolve(cwd, '__qce_runtime_resolution__.cjs'));
+
+  return resolver.resolve(specifier);
 }
 
 function validateProjectOutputSafety(

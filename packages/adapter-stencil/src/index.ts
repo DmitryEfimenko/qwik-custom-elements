@@ -6,6 +6,15 @@ export const metadata = {
 };
 
 interface ValidateProjectInput {
+  projectId?: string;
+  cwd?: string;
+  runtimeResolution?: {
+    resolveSourcePackageRoot?: (packageName: string) => string;
+    resolveImportSpecifier?: (
+      specifier: string,
+      packageRoot?: string,
+    ) => string;
+  };
   source: {
     type: 'CEM' | 'PACKAGE_NAME';
     packageName?: string;
@@ -16,6 +25,11 @@ interface ValidateProjectInput {
 interface ResolveRuntimeImportsResult {
   loaderImport: string;
   hydrateImport?: string;
+}
+
+interface ResolveRuntimeImportsOutcome {
+  runtimeImports: ResolveRuntimeImportsResult;
+  observedErrorCodes?: string[];
 }
 
 interface ProbeSsrInput {
@@ -59,9 +73,13 @@ export function validateProject({
 }
 
 export function resolveRuntimeImports({
+  projectId,
+  runtimeResolution,
   source,
   adapterOptions,
-}: ValidateProjectInput): ResolveRuntimeImportsResult {
+}: ValidateProjectInput):
+  | ResolveRuntimeImportsResult
+  | ResolveRuntimeImportsOutcome {
   const runtime = isRecord(adapterOptions?.runtime)
     ? adapterOptions.runtime
     : undefined;
@@ -92,9 +110,44 @@ export function resolveRuntimeImports({
     };
   }
 
+  const packageRoot = resolvePackageRootForProject(
+    source.packageName,
+    runtimeResolution,
+  );
+  const resolvedLoaderImport = resolveRequiredPackageRuntimeImport({
+    projectId,
+    packageName: source.packageName,
+    packageRoot,
+    runtimeResolution,
+    specifier: loaderImport ?? `${source.packageName}/loader`,
+    field: 'loader',
+  });
+  const observedErrorCodes: string[] = [];
+  const resolvedHydrateImport = resolveOptionalPackageRuntimeImport({
+    projectId,
+    packageName: source.packageName,
+    packageRoot,
+    runtimeResolution,
+    specifier: hydrateImport ?? `${source.packageName}/hydrate`,
+    field: 'hydrate',
+    observedErrorCodes,
+  });
+
+  const runtimeImports: ResolveRuntimeImportsResult = {
+    loaderImport: resolvedLoaderImport,
+  };
+
+  if (resolvedHydrateImport != null) {
+    runtimeImports.hydrateImport = resolvedHydrateImport;
+  }
+
+  if (observedErrorCodes.length === 0) {
+    return runtimeImports;
+  }
+
   return {
-    loaderImport: loaderImport ?? `${source.packageName}/loader`,
-    hydrateImport: hydrateImport ?? `${source.packageName}/hydrate`,
+    runtimeImports,
+    observedErrorCodes,
   };
 }
 
@@ -114,6 +167,88 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function isNonEmptyString(value: unknown): value is string {
   return typeof value === 'string' && value.trim() !== '';
+}
+
+function resolvePackageRootForProject(
+  packageName: string | undefined,
+  runtimeResolution: ValidateProjectInput['runtimeResolution'],
+): string | undefined {
+  return runtimeResolution?.resolveSourcePackageRoot?.(packageName ?? '');
+}
+
+function resolveRequiredPackageRuntimeImport(params: {
+  projectId?: string;
+  packageName?: string;
+  packageRoot?: string;
+  runtimeResolution?: ValidateProjectInput['runtimeResolution'];
+  specifier: string;
+  field: 'loader' | 'hydrate';
+}): string {
+  const {
+    projectId,
+    packageName,
+    packageRoot,
+    runtimeResolution,
+    specifier,
+    field,
+  } = params;
+
+  try {
+    runtimeResolution?.resolveImportSpecifier?.(specifier, packageRoot);
+    return specifier;
+  } catch (error) {
+    throw createValidationError(
+      getRuntimeResolutionErrorCode(field),
+      createProjectAwareMessage(
+        projectId,
+        `Could not resolve Stencil ${field} runtime import "${specifier}" for source package "${packageName}": ${toErrorMessage(error)}`,
+      ),
+    );
+  }
+}
+
+function resolveOptionalPackageRuntimeImport(params: {
+  projectId?: string;
+  packageName?: string;
+  packageRoot?: string;
+  runtimeResolution?: ValidateProjectInput['runtimeResolution'];
+  specifier: string;
+  field: 'hydrate';
+  observedErrorCodes: string[];
+}): string | undefined {
+  const {
+    packageRoot,
+    runtimeResolution,
+    specifier,
+    field,
+    observedErrorCodes,
+  } = params;
+
+  try {
+    runtimeResolution?.resolveImportSpecifier?.(specifier, packageRoot);
+    return specifier;
+  } catch {
+    observedErrorCodes.push(getRuntimeResolutionErrorCode(field));
+
+    return undefined;
+  }
+}
+
+function getRuntimeResolutionErrorCode(field: 'loader' | 'hydrate'): string {
+  return field === 'loader'
+    ? 'QCE_STENCIL_RUNTIME_LOADER_RESOLVE_FAILED'
+    : 'QCE_STENCIL_RUNTIME_HYDRATE_RESOLVE_FAILED';
+}
+
+function createProjectAwareMessage(
+  projectId: string | undefined,
+  message: string,
+): string {
+  return projectId == null ? message : `Project "${projectId}": ${message}`;
+}
+
+function toErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
 }
 
 function validateOptionalRuntimeOverride(

@@ -129,6 +129,57 @@ describe('adapter-stencil metadata contract', () => {
     });
   });
 
+  it('fails when a PACKAGE_NAME loader runtime import cannot be resolved', () => {
+    expect(() =>
+      resolveRuntimeImports({
+        projectId: 'demo',
+        source: {
+          type: 'PACKAGE_NAME',
+          packageName: '@acme/stencil-lib',
+        },
+        runtimeResolution: {
+          resolveSourcePackageRoot: () => '/virtual/@acme/stencil-lib',
+          resolveImportSpecifier: (specifier) => {
+            if (specifier === '@acme/stencil-lib/loader') {
+              throw new Error('Cannot find module');
+            }
+
+            return specifier;
+          },
+        },
+      }),
+    ).toThrowError(
+      'Project "demo": Could not resolve Stencil loader runtime import "@acme/stencil-lib/loader" for source package "@acme/stencil-lib": Cannot find module',
+    );
+  });
+
+  it('drops hydrate runtime import and reports a diagnostic when hydrate resolution fails', () => {
+    expect(
+      resolveRuntimeImports({
+        projectId: 'demo',
+        source: {
+          type: 'PACKAGE_NAME',
+          packageName: '@acme/stencil-lib',
+        },
+        runtimeResolution: {
+          resolveSourcePackageRoot: () => '/virtual/@acme/stencil-lib',
+          resolveImportSpecifier: (specifier) => {
+            if (specifier === '@acme/stencil-lib/hydrate') {
+              throw new Error('Cannot find module');
+            }
+
+            return specifier;
+          },
+        },
+      }),
+    ).toEqual({
+      runtimeImports: {
+        loaderImport: '@acme/stencil-lib/loader',
+      },
+      observedErrorCodes: ['QCE_STENCIL_RUNTIME_HYDRATE_RESOLVE_FAILED'],
+    });
+  });
+
   it('rejects blank PACKAGE_NAME runtime loader overrides', () => {
     expect(() =>
       validateProject({

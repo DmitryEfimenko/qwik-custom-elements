@@ -1,5 +1,43 @@
 # PRD-1 Progress Log
 
+## 2026-04-19 - Issue #32 partial: validate PACKAGE_NAME runtime imports before generation
+
+- Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+- Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/32
+- Task completed:
+  - Validated resolved `PACKAGE_NAME` Stencil runtime imports before generation proceeds.
+  - Treated unresolved loader imports as fatal generation errors with `QCE_STENCIL_RUNTIME_LOADER_RESOLVE_FAILED`.
+  - Treated unresolved hydrate imports as non-fatal diagnostics: dropped the hydrate runtime import, recorded `QCE_STENCIL_RUNTIME_HYDRATE_RESOLVE_FAILED`, and preserved SSR fallback behavior.
+  - Added adapter-level and core-level test coverage for the new loader-versus-hydrate diagnostic split.
+  - Updated adapter documentation to explain loader fatality, hydrate downgrade behavior, and runtime validation timing.
+- Key decisions made:
+  - Keep Stencil-specific runtime resolution rules adapter-owned.
+  - Inject Node-backed package-resolution helpers from core instead of importing Node builtins in the bundled adapter entrypoint.
+  - Preserve loader-only generation as a valid success path when hydrate resolution fails.
+- Files changed:
+  - `packages/adapter-stencil/src/index.ts`
+  - `packages/adapter-stencil/src/index.test.ts`
+  - `packages/adapter-stencil/README.md`
+  - `packages/core/src/generator.ts`
+  - `packages/core/src/__tests__/generator.test.ts`
+  - `packages/core/src/__tests__/config.test.ts`
+  - `docs/SYSTEM/findings-log.md`
+  - `.prd/progress/progress-for-prd-1.md`
+- Validation:
+  - `pnpm --filter @qwik-custom-elements/adapter-stencil test -- --run src/index.test.ts`
+  - `pnpm --filter @qwik-custom-elements/adapter-stencil run build`
+  - `pnpm --filter @qwik-custom-elements/core exec vitest run src/__tests__/generator.test.ts`
+  - `pnpm --filter @qwik-custom-elements/core exec vitest run src/__tests__/config.test.ts`
+  - `pnpm format`
+  - `pnpm typecheck`
+  - `pnpm test`
+  - `pnpm build`
+  - `pnpm lint`
+  - `pnpm e2e`
+- Remaining for issue #32:
+  - Consume resolved runtime imports in generated output where runtime imports still remain implicit.
+  - Update demo integration only if later runtime-import consumption changes the expected consumer path.
+
 ## 2026-04-19 - Issue #32 partial: make SSR availability depend on resolved runtime imports
 
 - Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1

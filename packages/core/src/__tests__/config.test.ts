@@ -617,15 +617,19 @@ describe('runCli', () => {
         expect(summary.projects[1].generatedIndexPath).toBe(
           path.join(tempDir, 'generated', 'z', 'index.ts'),
         );
-        expect(summary.projects[0].observedErrorCodes).toEqual([]);
-        expect(summary.projects[1].observedErrorCodes).toEqual([]);
+        expect(summary.projects[0].observedErrorCodes).toEqual([
+          'QCE_SSR_UNSUPPORTED_FALLBACK',
+        ]);
+        expect(summary.projects[1].observedErrorCodes).toEqual([
+          'QCE_SSR_UNSUPPORTED_FALLBACK',
+        ]);
         expect(summary.projects[0].ssrCapabilities).toEqual({
-          available: true,
+          available: false,
           supportsSsrProbe: true,
           ssrRuntimeSubpath: './ssr',
         });
         expect(summary.projects[1].ssrCapabilities).toEqual({
-          available: true,
+          available: false,
           supportsSsrProbe: true,
           ssrRuntimeSubpath: './ssr',
         });

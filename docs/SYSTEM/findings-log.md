@@ -11,6 +11,8 @@
   - Keep Stencil runtime default resolution in `@qwik-custom-elements/adapter-stencil`, not in core.
   - Treat `CEM` runtime imports as explicit adapter options only.
   - Pass adapter-resolved runtime inputs into downstream adapter hooks so SSR probing and later generation behavior share one runtime-resolution contract.
+  - Validate resolved `PACKAGE_NAME` loader imports before generation and fail with a loader-specific diagnostic when they cannot be resolved.
+  - Treat unresolved `PACKAGE_NAME` hydrate imports as a non-fatal hydrate-specific diagnostic that downgrades SSR availability instead of aborting loader-only generation.
 
 ## 2026-04-19 - Stencil CEM runtime contract must validate loader import before generation
 

@@ -401,6 +401,96 @@ describe('generateFromConfig', () => {
     });
   });
 
+  it('fails when a PACKAGE_NAME stencil loader runtime import cannot be resolved', async () => {
+    await withTempDir(async (tempDir) => {
+      const fixturePackageRoot = await createFixturePackage(
+        tempDir,
+        '@acme/stencil-lib',
+      );
+      await writeFile(
+        path.join(fixturePackageRoot, 'custom-elements.json'),
+        JSON.stringify({
+          modules: [{ declarations: [{ tagName: 'app-root' }] }],
+        }),
+        'utf8',
+      );
+
+      const config: GeneratorConfig = {
+        dryRun: true,
+        projects: [
+          {
+            id: 'demo',
+            adapter: 'stencil',
+            adapterPackage: '@qwik-custom-elements/adapter-stencil',
+            source: {
+              type: 'PACKAGE_NAME',
+              packageName: '@acme/stencil-lib',
+            },
+            outDir: './src/generated',
+          },
+        ],
+      };
+
+      await expect(
+        generateFromConfig(config, { cwd: tempDir }),
+      ).rejects.toMatchObject({
+        code: 'QCE_STENCIL_RUNTIME_LOADER_RESOLVE_FAILED',
+        message: expect.stringContaining('@acme/stencil-lib/loader'),
+      });
+    });
+  });
+
+  it('records a hydrate runtime diagnostic and falls back when a PACKAGE_NAME stencil hydrate import cannot be resolved', async () => {
+    await withTempDir(async (tempDir) => {
+      const fixturePackageRoot = await createFixturePackage(
+        tempDir,
+        '@acme/stencil-lib',
+      );
+      await writeFile(
+        path.join(fixturePackageRoot, 'custom-elements.json'),
+        JSON.stringify({
+          modules: [{ declarations: [{ tagName: 'app-root' }] }],
+        }),
+        'utf8',
+      );
+      await mkdir(path.join(fixturePackageRoot, 'loader'), { recursive: true });
+      await writeFile(
+        path.join(fixturePackageRoot, 'loader', 'index.js'),
+        'export const defineCustomElements = () => undefined;\n',
+        'utf8',
+      );
+
+      const config: GeneratorConfig = {
+        dryRun: true,
+        projects: [
+          {
+            id: 'demo',
+            adapter: 'stencil',
+            adapterPackage: '@qwik-custom-elements/adapter-stencil',
+            source: {
+              type: 'PACKAGE_NAME',
+              packageName: '@acme/stencil-lib',
+            },
+            outDir: './src/generated',
+          },
+        ],
+      };
+
+      const result = await generateFromConfig(config, { cwd: tempDir });
+
+      expect(result.projects[0].status).toBe('success');
+      expect(result.projects[0].ssrCapabilities).toEqual({
+        available: false,
+        supportsSsrProbe: true,
+        ssrRuntimeSubpath: './ssr',
+      });
+      expect(result.projects[0].observedErrorCodes).toEqual([
+        'QCE_SSR_UNSUPPORTED_FALLBACK',
+        'QCE_STENCIL_RUNTIME_HYDRATE_RESOLVE_FAILED',
+      ]);
+    });
+  });
+
   it('loads the lit adapter SSR subpath package without fallback warning', async () => {
     await withTempDir(async (tempDir) => {
       await writeFile(
