@@ -12,6 +12,7 @@
   - Allow `adapterOptions.runtime.hydrateImport` to remain optional so loader-only and SSR-fallback flows stay valid.
   - Keep core config loading adapter-agnostic and treat `adapterOptions` as opaque outside adapter-owned validation hooks.
   - Keep `PACKAGE_NAME` runtime fields as optional overrides on top of package-aware defaults rather than making them universally required.
+  - When `PACKAGE_NAME` runtime overrides are provided explicitly, validate them as non-empty strings so bad override values fail before generation.
 
 ## 2026-04-12 - Adapter subpath type resolution should not depend on prebuilt dist during app typecheck
 

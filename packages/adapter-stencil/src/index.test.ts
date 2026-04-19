@@ -43,4 +43,42 @@ describe('adapter-stencil metadata contract', () => {
       }),
     ).not.toThrow();
   });
+
+  it('allows PACKAGE_NAME projects to rely on package-aware runtime defaults', () => {
+    expect(() =>
+      validateProject({
+        source: { type: 'PACKAGE_NAME' },
+      }),
+    ).not.toThrow();
+  });
+
+  it('rejects blank PACKAGE_NAME runtime loader overrides', () => {
+    expect(() =>
+      validateProject({
+        source: { type: 'PACKAGE_NAME' },
+        adapterOptions: {
+          runtime: {
+            loaderImport: '   ',
+          },
+        },
+      }),
+    ).toThrowError(
+      'Stencil PACKAGE_NAME projects must provide a non-empty adapterOptions.runtime.loaderImport override when the override is set.',
+    );
+  });
+
+  it('rejects blank PACKAGE_NAME runtime hydrate overrides', () => {
+    expect(() =>
+      validateProject({
+        source: { type: 'PACKAGE_NAME' },
+        adapterOptions: {
+          runtime: {
+            hydrateImport: '   ',
+          },
+        },
+      }),
+    ).toThrowError(
+      'Stencil PACKAGE_NAME projects must provide a non-empty adapterOptions.runtime.hydrateImport override when the override is set.',
+    );
+  });
 });

@@ -1,5 +1,34 @@
 # PRD-1 Progress Log
 
+## 2026-04-19 - Issue #31 partial: validate PACKAGE_NAME runtime override values
+
+- Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+- Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/31
+- Task completed:
+  - Added adapter-stencil validation coverage for `PACKAGE_NAME` projects that rely on package-aware runtime defaults.
+  - Rejected blank `adapterOptions.runtime.loaderImport` and `adapterOptions.runtime.hydrateImport` override values when consumers explicitly set those overrides for `PACKAGE_NAME` source mode.
+  - Updated adapter-stencil README wording so the documented override contract matches the validation behavior.
+- Key decisions made:
+  - Keep `PACKAGE_NAME` ergonomic by allowing omitted runtime overrides to fall back to package-aware defaults.
+  - Treat explicit runtime overrides as validated user input: when set, they must be non-empty strings.
+  - Keep this validation adapter-owned in `@qwik-custom-elements/adapter-stencil` rather than teaching core about Stencil runtime option shapes.
+- Files changed:
+  - `packages/adapter-stencil/src/index.ts`
+  - `packages/adapter-stencil/src/index.test.ts`
+  - `packages/adapter-stencil/README.md`
+  - `docs/SYSTEM/findings-log.md`
+- Validation:
+  - `pnpm --filter @qwik-custom-elements/adapter-stencil test -- --run src/index.test.ts`
+  - `pnpm format`
+  - `pnpm typecheck`
+  - `pnpm test`
+  - `pnpm build`
+  - `pnpm lint`
+  - `pnpm e2e`
+- Remaining for issue #31:
+  - Wire the runtime import contract through downstream generation/output behavior where imports are still implicit.
+  - Expand consumer-facing examples if generation/output behavior changes the supported paths.
+
 ## 2026-04-19 - Issue #31 partial: enforce Stencil CEM loader import contract
 
 - Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1

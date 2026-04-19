@@ -194,7 +194,7 @@ For Stencil generation, the runtime can use two imports in addition to component
 
 The current contract is:
 
-- `PACKAGE_NAME` can use conventional package subpaths such as `<packageName>/loader` and `<packageName>/hydrate`, with `adapterOptions.runtime.loaderImport` and `adapterOptions.runtime.hydrateImport` available as explicit overrides.
+- `PACKAGE_NAME` can use conventional package subpaths such as `<packageName>/loader` and `<packageName>/hydrate`, with `adapterOptions.runtime.loaderImport` and `adapterOptions.runtime.hydrateImport` available as explicit overrides. When an override is set, it must be a non-empty string.
 - `CEM` requires `adapterOptions.runtime.loaderImport`.
 - `CEM` may omit `adapterOptions.runtime.hydrateImport` when SSR hydrate support is unavailable or intentionally deferred.
 
