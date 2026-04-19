@@ -1,5 +1,17 @@
 # Findings Log
 
+## 2026-04-19 - Adapter-specific generated runtime modules should use a generic core planned-write hook
+
+- Sources:
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/32
+- Finding:
+  - Runtime import resolution can feed generated output without making core framework-specific by letting adapters contribute additional planned writes after core resolves source metadata, runtime imports, and SSR capability.
+- Durable guidance:
+  - Keep framework-specific generated runtime modules adapter-owned.
+  - Let core expose only a generic planned-write extension point that passes project identity, resolved runtime imports, and other already-computed generation context.
+  - Reuse the same resolved runtime import contract across validation, SSR probing, and generated runtime files so emitted code cannot drift from planning-time decisions.
+
 ## 2026-04-19 - Stencil runtime import resolution should stay adapter-owned and feed SSR probing
 
 - Sources:

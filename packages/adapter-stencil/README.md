@@ -204,6 +204,18 @@ The current contract is:
 
 This keeps `PACKAGE_NAME` ergonomic while preserving `CEM` as an explicit-control mode for advanced or nonstandard setups.
 
+## Generated Client Bootstrap
+
+For `PACKAGE_NAME` projects with a valid resolved loader import, generation now emits `runtime.generated.ts` alongside the component wrappers.
+
+That generated module currently provides:
+
+- a resolved `defineCustomElements` wrapper bound to the package-aware loader import
+- `defineCustomElementsQrl`
+- `useGeneratedStencilClientSetup`
+
+This keeps the client bootstrap aligned with the same resolved runtime import contract already used for validation and SSR probing. When hydrate resolution fails, the client runtime module is still generated from the loader import so loader-only fallback flows remain usable.
+
 ## Planned SSR Fallback Behavior
 
 Support SSR where available, but do not make SSR availability a prerequisite for generating useful wrappers.

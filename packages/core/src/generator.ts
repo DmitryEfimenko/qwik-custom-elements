@@ -175,12 +175,21 @@ async function generateProject(
     adapterModule,
     runtimeImports,
   );
+  const adapterPlannedWrites = await createAdapterPlannedWrites(
+    project,
+    outDirPath,
+    componentTags,
+    adapterModule,
+    runtimeImports,
+    ssrProbe.available,
+  );
   const plannedWrites = createPlannedWrites(
     project.id,
     outDirPath,
     componentTags,
     adapterModule,
     ssrProbe.available,
+    adapterPlannedWrites,
   );
   const observedErrorCodes = [...runtimeImportResult.observedErrorCodes];
 
@@ -765,6 +774,7 @@ function createPlannedWrites(
   componentTags: string[],
   adapterModule: Record<string, unknown>,
   ssrAvailable: boolean,
+  adapterPlannedWrites: Array<{ path: string; content: string }> = [],
 ): Array<{ path: string; content: string }> {
   const wrapperWrites = componentTags.map((componentTag) => ({
     path: path.join(outDirPath, `${componentTag}.ts`),
@@ -780,8 +790,70 @@ function createPlannedWrites(
       path: path.join(outDirPath, 'index.ts'),
       content: renderGeneratedIndex(projectId, componentTags),
     },
+    ...adapterPlannedWrites,
     ...wrapperWrites,
   ];
+}
+
+async function createAdapterPlannedWrites(
+  project: GeneratorProject,
+  outDirPath: string,
+  componentTags: string[],
+  adapterModule: Record<string, unknown>,
+  runtimeImports: Record<string, unknown> | undefined,
+  ssrAvailable: boolean,
+): Promise<Array<{ path: string; content: string }>> {
+  const createAdditionalPlannedWrites =
+    adapterModule != null &&
+    typeof adapterModule.createAdditionalPlannedWrites === 'function'
+      ? adapterModule.createAdditionalPlannedWrites
+      : undefined;
+
+  if (createAdditionalPlannedWrites == null) {
+    return [];
+  }
+
+  try {
+    const plannedWrites = (await createAdditionalPlannedWrites({
+      projectId: project.id,
+      source: project.source,
+      adapterOptions: project.adapterOptions ?? {},
+      runtimeImports,
+      componentTags,
+      ssrAvailable,
+    })) as unknown;
+
+    if (!Array.isArray(plannedWrites)) {
+      return [];
+    }
+
+    return plannedWrites
+      .filter(
+        (
+          plannedWrite,
+        ): plannedWrite is { relativePath: string; content: string } =>
+          plannedWrite != null &&
+          typeof plannedWrite === 'object' &&
+          'relativePath' in plannedWrite &&
+          typeof plannedWrite.relativePath === 'string' &&
+          'content' in plannedWrite &&
+          typeof plannedWrite.content === 'string',
+      )
+      .map((plannedWrite) => ({
+        path: path.join(outDirPath, plannedWrite.relativePath),
+        content: plannedWrite.content,
+      }));
+  } catch (error) {
+    const errorCode =
+      typeof error === 'object' &&
+      error !== null &&
+      'code' in error &&
+      typeof error.code === 'string'
+        ? error.code
+        : 'QCE_ADAPTER_PLANNED_WRITES_INVALID';
+
+    throw new GenerationError(errorCode, toErrorMessage(error));
+  }
 }
 
 async function readComponentTagsFromCem(sourcePath: string): Promise<string[]> {

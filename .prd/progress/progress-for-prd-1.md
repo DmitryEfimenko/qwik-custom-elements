@@ -1,5 +1,32 @@
 # PRD-1 Progress Log
 
+## 2026-04-19 - Issue #32 partial: generate PACKAGE_NAME client runtime bootstrap from resolved loader imports
+
+- Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+- Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/32
+- Task completed:
+  - Added an adapter-owned planned-write hook so generated output can consume resolved runtime imports without teaching core Stencil-specific paths.
+  - Generated `runtime.generated.ts` for Stencil `PACKAGE_NAME` projects when the loader import resolves successfully.
+  - Wired the generated runtime module to `@qwik-custom-elements/adapter-stencil/client` and the resolved loader import, exporting `defineCustomElements`, `defineCustomElementsQrl`, and `useGeneratedStencilClientSetup`.
+  - Kept loader-only fallback usable by generating the client runtime bootstrap even when hydrate resolution downgrades SSR availability.
+- Key decisions made:
+  - Keep generated runtime bootstrap emission adapter-owned behind a generic core planned-write extension point.
+  - Limit this slice to the client bootstrap for `PACKAGE_NAME`; do not widen into CEM output wiring or SSR bridge generation in the same run.
+  - Reuse the resolved loader import directly in generated output so validation, probing, and emitted code stay aligned.
+- Files changed:
+  - `packages/core/src/__tests__/generator.test.ts`
+  - `packages/core/src/generator.ts`
+  - `packages/adapter-stencil/src/index.ts`
+  - `packages/adapter-stencil/README.md`
+  - `docs/SYSTEM/findings-log.md`
+  - `.prd/progress/progress-for-prd-1.md`
+- Validation:
+  - `pnpm --filter @qwik-custom-elements/core exec vitest run src/__tests__/generator.test.ts -t "generates a client runtime bootstrap from resolved PACKAGE_NAME loader imports"`
+  - `pnpm --filter @qwik-custom-elements/adapter-stencil run build`
+- Remaining for issue #32:
+  - Consume resolved runtime imports in generated output for the remaining Stencil source/runtime combinations, especially `CEM` and SSR bridge generation.
+  - Update demo integration only if later generated runtime modules replace the current manual bridge imports.
+
 ## 2026-04-19 - Issue #32 partial: validate PACKAGE_NAME runtime imports before generation
 
 - Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1

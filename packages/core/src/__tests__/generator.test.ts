@@ -491,6 +491,66 @@ describe('generateFromConfig', () => {
     });
   });
 
+  it('generates a client runtime bootstrap from resolved PACKAGE_NAME loader imports', async () => {
+    await withTempDir(async (tempDir) => {
+      const fixturePackageRoot = await createFixturePackage(
+        tempDir,
+        '@acme/stencil-lib',
+      );
+      await writeFile(
+        path.join(fixturePackageRoot, 'custom-elements.json'),
+        JSON.stringify({
+          modules: [{ declarations: [{ tagName: 'app-root' }] }],
+        }),
+        'utf8',
+      );
+      await mkdir(path.join(fixturePackageRoot, 'loader'), { recursive: true });
+      await writeFile(
+        path.join(fixturePackageRoot, 'loader', 'index.js'),
+        'export const defineCustomElements = () => undefined;\n',
+        'utf8',
+      );
+
+      const config: GeneratorConfig = {
+        dryRun: true,
+        projects: [
+          {
+            id: 'demo',
+            adapter: 'stencil',
+            adapterPackage: '@qwik-custom-elements/adapter-stencil',
+            source: {
+              type: 'PACKAGE_NAME',
+              packageName: '@acme/stencil-lib',
+            },
+            outDir: './src/generated',
+          },
+        ],
+      };
+
+      const result = await generateFromConfig(config, { cwd: tempDir });
+      const runtimeWrite = result.projects[0].plannedWrites.find(
+        (plannedWrite) =>
+          plannedWrite.path.endsWith(
+            path.join('src', 'generated', 'runtime.generated.ts'),
+          ),
+      );
+
+      expect(runtimeWrite).toBeDefined();
+      expect(runtimeWrite!.content).toContain(
+        "import { createStencilClientSetup } from '@qwik-custom-elements/adapter-stencil/client';",
+      );
+      expect(runtimeWrite!.content).toContain(
+        "import { defineCustomElements as runtimeDefineCustomElements } from '@acme/stencil-lib/loader';",
+      );
+      expect(runtimeWrite!.content).toContain(
+        'export const useGeneratedStencilClientSetup =',
+      );
+      expect(runtimeWrite!.content).toContain(
+        'createStencilClientSetup(defineCustomElementsQrl);',
+      );
+    });
+  });
+
   it('loads the lit adapter SSR subpath package without fallback warning', async () => {
     await withTempDir(async (tempDir) => {
       await writeFile(
