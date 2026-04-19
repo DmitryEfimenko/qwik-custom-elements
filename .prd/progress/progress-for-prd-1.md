@@ -1,5 +1,35 @@
 # PRD-1 Progress Log
 
+## 2026-04-19 - Issue #32 partial: make SSR availability depend on resolved runtime imports
+
+- Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+- Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/32
+- Task completed:
+  - Updated `@qwik-custom-elements/adapter-stencil` SSR probing to consume the resolved runtime imports it already receives.
+  - Marked SSR as available only when both `loaderImport` and `hydrateImport` are present as non-empty strings.
+  - Kept missing or blank hydrate input as an SSR-availability downgrade instead of a generation-time throw, preserving loader-only fallback flows.
+  - Added adapter-stencil unit coverage for loader-missing, hydrate-missing, and blank-runtime probe cases.
+- Key decisions made:
+  - Keep this slice adapter-owned and probe-local rather than widening core summary or diagnostic contracts in the same run.
+  - Treat missing runtime imports during SSR probing as capability detection, not as a second validation path.
+  - Leave deterministic loader-vs-hydrate generation-time diagnostics for a later issue `#32` slice.
+- Files changed:
+  - `packages/adapter-stencil/src/index.ts`
+  - `packages/adapter-stencil/src/index.test.ts`
+  - `.prd/progress/progress-for-prd-1.md`
+- Validation:
+  - `pnpm --filter @qwik-custom-elements/adapter-stencil test -- --run src/index.test.ts`
+  - `npm run typecheck`
+  - `npm run test`
+  - `npm run build`
+  - `npm run lint`
+  - `npm run format`
+  - `npm run e2e`
+- Remaining for issue #32:
+  - Distinguish loader and hydrate resolution failures with deterministic generation-time diagnostics.
+  - Document the full consumer-facing validation behavior in adapter docs once the remaining diagnostics land.
+  - Update demo integration only if later runtime-resolution work changes the generated consumer path.
+
 ## 2026-04-19 - Issue #32 partial: resolve PACKAGE_NAME runtime defaults and feed SSR probing
 
 - Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1

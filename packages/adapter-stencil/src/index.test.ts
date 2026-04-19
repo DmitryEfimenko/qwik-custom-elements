@@ -17,8 +17,46 @@ describe('adapter-stencil metadata contract', () => {
     });
   });
 
-  it('reports SSR availability through probeSSR', async () => {
-    await expect(probeSSR()).resolves.toEqual({ available: true });
+  it('reports SSR availability when loader and hydrate imports are both resolvable', async () => {
+    await expect(
+      probeSSR({
+        runtimeImports: {
+          loaderImport: '@acme/stencil-lib/loader',
+          hydrateImport: '@acme/stencil-lib/hydrate',
+        },
+      }),
+    ).resolves.toEqual({ available: true });
+  });
+
+  it('reports SSR as unavailable when the loader import is missing', async () => {
+    await expect(
+      probeSSR({
+        runtimeImports: {
+          hydrateImport: '@acme/stencil-lib/hydrate',
+        },
+      }),
+    ).resolves.toEqual({ available: false });
+  });
+
+  it('reports SSR as unavailable when the hydrate import is missing', async () => {
+    await expect(
+      probeSSR({
+        runtimeImports: {
+          loaderImport: '@acme/stencil-lib/loader',
+        },
+      }),
+    ).resolves.toEqual({ available: false });
+  });
+
+  it('reports SSR as unavailable when runtime imports are blank', async () => {
+    await expect(
+      probeSSR({
+        runtimeImports: {
+          loaderImport: '   ',
+          hydrateImport: '   ',
+        },
+      }),
+    ).resolves.toEqual({ available: false });
   });
 
   it('rejects CEM projects without a runtime loader import', () => {

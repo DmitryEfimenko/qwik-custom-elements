@@ -18,6 +18,13 @@ interface ResolveRuntimeImportsResult {
   hydrateImport?: string;
 }
 
+interface ProbeSsrInput {
+  runtimeImports?: {
+    loaderImport?: unknown;
+    hydrateImport?: unknown;
+  };
+}
+
 export function validateProject({
   source,
   adapterOptions,
@@ -91,12 +98,22 @@ export function resolveRuntimeImports({
   };
 }
 
-export async function probeSSR(): Promise<{ available: boolean }> {
-  return { available: true };
+export async function probeSSR({
+  runtimeImports,
+}: ProbeSsrInput = {}): Promise<{ available: boolean }> {
+  return {
+    available:
+      isNonEmptyString(runtimeImports?.loaderImport) &&
+      isNonEmptyString(runtimeImports?.hydrateImport),
+  };
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function isNonEmptyString(value: unknown): value is string {
+  return typeof value === 'string' && value.trim() !== '';
 }
 
 function validateOptionalRuntimeOverride(
