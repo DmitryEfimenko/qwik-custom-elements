@@ -6,10 +6,6 @@ const defineCustomElementsAsync = async () => {
   await Promise.resolve(defineCustomElements());
 };
 
-const useAdapterStencilClientSetup = createStencilClientSetup(
+export const useAdapterStencilClientSetup = createStencilClientSetup(
   $(defineCustomElementsAsync),
 );
-
-export const useStencilClientSetup = () => {
-  useAdapterStencilClientSetup();
-};

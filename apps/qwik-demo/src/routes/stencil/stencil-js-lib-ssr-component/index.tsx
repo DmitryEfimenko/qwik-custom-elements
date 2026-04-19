@@ -3,7 +3,7 @@ import type { DocumentHead } from '@builder.io/qwik-city';
 
 import {
   // StencilJsLibSSRComponent,
-  useStencilClientSetup,
+  useAdapterStencilClientSetup,
 } from '../../../components/stencil-lib-client';
 import { StencilJsLibSSRComponent } from '../../../components/stencil-lib-ssr';
 import { QwikDeAlert, QwikDeButton } from '../../../generated';
@@ -15,7 +15,7 @@ export default component$(() => {
   const secondCount = useSignal(0);
   const activeHandler = useSignal<'alpha' | 'beta'>('alpha');
 
-  useStencilClientSetup();
+  useAdapterStencilClientSetup();
 
   const handleFirstAlpha$ = $(() => {
     firstAlphaCount.value += 1;
