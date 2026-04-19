@@ -2,11 +2,11 @@ import { $, component$, inlinedQrl, useSignal } from '@builder.io/qwik';
 import type { DocumentHead } from '@builder.io/qwik-city';
 import { createStencilSSRComponent } from '@qwik-custom-elements/adapter-stencil/ssr';
 
+import { QwikDeAlert, QwikDeButton } from '../../../generated';
 import {
   renderToString as generatedStencilRenderToString,
   useGeneratedStencilClientSetup,
 } from '../../../generated/runtime';
-import { QwikDeAlert, QwikDeButton } from '../../../generated';
 
 const StencilJsLibSSRComponent = createStencilSSRComponent(
   inlinedQrl(generatedStencilRenderToString, 'generatedStencilRenderToString'),
