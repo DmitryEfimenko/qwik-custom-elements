@@ -17,7 +17,7 @@ test('home route renders baseline content', async ({ page }) => {
 test('stencil events interaction contract: toggles handler and increments active counters', async ({
   page,
 }) => {
-  await page.goto('/stencil/stencil-js-lib-ssr-component');
+  await page.goto('/stencil/ssr/bridge');
 
   await expect(page.locator('#active-handler')).toContainText(
     'Active handler: alpha',
