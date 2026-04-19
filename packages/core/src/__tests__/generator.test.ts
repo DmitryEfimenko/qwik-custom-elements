@@ -88,9 +88,15 @@ describe('generateFromConfig', () => {
       expect(result.projects).toHaveLength(1);
       expect(result.projects[0].wroteFiles).toBe(false);
       expect(result.projects[0].componentTags).toEqual(['a-button', 'z-card']);
-      expect(result.projects[0].plannedWrites).toHaveLength(4);
+      expect(result.projects[0].plannedWrites).toHaveLength(5);
       const indexWrite = result.projects[0].plannedWrites.find((plannedWrite) =>
         plannedWrite.path.endsWith(path.join('src', 'generated', 'index.ts')),
+      );
+      const runtimeBarrelWrite = result.projects[0].plannedWrites.find(
+        (plannedWrite) =>
+          plannedWrite.path.endsWith(
+            path.join('src', 'generated', 'runtime.ts'),
+          ),
       );
       const runtimeWrite = result.projects[0].plannedWrites.find(
         (plannedWrite) =>
@@ -125,10 +131,16 @@ describe('generateFromConfig', () => {
       expect(cardWrite?.content).toContain(
         'export const QwikZCard = "z-card" as const;',
       );
+      expect(runtimeBarrelWrite?.content).toContain(
+        "export * from './runtime.generated';",
+      );
       expect(runtimeWrite?.content).toContain(
         "import { defineCustomElements as runtimeDefineCustomElements } from '@acme/stencil-lib/loader';",
       );
       await expect(readFile(indexWrite!.path, 'utf8')).rejects.toThrow();
+      await expect(
+        readFile(runtimeBarrelWrite!.path, 'utf8'),
+      ).rejects.toThrow();
       await expect(readFile(runtimeWrite!.path, 'utf8')).rejects.toThrow();
       await expect(readFile(buttonWrite!.path, 'utf8')).rejects.toThrow();
       await expect(readFile(cardWrite!.path, 'utf8')).rejects.toThrow();
@@ -162,12 +174,23 @@ describe('generateFromConfig', () => {
             path.join('src', 'generated', 'runtime.generated.ts'),
           ),
       );
+      const runtimeBarrelWrite = result.projects[0].plannedWrites.find(
+        (plannedWrite) =>
+          plannedWrite.path.endsWith(
+            path.join('src', 'generated', 'runtime.ts'),
+          ),
+      );
       const indexDiskContent = await readFile(indexWrite!.path, 'utf8');
+      const runtimeBarrelDiskContent = await readFile(
+        runtimeBarrelWrite!.path,
+        'utf8',
+      );
       const runtimeDiskContent = await readFile(runtimeWrite!.path, 'utf8');
       const wrapperDiskContent = await readFile(wrapperWrite!.path, 'utf8');
       expect(result.projects[0].wroteFiles).toBe(true);
-      expect(result.projects[0].plannedWrites).toHaveLength(3);
+      expect(result.projects[0].plannedWrites).toHaveLength(4);
       expect(indexDiskContent).toBe(indexWrite!.content);
+      expect(runtimeBarrelDiskContent).toBe(runtimeBarrelWrite!.content);
       expect(runtimeDiskContent).toBe(runtimeWrite!.content);
       expect(wrapperDiskContent).toBe(wrapperWrite!.content);
     });
@@ -633,6 +656,68 @@ describe('generateFromConfig', () => {
       );
       expect(runtimeWrite!.content).toContain(
         'return runtimeRenderToString(input, options);',
+      );
+    });
+  });
+
+  it('generates a runtime barrel for resolved Stencil runtime modules', async () => {
+    await withTempDir(async (tempDir) => {
+      const fixturePackageRoot = await createFixturePackage(
+        tempDir,
+        '@acme/stencil-lib',
+      );
+      await writeFile(
+        path.join(fixturePackageRoot, 'custom-elements.json'),
+        JSON.stringify({
+          modules: [{ declarations: [{ tagName: 'app-root' }] }],
+        }),
+        'utf8',
+      );
+      await mkdir(path.join(fixturePackageRoot, 'loader'), { recursive: true });
+      await writeFile(
+        path.join(fixturePackageRoot, 'loader', 'index.js'),
+        'export const defineCustomElements = () => undefined;\n',
+        'utf8',
+      );
+      await mkdir(path.join(fixturePackageRoot, 'hydrate'), {
+        recursive: true,
+      });
+      await writeFile(
+        path.join(fixturePackageRoot, 'hydrate', 'index.js'),
+        'export const renderToString = async () => ({ html: "<app-root></app-root>" });\n',
+        'utf8',
+      );
+
+      const config: GeneratorConfig = {
+        dryRun: true,
+        projects: [
+          {
+            id: 'demo',
+            adapter: 'stencil',
+            adapterPackage: '@qwik-custom-elements/adapter-stencil',
+            source: {
+              type: 'PACKAGE_NAME',
+              packageName: '@acme/stencil-lib',
+            },
+            outDir: './src/generated',
+          },
+        ],
+      };
+
+      const result = await generateFromConfig(config, { cwd: tempDir });
+      const runtimeWrite = result.projects[0].plannedWrites.find(
+        (plannedWrite) =>
+          plannedWrite.path.endsWith(
+            path.join('src', 'generated', 'runtime.ts'),
+          ),
+      );
+
+      expect(runtimeWrite).toBeDefined();
+      expect(runtimeWrite!.content).toContain(
+        "export * from './runtime.generated';",
+      );
+      expect(runtimeWrite!.content).toContain(
+        "export * from './runtime-ssr.generated';",
       );
     });
   });

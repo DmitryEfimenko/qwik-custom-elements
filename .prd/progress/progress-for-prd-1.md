@@ -1,5 +1,41 @@
 # PRD-1 Progress Log
 
+# PRD-1 Progress Log
+
+## 2026-04-19 - Issue #32 complete: consume generated Stencil runtime barrel in demo
+
+- Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+- Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/32
+- Task completed:
+  - Extended the adapter-owned Stencil planned-write hook to emit `runtime.ts` as a generated runtime barrel alongside the existing client and SSR runtime modules.
+  - Regenerated `apps/qwik-demo/src/generated/runtime.ts` and updated the Stencil SSR demo route to import its client setup and SSR render helper from generated runtime output directly.
+  - Deleted the now-redundant demo-local wrapper files for Stencil client setup and SSR bridging.
+  - Aligned core generator coverage and baseline planned-write assertions with the new runtime barrel shape.
+- Key decisions made:
+  - Generated runtime helpers should be consumed through a stable generated barrel instead of hand-written app-local wrapper modules.
+  - The new `runtime.ts` file follows the same generated-file provenance header contract as the other emitted runtime files.
+- Files changed:
+  - `packages/adapter-stencil/src/index.ts`
+  - `packages/core/src/__tests__/generator.test.ts`
+  - `apps/qwik-demo/src/routes/stencil/stencil-js-lib-ssr-component/index.tsx`
+  - `apps/qwik-demo/src/generated/runtime.ts`
+  - `apps/qwik-demo/src/generated/runtime.generated.ts`
+  - `apps/qwik-demo/src/generated/runtime-ssr.generated.ts`
+  - `docs/SYSTEM/findings-log.md`
+  - `.prd/progress/progress-for-prd-1.md`
+- Validation:
+  - `pnpm --filter @qwik-custom-elements/adapter-stencil run build`
+  - `pnpm --filter @qwik-custom-elements/core exec vitest run src/__tests__/generator.test.ts -t "generates a runtime barrel for resolved Stencil runtime modules"`
+  - `node packages/core/dist/cli.js --config qwik-custom-elements.config.json`
+  - `pnpm --filter qwik-demo run build`
+  - `pnpm typecheck`
+  - `pnpm test`
+  - `pnpm build`
+  - `pnpm lint`
+  - `pnpm e2e`
+- Remaining for issue #32:
+  - None. Acceptance criteria satisfied.
+
 ## 2026-04-19 - Issue #32 partial: generate SSR runtime bridge from resolved hydrate imports
 
 - Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1

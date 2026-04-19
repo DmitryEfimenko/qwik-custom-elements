@@ -1,5 +1,18 @@
 # Findings Log
 
+# Findings Log
+
+## 2026-04-19 - Generated Stencil runtime barrels should be the app-facing integration surface
+
+- Sources:
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/32
+- Finding:
+  - When Stencil runtime imports resolve successfully, generation should emit a stable `runtime.ts` barrel that re-exports the generated client and SSR runtime helpers so consuming apps do not need manual wrapper modules.
+- Durable guidance:
+  - Keep the runtime barrel adapter-owned and generated alongside `runtime.generated.ts` and `runtime-ssr.generated.ts`.
+  - Prefer importing app bootstrap and SSR helpers from the generated runtime barrel instead of adding hand-written demo or app-local wrapper files.
+
 ## 2026-04-19 - Generated Stencil client bootstrap should depend on resolved loader imports, not source type
 
 - Sources:

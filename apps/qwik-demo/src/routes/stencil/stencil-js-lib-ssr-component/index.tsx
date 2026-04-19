@@ -1,12 +1,16 @@
-import { $, component$, useSignal } from '@builder.io/qwik';
+import { $, component$, inlinedQrl, useSignal } from '@builder.io/qwik';
 import type { DocumentHead } from '@builder.io/qwik-city';
+import { createStencilSSRComponent } from '@qwik-custom-elements/adapter-stencil/ssr';
 
 import {
-  // StencilJsLibSSRComponent,
-  useAdapterStencilClientSetup,
-} from '../../../components/stencil-lib-client';
-import { StencilJsLibSSRComponent } from '../../../components/stencil-lib-ssr';
+  renderToString as generatedStencilRenderToString,
+  useGeneratedStencilClientSetup,
+} from '../../../generated/runtime';
 import { QwikDeAlert, QwikDeButton } from '../../../generated';
+
+const StencilJsLibSSRComponent = createStencilSSRComponent(
+  inlinedQrl(generatedStencilRenderToString, 'generatedStencilRenderToString'),
+);
 
 export default component$(() => {
   const buttonSize = useSignal<'md' | 'lg'>('md');
@@ -15,7 +19,7 @@ export default component$(() => {
   const secondCount = useSignal(0);
   const activeHandler = useSignal<'alpha' | 'beta'>('alpha');
 
-  useAdapterStencilClientSetup();
+  useGeneratedStencilClientSetup();
 
   const handleFirstAlpha$ = $(() => {
     firstAlphaCount.value += 1;
