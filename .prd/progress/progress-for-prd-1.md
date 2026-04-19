@@ -1,5 +1,27 @@
 # PRD-1 Progress Log
 
+## 2026-04-19 - Issue #31 audit: acceptance criteria satisfied, issue closed
+
+- Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+- Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/31
+- Audit result:
+  - Verified the implemented Stencil runtime import contract matches the issue acceptance checklist.
+  - Confirmed `CEM` requires `adapterOptions.runtime.loaderImport` and allows optional `adapterOptions.runtime.hydrateImport`.
+  - Confirmed `PACKAGE_NAME` supports optional runtime overrides for `loaderImport` and `hydrateImport`, while allowing package-aware defaults when omitted.
+  - Confirmed generator-facing validation flows through the core adapter-validation hook without teaching core Stencil-specific option shapes.
+  - Confirmed consumer-facing README examples cover both source types and required versus optional runtime fields.
+  - Confirmed the checked-in demo config already uses the supported runtime path.
+- Key decisions made:
+  - Treat the previously noted "remaining" runtime import wiring work as issue `#32` scope because it concerns default resolution and precedence, not the source contract finalized by `#31`.
+  - Leave `docs/SYSTEM/*` unchanged because this audit did not introduce new durable decisions or findings.
+- Validation:
+  - `pnpm --filter @qwik-custom-elements/adapter-stencil test -- --run src/index.test.ts`
+  - `pnpm --filter @qwik-custom-elements/core exec vitest run src/__tests__/config.test.ts src/__tests__/generator.test.ts`
+- Files changed:
+  - `.prd/progress/progress-for-prd-1.md`
+- Follow-up:
+  - Continue Stencil runtime default-resolution and override-precedence work under issue `#32`.
+
 ## 2026-04-19 - Issue #31 partial: validate PACKAGE_NAME runtime override values
 
 - Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
