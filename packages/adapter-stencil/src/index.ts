@@ -8,8 +8,14 @@ export const metadata = {
 interface ValidateProjectInput {
   source: {
     type: 'CEM' | 'PACKAGE_NAME';
+    packageName?: string;
   };
   adapterOptions?: Record<string, unknown>;
+}
+
+interface ResolveRuntimeImportsResult {
+  loaderImport: string;
+  hydrateImport?: string;
 }
 
 export function validateProject({
@@ -43,6 +49,46 @@ export function validateProject({
       'Stencil CEM projects must provide adapterOptions.runtime.loaderImport.',
     );
   }
+}
+
+export function resolveRuntimeImports({
+  source,
+  adapterOptions,
+}: ValidateProjectInput): ResolveRuntimeImportsResult {
+  const runtime = isRecord(adapterOptions?.runtime)
+    ? adapterOptions.runtime
+    : undefined;
+  const loaderImport = validateOptionalRuntimeOverride(
+    runtime,
+    'loaderImport',
+    'QCE_STENCIL_RUNTIME_LOADER_OVERRIDE_INVALID',
+    `Stencil ${source.type} projects must provide a non-empty adapterOptions.runtime.loaderImport override when the override is set.`,
+  );
+  const hydrateImport = validateOptionalRuntimeOverride(
+    runtime,
+    'hydrateImport',
+    'QCE_STENCIL_RUNTIME_HYDRATE_OVERRIDE_INVALID',
+    `Stencil ${source.type} projects must provide a non-empty adapterOptions.runtime.hydrateImport override when the override is set.`,
+  );
+
+  if (source.type === 'CEM') {
+    if (loaderImport == null) {
+      throw createValidationError(
+        'QCE_STENCIL_RUNTIME_LOADER_REQUIRED',
+        'Stencil CEM projects must provide adapterOptions.runtime.loaderImport.',
+      );
+    }
+
+    return {
+      loaderImport,
+      hydrateImport,
+    };
+  }
+
+  return {
+    loaderImport: loaderImport ?? `${source.packageName}/loader`,
+    hydrateImport: hydrateImport ?? `${source.packageName}/hydrate`,
+  };
 }
 
 export async function probeSSR(): Promise<{ available: boolean }> {

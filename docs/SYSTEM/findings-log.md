@@ -1,5 +1,17 @@
 # Findings Log
 
+## 2026-04-19 - Stencil runtime import resolution should stay adapter-owned and feed SSR probing
+
+- Sources:
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/32
+- Finding:
+  - Stencil runtime import resolution is adapter-specific behavior: `PACKAGE_NAME` should derive conventional `<packageName>/loader` and `<packageName>/hydrate` defaults, explicit runtime overrides should win when present, and core should consume the adapter-resolved runtime inputs when invoking SSR probes.
+- Durable guidance:
+  - Keep Stencil runtime default resolution in `@qwik-custom-elements/adapter-stencil`, not in core.
+  - Treat `CEM` runtime imports as explicit adapter options only.
+  - Pass adapter-resolved runtime inputs into downstream adapter hooks so SSR probing and later generation behavior share one runtime-resolution contract.
+
 ## 2026-04-19 - Stencil CEM runtime contract must validate loader import before generation
 
 - Sources:

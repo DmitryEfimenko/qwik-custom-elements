@@ -1,5 +1,35 @@
 # PRD-1 Progress Log
 
+## 2026-04-19 - Issue #32 partial: resolve PACKAGE_NAME runtime defaults and feed SSR probing
+
+- Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+- Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/32
+- Task completed:
+  - Added adapter-owned `resolveRuntimeImports(...)` handling in `@qwik-custom-elements/adapter-stencil`.
+  - Derived PACKAGE_NAME runtime defaults as `<packageName>/loader` and `<packageName>/hydrate`.
+  - Preserved explicit PACKAGE_NAME override precedence for `loaderImport` and `hydrateImport`.
+  - Wired core generation to pass adapter-resolved runtime imports into adapter SSR probing.
+  - Updated adapter-stencil documentation to describe default resolution, override precedence, and the probe input contract.
+- Key decisions made:
+  - Keep Stencil runtime import resolution adapter-owned rather than teaching core Stencil-specific defaults.
+  - Reuse the adapter-resolved runtime import contract as the input to SSR probing so later capability and generation decisions do not diverge.
+  - Keep this slice focused on runtime resolution and probe input plumbing; generation output changes remain for later issue #32 slices.
+- Files changed:
+  - `packages/adapter-stencil/src/index.ts`
+  - `packages/adapter-stencil/src/index.test.ts`
+  - `packages/adapter-stencil/README.md`
+  - `packages/core/src/generator.ts`
+  - `packages/core/src/__tests__/generator.test.ts`
+  - `docs/SYSTEM/findings-log.md`
+  - `.prd/progress/progress-for-prd-1.md`
+- Validation:
+  - `pnpm --filter @qwik-custom-elements/adapter-stencil test -- --run src/index.test.ts`
+  - `pnpm --filter @qwik-custom-elements/core exec vitest run src/__tests__/generator.test.ts`
+- Remaining for issue #32:
+  - Distinguish loader and hydrate resolution failures with deterministic generation-time diagnostics.
+  - Consume resolved runtime imports in generated output paths where runtime imports still remain implicit.
+  - Update demo integration if resolved runtime inputs change the expected consumer path.
+
 ## 2026-04-19 - Issue #31 audit: acceptance criteria satisfied, issue closed
 
 - Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1

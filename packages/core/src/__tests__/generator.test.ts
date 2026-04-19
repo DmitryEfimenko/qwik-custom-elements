@@ -337,6 +337,70 @@ describe('generateFromConfig', () => {
       ]);
     });
   });
+
+  it('passes adapter-resolved runtime imports into SSR probing', async () => {
+    await withTempDir(async (tempDir) => {
+      const fixturePackageRoot = await createFixturePackage(
+        tempDir,
+        '@acme/stencil-lib',
+      );
+      await writeFile(
+        path.join(fixturePackageRoot, 'custom-elements.json'),
+        JSON.stringify({
+          modules: [{ declarations: [{ tagName: 'app-root' }] }],
+        }),
+        'utf8',
+      );
+      await writeFile(
+        path.join(tempDir, 'adapter-runtime-resolution.mjs'),
+        [
+          'export const metadata = {',
+          "  supportedSourceTypes: ['CEM', 'PACKAGE_NAME'],",
+          '  supportsSsrProbe: true,',
+          "  ssrRuntimeSubpath: './ssr',",
+          '};',
+          '',
+          'export function resolveRuntimeImports({ source, adapterOptions }) {',
+          '  return {',
+          '    loaderImport: adapterOptions?.runtime?.loaderImport ?? `${source.packageName}/loader`,',
+          '    hydrateImport: adapterOptions?.runtime?.hydrateImport ?? `${source.packageName}/hydrate`,',
+          '  };',
+          '}',
+          '',
+          'export async function probeSSR({ runtimeImports }) {',
+          "  return { available: runtimeImports?.loaderImport === '@acme/stencil-lib/loader' && runtimeImports?.hydrateImport === '@acme/stencil-lib/hydrate' };",
+          '}',
+          '',
+        ].join('\n'),
+        'utf8',
+      );
+
+      const config: GeneratorConfig = {
+        dryRun: true,
+        projects: [
+          {
+            id: 'demo',
+            adapter: 'stencil',
+            adapterPackage: './adapter-runtime-resolution.mjs',
+            source: {
+              type: 'PACKAGE_NAME',
+              packageName: '@acme/stencil-lib',
+            },
+            outDir: './src/generated',
+          },
+        ],
+      };
+
+      const result = await generateFromConfig(config, { cwd: tempDir });
+      expect(result.projects[0].ssrCapabilities).toEqual({
+        available: true,
+        supportsSsrProbe: true,
+        ssrRuntimeSubpath: './ssr',
+      });
+      expect(result.projects[0].observedErrorCodes).toEqual([]);
+    });
+  });
+
   it('loads the lit adapter SSR subpath package without fallback warning', async () => {
     await withTempDir(async (tempDir) => {
       await writeFile(

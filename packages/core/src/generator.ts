@@ -159,12 +159,20 @@ async function generateProject(
 
   validateAdapterSourceCompatibility(project, adapterModule);
   await validateAdapterProject(project, adapterModule);
+  const runtimeImports = await resolveAdapterRuntimeImports(
+    project,
+    adapterModule,
+  );
 
   const sourcePath = resolveProjectSourcePath(project.id, project.source, cwd);
   const outDirPath = path.resolve(cwd, project.outDir);
   const componentTags = await readComponentTagsFromCem(sourcePath);
   const adapterSsrCapabilities = resolveAdapterSsrCapabilities(adapterModule);
-  const ssrProbe = await probeProjectSsrAvailability(project, adapterModule);
+  const ssrProbe = await probeProjectSsrAvailability(
+    project,
+    adapterModule,
+    runtimeImports,
+  );
   const plannedWrites = createPlannedWrites(
     project.id,
     outDirPath,
@@ -234,6 +242,7 @@ function resolveAdapterSsrCapabilities(
 async function probeProjectSsrAvailability(
   project: GeneratorProject,
   adapterModule: Record<string, unknown>,
+  runtimeImports: Record<string, unknown> | undefined,
 ): Promise<{ available: boolean }> {
   const probeSSR =
     adapterModule != null && typeof adapterModule.probeSSR === 'function'
@@ -246,7 +255,9 @@ async function probeProjectSsrAvailability(
 
   const probeResult = (await probeSSR({
     projectId: project.id,
+    source: project.source,
     adapterOptions: project.adapterOptions ?? {},
+    runtimeImports,
   })) as { available?: unknown };
 
   if (probeResult != null && probeResult.available === true) {
@@ -254,6 +265,47 @@ async function probeProjectSsrAvailability(
   }
 
   return { available: false };
+}
+
+async function resolveAdapterRuntimeImports(
+  project: GeneratorProject,
+  adapterModule: Record<string, unknown>,
+): Promise<Record<string, unknown> | undefined> {
+  const resolveRuntimeImports =
+    adapterModule != null &&
+    typeof adapterModule.resolveRuntimeImports === 'function'
+      ? adapterModule.resolveRuntimeImports
+      : undefined;
+
+  if (resolveRuntimeImports == null) {
+    return undefined;
+  }
+
+  try {
+    const runtimeImports = await resolveRuntimeImports({
+      projectId: project.id,
+      source: project.source,
+      adapterOptions: project.adapterOptions ?? {},
+    });
+
+    return runtimeImports != null && typeof runtimeImports === 'object'
+      ? (runtimeImports as Record<string, unknown>)
+      : undefined;
+  } catch (error) {
+    if (error instanceof GenerationError) {
+      throw error;
+    }
+
+    const errorCode =
+      typeof error === 'object' &&
+      error !== null &&
+      'code' in error &&
+      typeof error.code === 'string'
+        ? error.code
+        : 'QCE_ADAPTER_RUNTIME_IMPORTS_INVALID';
+
+    throw new GenerationError(errorCode, toErrorMessage(error));
+  }
 }
 
 function validateAdapterSourceCompatibility(

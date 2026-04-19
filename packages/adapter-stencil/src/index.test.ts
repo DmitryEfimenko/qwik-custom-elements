@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-import { metadata, probeSSR, validateProject } from './index';
+import {
+  metadata,
+  probeSSR,
+  resolveRuntimeImports,
+  validateProject,
+} from './index';
 
 describe('adapter-stencil metadata contract', () => {
   it('declares deterministic capabilities for source and SSR runtime ownership', () => {
@@ -50,6 +55,40 @@ describe('adapter-stencil metadata contract', () => {
         source: { type: 'PACKAGE_NAME' },
       }),
     ).not.toThrow();
+  });
+
+  it('resolves PACKAGE_NAME runtime imports from package-aware defaults', () => {
+    expect(
+      resolveRuntimeImports({
+        source: {
+          type: 'PACKAGE_NAME',
+          packageName: '@acme/stencil-lib',
+        },
+      }),
+    ).toEqual({
+      loaderImport: '@acme/stencil-lib/loader',
+      hydrateImport: '@acme/stencil-lib/hydrate',
+    });
+  });
+
+  it('prefers explicit PACKAGE_NAME runtime overrides over package-aware defaults', () => {
+    expect(
+      resolveRuntimeImports({
+        source: {
+          type: 'PACKAGE_NAME',
+          packageName: '@acme/stencil-lib',
+        },
+        adapterOptions: {
+          runtime: {
+            loaderImport: './runtime/loader',
+            hydrateImport: './runtime/hydrate',
+          },
+        },
+      }),
+    ).toEqual({
+      loaderImport: './runtime/loader',
+      hydrateImport: './runtime/hydrate',
+    });
   });
 
   it('rejects blank PACKAGE_NAME runtime loader overrides', () => {
