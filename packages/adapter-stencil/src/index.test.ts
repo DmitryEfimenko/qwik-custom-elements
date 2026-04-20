@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  createAdditionalPlannedWrites,
   metadata,
   probeSSR,
   resolveRuntimeImports,
@@ -208,5 +209,58 @@ describe('adapter-stencil metadata contract', () => {
     ).toThrowError(
       'Stencil PACKAGE_NAME projects must provide a non-empty adapterOptions.runtime.hydrateImport override when the override is set.',
     );
+  });
+
+  it('generates Stencil wrapper modules as adapter-owned planned writes', () => {
+    const plannedWrites = createAdditionalPlannedWrites({
+      projectId: 'demo',
+      source: { type: 'CEM' },
+      runtimeImports: {
+        loaderImport: '@acme/stencil-lib/loader',
+      },
+      componentDefinitions: [
+        {
+          tagName: 'de-button',
+          props: [
+            {
+              name: 'label',
+              type: 'string',
+              required: false,
+            },
+          ],
+          events: [
+            {
+              name: 'ready',
+              type: 'CustomEvent<void>',
+            },
+          ],
+          slots: [
+            {
+              name: 'icon',
+            },
+          ],
+        },
+      ],
+      ssrAvailable: false,
+    });
+
+    const wrapperWrite = plannedWrites.find(
+      (plannedWrite) => plannedWrite.relativePath === 'de-button.tsx',
+    );
+
+    expect(wrapperWrite?.content).toContain(
+      "import { useGeneratedStencilClientSetup } from './runtime';",
+    );
+    expect(wrapperWrite?.content).toContain(
+      'export interface QwikDeButtonProps {',
+    );
+    expect(wrapperWrite?.content).toContain('  label?: string;');
+    expect(wrapperWrite?.content).toContain(
+      '  onReady$?: QRL<(event: CustomEvent<void>) => void>;',
+    );
+    expect(wrapperWrite?.content).toContain(
+      '  return <de-button {...elementProps} {...eventProps}>',
+    );
+    expect(wrapperWrite?.content).toContain('    <Slot name="icon" />');
   });
 });

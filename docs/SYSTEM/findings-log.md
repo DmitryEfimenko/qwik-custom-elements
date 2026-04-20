@@ -12,6 +12,7 @@
   - Treat adapter generation as a primary adapter contract, not as an "additional" write hook layered on top of core-owned output shaping.
   - Pass typed parsed component metadata from core into adapter generation hooks so adapters do not need to re-parse CEM files.
   - Do not let core branch on adapter identity to decide generated filenames, wrapper structure, export topology, or fallback wrapper generation.
+  - Preserve the current consumer-facing generated surface during the ownership migration by letting adapters claim stable wrapper/barrel paths directly and having core skip only the component tags already owned by an adapter.
 
 ## 2026-04-19 - Generated Stencil wrapper files should consume generated runtime setup and derive prop typing from CEM metadata
 

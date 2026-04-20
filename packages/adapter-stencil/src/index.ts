@@ -32,6 +32,28 @@ interface ResolveRuntimeImportsOutcome {
   observedErrorCodes?: string[];
 }
 
+interface CemComponentProp {
+  name: string;
+  type: string;
+  required: boolean;
+}
+
+interface CemComponentEvent {
+  name: string;
+  type: string;
+}
+
+interface CemComponentSlot {
+  name: string;
+}
+
+interface CemComponentDefinition {
+  tagName: string;
+  props: CemComponentProp[];
+  events: CemComponentEvent[];
+  slots: CemComponentSlot[];
+}
+
 interface ProbeSsrInput {
   runtimeImports?: {
     loaderImport?: unknown;
@@ -44,10 +66,12 @@ interface CreateAdditionalPlannedWritesInput {
   source: {
     type: 'CEM' | 'PACKAGE_NAME';
   };
+  componentDefinitions?: CemComponentDefinition[];
   runtimeImports?: {
     loaderImport?: unknown;
     hydrateImport?: unknown;
   };
+  ssrAvailable?: boolean;
 }
 
 export function validateProject({
@@ -174,7 +198,9 @@ export async function probeSSR({
 
 export function createAdditionalPlannedWrites({
   projectId,
+  componentDefinitions,
   runtimeImports,
+  ssrAvailable,
 }: CreateAdditionalPlannedWritesInput): Array<{
   relativePath: string;
   content: string;
@@ -210,6 +236,17 @@ export function createAdditionalPlannedWrites({
     plannedWrites.push({
       relativePath: 'runtime-ssr.generated.ts',
       content: renderServerRuntimeModule(projectId, hydrateImport),
+    });
+  }
+
+  for (const componentDefinition of componentDefinitions ?? []) {
+    plannedWrites.push({
+      relativePath: `${componentDefinition.tagName}.tsx`,
+      content: renderStencilComponentWrapper(
+        projectId,
+        componentDefinition,
+        ssrAvailable === true,
+      ),
     });
   }
 
@@ -295,6 +332,171 @@ function renderServerRuntimeModule(
     ');',
     '',
   ].join('\n');
+}
+
+function renderStencilComponentWrapper(
+  projectId: string | undefined,
+  componentDefinition: CemComponentDefinition,
+  ssrAvailable: boolean,
+): string {
+  const wrapperName = toWrapperName(componentDefinition.tagName);
+  const propsTypeName = `${wrapperName}Props`;
+  const usesGeneratedStencilComponent = ssrAvailable;
+  const slotLines = [
+    '    <Slot />',
+    ...componentDefinition.slots.map(
+      (slot) => `    <Slot name=${JSON.stringify(slot.name)} />`,
+    ),
+  ];
+  const slotListToken =
+    componentDefinition.slots.length > 0
+      ? JSON.stringify(componentDefinition.slots.map((slot) => slot.name))
+      : 'undefined';
+  const propLines = componentDefinition.props.map((prop) => {
+    const key = isValidIdentifier(prop.name) ? prop.name : `'${prop.name}'`;
+    const optionalToken = prop.required ? '' : '?';
+
+    return `  ${key}${optionalToken}: ${prop.type};`;
+  });
+
+  const eventPropLines = componentDefinition.events.map((event) => {
+    return `  ${toEventPropName(event.name)}?: QRL<(event: ${event.type}) => void>;`;
+  });
+
+  propLines.push(...eventPropLines, '  [key: string]: unknown;');
+
+  const importLines = ["import { Slot, component$ } from '@builder.io/qwik';"];
+
+  if (componentDefinition.events.length > 0) {
+    importLines.push("import type { QRL } from '@builder.io/qwik';");
+  }
+
+  importLines.push(
+    usesGeneratedStencilComponent
+      ? "import { GeneratedStencilComponent, useGeneratedStencilClientSetup } from './runtime';"
+      : "import { useGeneratedStencilClientSetup } from './runtime';",
+  );
+
+  const splitPropsLines = [
+    '  const isEventBindingKey = (key: string) =>',
+    "    /^on[A-Z].*\\$$/.test(key) || key.includes(':');",
+    '  const eventProps: Record<string, unknown> = {};',
+    '  const elementProps: Record<string, unknown> = {};',
+    '',
+    '  for (const [key, value] of Object.entries(props as Record<string, unknown>)) {',
+    "    if (key === 'children') {",
+    '      continue;',
+    '    }',
+    '',
+    '    if (isEventBindingKey(key)) {',
+    '      eventProps[key] = value;',
+    '      continue;',
+    '    }',
+    '',
+    '    elementProps[key] = value;',
+    '  }',
+  ];
+
+  const mappedEventLines =
+    componentDefinition.events.length > 0
+      ? [
+          '',
+          `  const mappedEventPropKeys = new Set(${JSON.stringify(componentDefinition.events.map((event) => toEventPropName(event.name)))});`,
+          '  const passthroughEventProps = Object.fromEntries(',
+          '    Object.entries(eventProps).filter(',
+          '      ([key]) => !mappedEventPropKeys.has(key),',
+          '    ),',
+          '  );',
+          '',
+          '  const events: Record<string, QRL<(...args: any[]) => void>> = {};',
+          ...componentDefinition.events.map(
+            (event) =>
+              `  if (props.${toEventPropName(event.name)}) { events['${event.name}'] = props.${toEventPropName(event.name)}; }`,
+          ),
+          '  const mappedEvents = Object.keys(events).length > 0 ? events : undefined;',
+        ]
+      : [
+          '',
+          '  const passthroughEventProps = eventProps;',
+          '  const mappedEvents = undefined;',
+        ];
+
+  const bodyLines = usesGeneratedStencilComponent
+    ? [
+        ...splitPropsLines,
+        ...mappedEventLines,
+        '',
+        '  return (',
+        '    <GeneratedStencilComponent',
+        `      tagName=${JSON.stringify(componentDefinition.tagName)}`,
+        '      props={elementProps}',
+        '      events={mappedEvents}',
+        `      slots={${slotListToken}}`,
+        '      {...passthroughEventProps}',
+        '    >',
+        ...slotLines,
+        '    </GeneratedStencilComponent>',
+        '  );',
+      ]
+    : componentDefinition.events.length > 0
+      ? [
+          ...splitPropsLines,
+          '',
+          `  return <${componentDefinition.tagName} {...elementProps} {...eventProps}>`,
+          ...slotLines,
+          `  </${componentDefinition.tagName}>;`,
+        ]
+      : [
+          '  const elementProps = Object.fromEntries(',
+          '    Object.entries(props as Record<string, unknown>).filter(',
+          "      ([key]) => key !== 'children',",
+          '    ),',
+          '  );',
+          '',
+          `  return <${componentDefinition.tagName} {...elementProps}>`,
+          ...slotLines,
+          `  </${componentDefinition.tagName}>;`,
+        ];
+
+  return [
+    `// Generated by @qwik-custom-elements/core. Project: ${projectId ?? 'unknown'}.`,
+    '// Do not edit this file directly. Use a manual extension layer.',
+    '',
+    ...importLines,
+    '',
+    `export interface ${propsTypeName} {`,
+    ...propLines,
+    '}',
+    '',
+    `export const ${wrapperName} = component$<${propsTypeName}>((props) => {`,
+    '  useGeneratedStencilClientSetup();',
+    ...bodyLines,
+    '});',
+    '',
+  ].join('\n');
+}
+
+function toWrapperName(componentTag: string): string {
+  const parts = componentTag.split('-').filter((part) => part.length > 0);
+  const normalizedName = parts
+    .map((part) => `${part.charAt(0).toUpperCase()}${part.slice(1)}`)
+    .join('');
+
+  return `Qwik${normalizedName}`;
+}
+
+function isValidIdentifier(name: string): boolean {
+  return /^[A-Za-z_$][A-Za-z0-9_$]*$/.test(name);
+}
+
+function toEventPropName(eventName: string): string {
+  const normalizedName = eventName
+    .split(/[^A-Za-z0-9]+/)
+    .filter((part) => part.length > 0)
+    .map((part) => `${part.charAt(0).toUpperCase()}${part.slice(1)}`)
+    .join('');
+
+  return `on${normalizedName}$`;
 }
 
 function resolvePackageRootForProject(

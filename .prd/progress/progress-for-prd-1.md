@@ -1,6 +1,35 @@
 # PRD-1 Progress Log
 
-# PRD-1 Progress Log
+## 2026-04-20 - Issue #36 partial: move Stencil wrapper output ownership into adapter-stencil
+
+- Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+- Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/36
+- Task completed:
+  - Moved generated Stencil wrapper module rendering behind `@qwik-custom-elements/adapter-stencil#createAdditionalPlannedWrites` so the adapter now owns wrapper filenames and wrapper content for Stencil components.
+  - Changed core wrapper planning to consume adapter-owned wrapper writes first and emit only the remaining generic fallback wrappers for component tags not claimed by an adapter.
+  - Added focused adapter coverage for adapter-owned Stencil wrapper writes while preserving the existing core generator surface and root-level validation loop.
+- Key decisions made:
+  - The ownership refactor can land incrementally by letting adapters claim consumer-facing wrapper outputs one adapter at a time without breaking the existing generated surface.
+  - Core may still provide a generic fallback wrapper path for adapters that have not yet taken ownership, but it must stop branching on adapter identity to decide wrapper filenames or wrapper shape.
+  - For Stencil, typed parsed component metadata should cross the core-to-adapter generation boundary directly so adapter-owned wrapper generation does not need to re-parse CEM files.
+- Files changed:
+  - `packages/core/src/generator.ts`
+  - `packages/adapter-stencil/src/index.ts`
+  - `packages/adapter-stencil/src/index.test.ts`
+  - `.prd/progress/progress-for-prd-1.md`
+  - `docs/SYSTEM/findings-log.md`
+- Validation:
+  - `pnpm --filter @qwik-custom-elements/adapter-stencil exec vitest run src/index.test.ts`
+  - `pnpm --filter @qwik-custom-elements/core exec vitest run src/__tests__/generator.test.ts`
+  - `pnpm format`
+  - `pnpm typecheck`
+  - `pnpm test`
+  - `pnpm build`
+  - `pnpm lint`
+  - `pnpm e2e`
+- Remaining for issue #36:
+  - Move generated barrel and wrapper ownership for Lit behind the same primary adapter generation contract.
+  - Remove the remaining generic core fallback generation once each adapter owns its full generated file set.
 
 ## 2026-04-20 - PRD architecture sync: lock adapter-owned generated output boundary
 
