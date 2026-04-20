@@ -2,6 +2,44 @@
 
 # PRD-1 Progress Log
 
+## 2026-04-20 - Issue #33 partial: wire generated Stencil wrappers into the SSR demo route
+
+- Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+- Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/33
+- Task completed:
+  - Added the required `/stencil/ssr/wrappers/` demo route and switched the focused Playwright contract test to validate that route instead of the older bridge-only path.
+  - Updated generated Stencil SSR runtime output to export a generated adapter-owned `GeneratedStencilComponent` so checked-in wrapper files can reuse the existing SSR bridge contract instead of reintroducing a hand-written app-local bridge.
+  - Updated generated Stencil wrapper output to map typed `onEvent$` props into the adapter SSR component `events` contract and keep those mapped event props out of wrapper-container passthrough so event handlers survive Qwik rerenders.
+  - Regenerated the checked-in demo wrapper artifacts from stale tag-name constants to `.tsx` wrapper components aligned with the current generator contract.
+- Key decisions made:
+  - This slice stays on the demo integration path only; it does not widen into consumer-facing documentation in the same run.
+  - SSR-capable generated Stencil wrappers should render through the generated adapter-owned SSR component instead of directly rendering the custom-element tag when custom-event wiring must survive SSR and client rerenders.
+  - Generated `onEvent$` props that are mapped into the SSR bridge `events` contract must not also be forwarded onto the wrapper container as generic Qwik event props.
+- Files changed:
+  - `apps/qwik-demo/e2e/smoke.spec.ts`
+  - `apps/qwik-demo/src/routes/stencil/ssr/wrappers/index.tsx`
+  - `apps/qwik-demo/src/generated/de-alert.tsx`
+  - `apps/qwik-demo/src/generated/de-alert-shadow.tsx`
+  - `apps/qwik-demo/src/generated/de-button.tsx`
+  - `apps/qwik-demo/src/generated/de-button-shadow.tsx`
+  - `apps/qwik-demo/src/generated/runtime-ssr.generated.ts`
+  - `packages/core/src/generator.ts`
+  - `packages/core/src/__tests__/generator.test.ts`
+  - `packages/adapter-stencil/src/index.ts`
+  - `.prd/progress/progress-for-prd-1.md`
+  - `docs/SYSTEM/findings-log.md`
+- Validation:
+  - `pnpm --filter @qwik-custom-elements/core exec vitest run src/__tests__/generator.test.ts -t "renders Stencil wrappers through the generated SSR component when hydrate runtime is available|generates a server runtime bridge from resolved PACKAGE_NAME hydrate imports"`
+  - `pnpm --filter ./apps/qwik-demo exec playwright test e2e/smoke.spec.ts -g "stencil wrappers interaction contract"`
+  - `pnpm format`
+  - `pnpm typecheck`
+  - `pnpm test`
+  - `pnpm build`
+  - `pnpm lint`
+  - `pnpm e2e`
+- Remaining for issue #33:
+  - Add consumer-facing documentation for generated wrapper artifact shape and usage.
+
 ## 2026-04-19 - Issue #33 partial: preserve named-slot metadata in generated Stencil wrappers
 
 - Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1

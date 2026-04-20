@@ -815,6 +815,7 @@ function createPlannedWrites(
       projectId,
       componentDefinition,
       adapterId,
+      ssrAvailable,
       ssrMarkup: renderAdapterSsrMarkup(
         adapterModule,
         componentDefinition.tagName,
@@ -1208,14 +1209,20 @@ function renderComponentWrapper(input: {
   projectId: string;
   componentDefinition: CemComponentDefinition;
   adapterId: string | null;
+  ssrAvailable: boolean;
   ssrMarkup: string | null;
 }): string {
-  const { projectId, componentDefinition, adapterId, ssrMarkup } = input;
+  const { projectId, componentDefinition, adapterId, ssrAvailable, ssrMarkup } =
+    input;
   const { tagName: componentTag } = componentDefinition;
   const wrapperName = toWrapperName(componentTag);
 
   if (adapterId === 'stencil') {
-    return renderStencilComponentWrapper(projectId, componentDefinition);
+    return renderStencilComponentWrapper(
+      projectId,
+      componentDefinition,
+      ssrAvailable,
+    );
   }
 
   const lines = [
@@ -1239,15 +1246,21 @@ function renderComponentWrapper(input: {
 function renderStencilComponentWrapper(
   projectId: string,
   componentDefinition: CemComponentDefinition,
+  ssrAvailable: boolean,
 ): string {
   const wrapperName = toWrapperName(componentDefinition.tagName);
   const propsTypeName = `${wrapperName}Props`;
+  const usesGeneratedStencilComponent = ssrAvailable;
   const slotLines = [
     '    <Slot />',
     ...componentDefinition.slots.map(
       (slot) => `    <Slot name=${JSON.stringify(slot.name)} />`,
     ),
   ];
+  const slotListToken =
+    componentDefinition.slots.length > 0
+      ? JSON.stringify(componentDefinition.slots.map((slot) => slot.name))
+      : 'undefined';
   const propLines = componentDefinition.props.map((prop) => {
     const key = isValidIdentifier(prop.name) ? prop.name : `'${prop.name}'`;
     const optionalToken = prop.required ? '' : '?';
@@ -1267,26 +1280,76 @@ function renderStencilComponentWrapper(
     importLines.push("import type { QRL } from '@builder.io/qwik';");
   }
 
-  const bodyLines =
+  importLines.push(
+    usesGeneratedStencilComponent
+      ? "import { GeneratedStencilComponent, useGeneratedStencilClientSetup } from './runtime';"
+      : "import { useGeneratedStencilClientSetup } from './runtime';",
+  );
+
+  const splitPropsLines = [
+    '  const isEventBindingKey = (key: string) =>',
+    "    /^on[A-Z].*\\$$/.test(key) || key.includes(':');",
+    '  const eventProps: Record<string, unknown> = {};',
+    '  const elementProps: Record<string, unknown> = {};',
+    '',
+    '  for (const [key, value] of Object.entries(props as Record<string, unknown>)) {',
+    "    if (key === 'children') {",
+    '      continue;',
+    '    }',
+    '',
+    '    if (isEventBindingKey(key)) {',
+    '      eventProps[key] = value;',
+    '      continue;',
+    '    }',
+    '',
+    '    elementProps[key] = value;',
+    '  }',
+  ];
+
+  const mappedEventLines =
     componentDefinition.events.length > 0
       ? [
-          '  const isEventBindingKey = (key: string) =>',
-          "    /^on[A-Z].*\\$$/.test(key) || key.includes(':');",
-          '  const eventProps: Record<string, unknown> = {};',
-          '  const elementProps: Record<string, unknown> = {};',
           '',
-          '  for (const [key, value] of Object.entries(props as Record<string, unknown>)) {',
-          "    if (key === 'children') {",
-          '      continue;',
-          '    }',
+          `  const mappedEventPropKeys = new Set(${JSON.stringify(componentDefinition.events.map((event) => toEventPropName(event.name)))});`,
+          '  const passthroughEventProps = Object.fromEntries(',
+          '    Object.entries(eventProps).filter(',
+          '      ([key]) => !mappedEventPropKeys.has(key),',
+          '    ),',
+          '  );',
           '',
-          '    if (isEventBindingKey(key)) {',
-          '      eventProps[key] = value;',
-          '      continue;',
-          '    }',
+          '  const events: Record<string, QRL<(...args: any[]) => void>> = {};',
+          ...componentDefinition.events.map(
+            (event) =>
+              `  if (props.${toEventPropName(event.name)}) { events['${event.name}'] = props.${toEventPropName(event.name)}; }`,
+          ),
+          '  const mappedEvents = Object.keys(events).length > 0 ? events : undefined;',
+        ]
+      : [
           '',
-          '    elementProps[key] = value;',
-          '  }',
+          '  const passthroughEventProps = eventProps;',
+          '  const mappedEvents = undefined;',
+        ];
+
+  const bodyLines = usesGeneratedStencilComponent
+    ? [
+        ...splitPropsLines,
+        ...mappedEventLines,
+        '',
+        '  return (',
+        '    <GeneratedStencilComponent',
+        `      tagName=${JSON.stringify(componentDefinition.tagName)}`,
+        '      props={elementProps}',
+        '      events={mappedEvents}',
+        `      slots={${slotListToken}}`,
+        '      {...passthroughEventProps}',
+        '    >',
+        ...slotLines,
+        '    </GeneratedStencilComponent>',
+        '  );',
+      ]
+    : componentDefinition.events.length > 0
+      ? [
+          ...splitPropsLines,
           '',
           `  return <${componentDefinition.tagName} {...elementProps} {...eventProps}>`,
           ...slotLines,
@@ -1309,7 +1372,6 @@ function renderStencilComponentWrapper(
     '// Do not edit this file directly. Use a manual extension layer.',
     '',
     ...importLines,
-    "import { useGeneratedStencilClientSetup } from './runtime';",
     '',
     `export interface ${propsTypeName} {`,
     ...propLines,

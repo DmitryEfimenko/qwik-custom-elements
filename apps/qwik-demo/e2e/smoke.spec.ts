@@ -14,10 +14,10 @@ test('home route renders baseline content', async ({ page }) => {
   ).toBeVisible();
 });
 
-test('stencil events interaction contract: toggles handler and increments active counters', async ({
+test('stencil wrappers interaction contract: toggles handler and increments active counters', async ({
   page,
 }) => {
-  await page.goto('/stencil/ssr/bridge');
+  await page.goto('/stencil/ssr/wrappers');
 
   await expect(page.locator('#active-handler')).toContainText(
     'Active handler: alpha',

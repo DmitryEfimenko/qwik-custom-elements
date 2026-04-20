@@ -14,6 +14,7 @@
   - Preserve enough CEM component metadata in core generation to drive wrapper contracts, even if later slices add richer event or slot support.
   - Treat prop typing from CEM attributes and members as the baseline wrapper contract; layer event and slot metadata on top in later issue slices instead of blocking wrapper generation on full metadata parity.
   - When CEM event metadata is available, emit typed `onEvent$` wrapper props from that metadata and keep those Qwik event bindings out of the plain custom-element prop spread.
+  - When SSR runtime is available, render generated Stencil wrappers through an adapter-owned generated SSR component and map typed `onEvent$` props into its `events` contract rather than forwarding those mapped handlers as generic wrapper-container props.
   - When CEM slot metadata is available, emit the default `<Slot />` plus deterministic named `<Slot name="..." />` projections so generated wrapper output stays aligned with declared component slots.
 
 ## 2026-04-19 - Generated Stencil runtime barrels should be the app-facing integration surface

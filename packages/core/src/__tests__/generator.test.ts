@@ -702,6 +702,107 @@ describe('generateFromConfig', () => {
       expect(runtimeWrite!.content).toContain(
         'return runtimeRenderToString(input, options);',
       );
+      expect(runtimeWrite!.content).toContain(
+        'export const GeneratedStencilComponent = createStencilSSRComponent(',
+      );
+    });
+  });
+
+  it('renders Stencil wrappers through the generated SSR component when hydrate runtime is available', async () => {
+    await withTempDir(async (tempDir) => {
+      await writeFile(
+        path.join(tempDir, 'custom-elements.json'),
+        JSON.stringify(
+          {
+            modules: [
+              {
+                declarations: [
+                  {
+                    tagName: 'a-button',
+                    attributes: [
+                      {
+                        name: 'size',
+                        fieldName: 'size',
+                        type: { text: '"lg" | "md" | "sm"' },
+                      },
+                    ],
+                    events: [
+                      {
+                        name: 'tripleClick',
+                        type: { text: 'CustomEvent<MouseEvent>' },
+                      },
+                    ],
+                    slots: [
+                      {
+                        name: 'footer',
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          null,
+          2,
+        ),
+        'utf8',
+      );
+
+      const config: GeneratorConfig = {
+        dryRun: true,
+        projects: [
+          {
+            id: 'demo',
+            adapter: 'stencil',
+            adapterPackage: '@qwik-custom-elements/adapter-stencil',
+            source: {
+              type: 'CEM',
+              path: './custom-elements.json',
+            },
+            outDir: './src/generated',
+            adapterOptions: {
+              runtime: {
+                loaderImport: './runtime/acme-loader',
+                hydrateImport: './runtime/acme-hydrate',
+              },
+            },
+          },
+        ],
+      };
+
+      const result = await generateFromConfig(config, { cwd: tempDir });
+      const buttonWrite = result.projects[0].plannedWrites.find(
+        (plannedWrite) =>
+          plannedWrite.path.endsWith(
+            path.join('src', 'generated', 'a-button.tsx'),
+          ),
+      );
+
+      expect(buttonWrite).toBeDefined();
+      expect(buttonWrite!.content).toContain(
+        "import { GeneratedStencilComponent, useGeneratedStencilClientSetup } from './runtime';",
+      );
+      expect(buttonWrite!.content).toContain(
+        '  const events: Record<string, QRL<(...args: any[]) => void>> = {};',
+      );
+      expect(buttonWrite!.content).toContain(
+        '  const passthroughEventProps = Object.fromEntries(',
+      );
+      expect(buttonWrite!.content).toContain(
+        '      ([key]) => !mappedEventPropKeys.has(key),',
+      );
+      expect(buttonWrite!.content).toContain(
+        "  if (props.onTripleClick$) { events['tripleClick'] = props.onTripleClick$; }",
+      );
+      expect(buttonWrite!.content).toContain('      tagName="a-button"');
+      expect(buttonWrite!.content).toContain('      events={mappedEvents}');
+      expect(buttonWrite!.content).toContain('      slots={["footer"]}');
+      expect(buttonWrite!.content).toContain(
+        '      {...passthroughEventProps}',
+      );
+      expect(buttonWrite!.content).toContain(
+        '    </GeneratedStencilComponent>',
+      );
     });
   });
 
