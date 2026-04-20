@@ -1,5 +1,31 @@
 # PRD-1 Progress Log
 
+## 2026-04-20 - Issue #36 complete: make the core ownership boundary explicit in generator coverage
+
+- Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+- Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/36
+- Task completed:
+  - Added focused `@qwik-custom-elements/core` coverage that proves the generator returns only adapter-owned planned writes and does not add any fallback barrel, runtime, or wrapper output on top of the adapter contract.
+  - Re-ran the full root feedback loop after the test addition and confirmed format, typecheck, test, build, lint, and e2e all pass.
+  - Rechecked package docs and system decision artifacts during this run and confirmed the ownership boundary wording already matched the implemented primary adapter-generation contract, so no additional system-doc sync was needed for this slice.
+- Key decisions made:
+  - The smallest remaining acceptance gap for issue #36 was explicit structural-boundary coverage in core, not another contract or docs refactor.
+  - The boundary is strongest when core is tested against an intentionally custom adapter-owned output path that would immediately expose any fallback file shaping.
+  - No new durable architecture finding emerged beyond the already-recorded adapter-owned output decision, so `docs/SYSTEM/*` remains unchanged in this run.
+- Files changed:
+  - `packages/core/src/__tests__/generator.test.ts`
+  - `.prd/progress/progress-for-prd-1.md`
+- Validation:
+  - `pnpm --filter @qwik-custom-elements/core exec vitest run src/__tests__/generator.test.ts -t "returns only adapter-generated files without adding core fallback output"`
+  - `pnpm format`
+  - `pnpm typecheck`
+  - `pnpm test`
+  - `pnpm build`
+  - `pnpm lint`
+  - `pnpm e2e`
+- Remaining for issue #36:
+  - None. Acceptance criteria satisfied.
+
 ## 2026-04-20 - Issue #36 partial: remove the transitional adapter generation alias and enforce the primary contract
 
 - Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1

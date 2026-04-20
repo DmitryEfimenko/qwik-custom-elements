@@ -474,6 +474,61 @@ describe('generateFromConfig', () => {
     });
   });
 
+  it('returns only adapter-generated files without adding core fallback output', async () => {
+    await withTempDir(async (tempDir) => {
+      await writeFile(
+        path.join(tempDir, 'custom-elements.json'),
+        JSON.stringify(
+          {
+            modules: [{ declarations: [{ tagName: 'app-root' }] }],
+          },
+          null,
+          2,
+        ),
+        'utf8',
+      );
+      await writeFile(
+        path.join(tempDir, 'adapter-owned-output.mjs'),
+        [
+          'export const metadata = {',
+          "  supportedSourceTypes: ['CEM', 'PACKAGE_NAME'],",
+          '  supportsSsrProbe: false,',
+          '  ssrRuntimeSubpath: null,',
+          '};',
+          '',
+          'export function createGeneratedOutput({ projectId, componentDefinitions }) {',
+          '  return [',
+          '    {',
+          "      relativePath: 'owned/runtime-entry.ts',",
+          '      content: `owned:${projectId}:${componentDefinitions[0]?.tagName ?? "missing"}`,',
+          '    },',
+          '  ];',
+          '}',
+          '',
+        ].join('\n'),
+        'utf8',
+      );
+
+      const config = createSingleProjectConfig(tempDir, true);
+      config.projects[0].adapterPackage = './adapter-owned-output.mjs';
+
+      const result = await generateFromConfig(config, { cwd: tempDir });
+
+      expect(result.projects[0].plannedWrites).toEqual([
+        {
+          path: path.join(
+            tempDir,
+            'src',
+            'generated',
+            'owned',
+            'runtime-entry.ts',
+          ),
+          content: 'owned:demo:app-root',
+        },
+      ]);
+    });
+  });
+
   it('fails when an adapter only exposes the deprecated additional planned writes contract', async () => {
     await withTempDir(async (tempDir) => {
       await writeFile(
