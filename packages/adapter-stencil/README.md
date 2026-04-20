@@ -239,6 +239,72 @@ Keep the split intentional:
 
 When hydrate resolution fails, the client runtime module is still generated from the loader import so loader-only fallback flows remain usable.
 
+## Generated Wrapper Artifacts
+
+When the generator has enough Stencil runtime information, `@qwik-custom-elements/adapter-stencil` owns the full generated surface under the target `outDir`.
+
+For equivalent resolved runtime inputs, `PACKAGE_NAME` and `CEM` projects produce the same consumer-facing artifact shape:
+
+- `index.ts`
+  - Barrel that re-exports each generated Qwik wrapper plus the shared runtime helpers.
+- `runtime.ts`
+  - Stable app-facing barrel that re-exports the generated client and SSR runtime leaves.
+- `runtime-csr.generated.ts`
+  - Client bootstrap module that wires `defineCustomElements` into Qwik-friendly helpers.
+- `runtime-ssr.generated.ts`
+  - SSR-only bridge helpers that keep hydrate loading behind a dynamic import boundary.
+- `*.tsx`
+  - One generated Qwik wrapper per discovered Stencil component.
+
+Generated wrapper components follow a stable contract:
+
+- Prop typing starts from available CEM attribute and member metadata.
+- Custom events become typed `onEvent$` QRL props when event metadata is available.
+- Wrapper components call `useGeneratedStencilClientSetup()` so client bootstrap stays centralized in generated runtime output.
+- When SSR runtime is available, wrappers render through the shared generated `GeneratedStencilComponent` bridge instead of requiring app-local handwritten bridge files.
+- Slot metadata is projected with deterministic Qwik `<Slot />` output, including named slot support when the source metadata declares it.
+
+Example generated surface:
+
+```text
+src/generated/
+  index.ts
+  runtime.ts
+  runtime-csr.generated.ts
+  runtime-ssr.generated.ts
+  de-button.tsx
+  de-alert.tsx
+```
+
+Example consumer usage:
+
+```tsx
+import { $, component$ } from '@builder.io/qwik';
+
+import { QwikDeAlert, QwikDeButton } from './generated';
+
+export default component$(() => {
+  const handleTripleClick$ = $(() => {
+    console.log('triple click');
+  });
+
+  return (
+    <>
+      <QwikDeButton size="md" onTripleClick$={handleTripleClick$}>
+        Generated Button
+      </QwikDeButton>
+
+      <QwikDeAlert heading="Generated Alert">
+        <span>Default slot content</span>
+        <span q:slot="footer">Named slot content</span>
+      </QwikDeAlert>
+    </>
+  );
+});
+```
+
+The checked-in demo route at `apps/qwik-demo/src/routes/stencil/ssr/wrappers/` is the reference integration path for this generated surface. It validates that generated wrappers, generated runtime setup, typed event handlers, and slot projection all work together without a handwritten app-local bridge layer.
+
 ## Planned SSR Fallback Behavior
 
 Support SSR where available, but do not make SSR availability a prerequisite for generating useful wrappers.

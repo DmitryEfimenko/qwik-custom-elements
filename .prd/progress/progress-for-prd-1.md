@@ -1,5 +1,31 @@
 # PRD-1 Progress Log
 
+## 2026-04-20 - Issue #33 complete: document the generated Stencil wrapper artifact surface
+
+- Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+- Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/33
+- Task completed:
+  - Added consumer-facing documentation to `@qwik-custom-elements/adapter-stencil` that explains the generated Stencil artifact shape under `outDir`, including the stable runtime barrels and per-component wrapper modules.
+  - Documented the generated wrapper contract for typed props, typed `onEvent$` bindings, slot projection, and the shared generated SSR bridge so consumers are not expected to maintain app-local bridge files.
+  - Added a concrete usage example and pointed readers at the checked-in `/stencil/ssr/wrappers/` demo route as the verified integration path for generated Stencil wrappers.
+- Key decisions made:
+  - The smallest remaining acceptance gap for issue #33 was package-level consumer documentation, not more generator or demo-app implementation work.
+  - The adapter README is the canonical consumer-facing place to describe the generated wrapper surface because Stencil-specific generated output ownership lives in `@qwik-custom-elements/adapter-stencil` rather than in core.
+  - No new durable architecture rule emerged beyond the already-recorded adapter-owned output boundary and Stencil wrapper findings, so `docs/SYSTEM/*` should remain unchanged unless the validation loop exposes a broader documentation mismatch.
+- Files changed:
+  - `packages/adapter-stencil/README.md`
+  - `.prd/progress/progress-for-prd-1.md`
+- Validation:
+  - `pnpm exec prettier --check packages/adapter-stencil/README.md`
+  - `pnpm format`
+  - `pnpm typecheck`
+  - `pnpm test`
+  - `pnpm build`
+  - `pnpm lint`
+  - `pnpm e2e`
+- Remaining for issue #33:
+  - None. Acceptance criteria satisfied.
+
 ## 2026-04-20 - Issue #36 complete: make the core ownership boundary explicit in generator coverage
 
 - Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
