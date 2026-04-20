@@ -237,6 +237,11 @@ Keep the split intentional:
 - `runtime-csr.generated.ts` is client-reachable and must remain loader-only.
 - `runtime-ssr.generated.ts` owns the hydrate-backed `renderToString` bridge and keeps hydrate loading behind a dynamic import boundary.
 
+Generation mode depends on which resolved runtime imports are actually available:
+
+- Full SSR mode: both loader and hydrate resolve, so generation emits both runtime leaves and `runtime.ts` re-exports the client and SSR helpers together.
+- Loader-only mode: loader resolves but hydrate does not, so generation still emits `runtime-csr.generated.ts` and typed wrappers, but omits `runtime-ssr.generated.ts` and keeps `runtime.ts` client-only.
+
 When hydrate resolution fails, the client runtime module is still generated from the loader import so loader-only fallback flows remain usable.
 
 ## Generated Wrapper Artifacts
@@ -262,6 +267,7 @@ Generated wrapper components follow a stable contract:
 - Custom events become typed `onEvent$` QRL props when event metadata is available.
 - Wrapper components call `useGeneratedStencilClientSetup()` so client bootstrap stays centralized in generated runtime output.
 - When SSR runtime is available, wrappers render through the shared generated `GeneratedStencilComponent` bridge instead of requiring app-local handwritten bridge files.
+- When only the loader runtime is available, wrappers stay on the same generated runtime layer but degrade to a slim proxy that renders the custom-element tag directly and forwards props, typed `onEvent$` bindings, and slot metadata without Stencil server rendering.
 - Slot metadata is projected with deterministic Qwik `<Slot />` output, including named slot support when the source metadata declares it.
 
 Example generated surface:
@@ -314,6 +320,12 @@ The intended behavior for Stencil projects is:
 - If both loader and hydrate are available, generate the shared bridge plus typed Qwik wrappers with SSR support.
 - If only loader is available and hydrate/SSR support is unavailable, still generate the shared bridge plus typed Qwik wrappers.
 - In the loader-only case, the bridge should degrade to a minimal proxy that renders the custom element tag and forwards props, events, and slot metadata without server-side Stencil rendering.
+
+Consumers should treat those two modes as the same generated wrapper surface with different SSR capabilities:
+
+- Full SSR mode includes `runtime-ssr.generated.ts`, exposes hydrate-backed `renderToString`, and lets wrappers render through the shared generated SSR bridge.
+- Loader-only mode keeps `runtime-csr.generated.ts`, omits the SSR runtime leaf, and still produces usable typed wrappers for client-side upgrade and interaction.
+- In both modes, wrapper props, event bindings, slot projection, and client bootstrap stay adapter-owned and deterministic.
 
 That fallback still provides value to consumers because generated Qwik components remain:
 

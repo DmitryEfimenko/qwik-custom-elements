@@ -1,5 +1,33 @@
 # PRD-1 Progress Log
 
+## 2026-04-20 - Issue #34 partial: clarify consumer-facing loader-only versus full SSR behavior
+
+- Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+- Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/34
+- Task completed:
+  - Expanded `@qwik-custom-elements/adapter-stencil` consumer documentation to distinguish full SSR generation from loader-only generation using the generated runtime artifact surface that consumers see under `outDir`.
+  - Documented that loader-only mode keeps the same adapter-owned wrapper surface, omits `runtime-ssr.generated.ts`, and degrades wrapper rendering to a slim custom-element proxy while preserving typed props, `onEvent$` bindings, slot projection, and client bootstrap.
+  - Re-ran the repository validation loop and confirmed the docs-only slice does not require a new `docs/SYSTEM/*` sync because the underlying hydrate-downgrade behavior and ownership boundary were already captured in existing system findings.
+- Key decisions made:
+  - The smallest honest remaining slice for issue #34 was consumer-facing documentation, not a demo-route change, because the checked-in demo output still reflects the full-SSR runtime surface today.
+  - The adapter README remains the canonical place to explain Stencil-specific loader-only versus full-SSR behavior because the generated artifact contract is adapter-owned.
+  - No new durable architecture or API contract emerged from this run; the change clarifies existing behavior rather than changing it.
+- Files changed:
+  - `packages/adapter-stencil/README.md`
+  - `.prd/progress/progress-for-prd-1.md`
+- Validation:
+  - `pnpm exec prettier --check packages/adapter-stencil/README.md`
+  - `pnpm format`
+  - `pnpm typecheck`
+  - `pnpm test`
+  - `pnpm build`
+  - `pnpm lint`
+  - `pnpm e2e`
+- Remaining for issue #34:
+  - Add demo-app routes that prove the loader-only path end to end when hydrate is unavailable.
+  - Add E2E coverage for the loader-only routes.
+  - Extend user-facing coverage for structured capability output and deterministic diagnostics if the remaining acceptance slices require it.
+
 ## 2026-04-20 - Issue #34 partial: lock loader-only Stencil generated surface coverage in core
 
 - Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
