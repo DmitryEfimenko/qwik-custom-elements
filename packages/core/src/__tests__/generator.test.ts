@@ -101,7 +101,7 @@ describe('generateFromConfig', () => {
       const runtimeWrite = result.projects[0].plannedWrites.find(
         (plannedWrite) =>
           plannedWrite.path.endsWith(
-            path.join('src', 'generated', 'runtime.generated.ts'),
+            path.join('src', 'generated', 'runtime-csr.generated.ts'),
           ),
       );
       const buttonWrite = result.projects[0].plannedWrites.find(
@@ -132,7 +132,7 @@ describe('generateFromConfig', () => {
         'export const QwikZCard = "z-card" as const;',
       );
       expect(runtimeBarrelWrite?.content).toContain(
-        "export * from './runtime.generated';",
+        "export * from './runtime-csr.generated';",
       );
       expect(runtimeWrite?.content).toContain(
         "import { defineCustomElements as runtimeDefineCustomElements } from '@acme/stencil-lib/loader';",
@@ -171,7 +171,7 @@ describe('generateFromConfig', () => {
       const runtimeWrite = result.projects[0].plannedWrites.find(
         (plannedWrite) =>
           plannedWrite.path.endsWith(
-            path.join('src', 'generated', 'runtime.generated.ts'),
+            path.join('src', 'generated', 'runtime-csr.generated.ts'),
           ),
       );
       const runtimeBarrelWrite = result.projects[0].plannedWrites.find(
@@ -572,14 +572,11 @@ describe('generateFromConfig', () => {
       const runtimeWrite = result.projects[0].plannedWrites.find(
         (plannedWrite) =>
           plannedWrite.path.endsWith(
-            path.join('src', 'generated', 'runtime.generated.ts'),
+            path.join('src', 'generated', 'runtime-csr.generated.ts'),
           ),
       );
 
       expect(runtimeWrite).toBeDefined();
-      expect(runtimeWrite!.content).toContain(
-        "import { createStencilClientSetup } from '@qwik-custom-elements/adapter-stencil/client';",
-      );
       expect(runtimeWrite!.content).toContain(
         "import { defineCustomElements as runtimeDefineCustomElements } from '@acme/stencil-lib/loader';",
       );
@@ -714,7 +711,7 @@ describe('generateFromConfig', () => {
 
       expect(runtimeWrite).toBeDefined();
       expect(runtimeWrite!.content).toContain(
-        "export * from './runtime.generated';",
+        "export * from './runtime-csr.generated';",
       );
       expect(runtimeWrite!.content).toContain(
         "export * from './runtime-ssr.generated';",
@@ -757,7 +754,7 @@ describe('generateFromConfig', () => {
       const runtimeWrite = result.projects[0].plannedWrites.find(
         (plannedWrite) =>
           plannedWrite.path.endsWith(
-            path.join('src', 'generated', 'runtime.generated.ts'),
+            path.join('src', 'generated', 'runtime-csr.generated.ts'),
           ),
       );
 

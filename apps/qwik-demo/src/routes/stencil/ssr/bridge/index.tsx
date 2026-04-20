@@ -4,8 +4,8 @@ import { createStencilSSRComponent } from '@qwik-custom-elements/adapter-stencil
 
 import { QwikDeAlert, QwikDeButton } from '../../../../generated';
 import {
-    renderToString as generatedStencilRenderToString,
-    useGeneratedStencilClientSetup,
+  renderToString as generatedStencilRenderToString,
+  useGeneratedStencilClientSetup,
 } from '../../../../generated/runtime';
 
 const StencilJsLibSSRComponent = createStencilSSRComponent(

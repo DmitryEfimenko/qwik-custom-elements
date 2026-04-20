@@ -2,6 +2,33 @@
 
 # PRD-1 Progress Log
 
+## 2026-04-19 - Issue #32 follow-up: rename generated client runtime leaf to runtime-csr.generated.ts
+
+- Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+- Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/32
+- Task completed:
+  - Renamed the generated Stencil client runtime leaf from `runtime.generated.ts` to `runtime-csr.generated.ts`.
+  - Kept the stable generated barrel at `runtime.ts` and updated it to re-export the renamed client leaf.
+  - Updated generator coverage, adapter documentation, and checked-in demo generated output to use the explicit CSR filename.
+- Key decisions made:
+  - The generated client runtime leaf should use an explicit `-csr` suffix to mirror the existing `-ssr` split and make the client-only contract obvious.
+  - `runtime.ts` remains the stable consumer-facing import surface so app code does not need to care about the leaf filename.
+- Files changed:
+  - `packages/adapter-stencil/src/index.ts`
+  - `packages/adapter-stencil/dist/index.qwik.mjs`
+  - `packages/adapter-stencil/dist/index.qwik.cjs`
+  - `packages/core/src/__tests__/generator.test.ts`
+  - `apps/qwik-demo/src/generated/runtime.ts`
+  - `apps/qwik-demo/src/generated/runtime-csr.generated.ts`
+  - `packages/adapter-stencil/README.md`
+  - `docs/SYSTEM/findings-log.md`
+  - `.prd/progress/progress-for-prd-1.md`
+- Validation:
+  - `pnpm --filter @qwik-custom-elements/adapter-stencil run build`
+  - `pnpm --filter @qwik-custom-elements/core exec vitest run src/__tests__/generator.test.ts`
+- Remaining for issue #32:
+  - None. This is a naming clarification follow-up on top of the already completed issue.
+
 ## 2026-04-19 - Issue #32 complete: consume generated Stencil runtime barrel in demo
 
 - Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1

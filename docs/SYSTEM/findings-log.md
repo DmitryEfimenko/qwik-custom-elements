@@ -10,7 +10,7 @@
 - Finding:
   - When Stencil runtime imports resolve successfully, generation should emit a stable `runtime.ts` barrel that re-exports the generated client and SSR runtime helpers so consuming apps do not need manual wrapper modules.
 - Durable guidance:
-  - Keep the runtime barrel adapter-owned and generated alongside `runtime.generated.ts` and `runtime-ssr.generated.ts`.
+  - Keep the runtime barrel adapter-owned and generated alongside `runtime-csr.generated.ts` and `runtime-ssr.generated.ts`.
   - Prefer importing app bootstrap and SSR helpers from the generated runtime barrel instead of adding hand-written demo or app-local wrapper files.
 
 ## 2026-04-19 - Generated Stencil client bootstrap should depend on resolved loader imports, not source type
@@ -21,8 +21,19 @@
 - Finding:
   - The generated Stencil client bootstrap is valid whenever the adapter has a resolved `loaderImport`, regardless of whether that import came from `PACKAGE_NAME` defaults or the explicit `CEM` runtime contract.
 - Durable guidance:
-  - Gate `runtime.generated.ts` emission on the presence of a resolved loader import, not on the source type.
+  - Gate `runtime-csr.generated.ts` emission on the presence of a resolved loader import, not on the source type.
   - Keep `PACKAGE_NAME` and `CEM` client bootstrap output aligned when they resolve to equivalent runtime imports.
+
+## 2026-04-19 - Generated Stencil runtime leaf filenames should make CSR vs SSR intent explicit
+
+- Sources:
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/32
+- Finding:
+  - The generated Stencil client runtime leaf is easier to reason about when its filename explicitly signals that it is the client-side counterpart to `runtime-ssr.generated.ts`.
+- Durable guidance:
+  - Use `runtime-csr.generated.ts` for the generated client runtime leaf while keeping `runtime.ts` as the stable app-facing barrel.
+  - Reserve `runtime-ssr.generated.ts` for SSR-only helpers and keep the client leaf loader-only.
 
 ## 2026-04-19 - Adapter-specific generated runtime modules should use a generic core planned-write hook
 

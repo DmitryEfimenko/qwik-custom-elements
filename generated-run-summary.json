@@ -1,0 +1,23 @@
+{
+  "schemaVersion": "1.0.0",
+  "startedAt": "2026-04-19T23:52:59.243Z",
+  "finishedAt": "2026-04-19T23:52:59.255Z",
+  "dryRun": false,
+  "projects": [
+    {
+      "projectId": "demo",
+      "status": "success",
+      "durationMs": 11,
+      "generatedIndexPath": "C:\\Source\\qwik-custom-elements\\apps\\qwik-demo\\src\\generated\\index.ts",
+      "resolvedCoreVersion": "0.0.0",
+      "resolvedAdapterVersion": "0.0.0",
+      "ssrCapabilities": {
+        "available": true,
+        "supportsSsrProbe": true,
+        "ssrRuntimeSubpath": "./ssr"
+      },
+      "observedErrorCodes": []
+    }
+  ],
+  "observedErrorCodes": []
+}

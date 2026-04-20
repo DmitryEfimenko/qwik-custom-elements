@@ -201,7 +201,7 @@ export function createAdditionalPlannedWrites({
       content: renderRuntimeBarrelModule(projectId, hasHydrateRuntime),
     },
     {
-      relativePath: 'runtime.generated.ts',
+      relativePath: 'runtime-csr.generated.ts',
       content: renderClientRuntimeModule(projectId, loaderImport),
     },
   ];
@@ -251,7 +251,7 @@ function renderRuntimeBarrelModule(
   projectId: string | undefined,
   hasHydrateRuntime: boolean,
 ): string {
-  const exportLines = ["export * from './runtime.generated';"];
+  const exportLines = ["export * from './runtime-csr.generated';"];
 
   if (hasHydrateRuntime) {
     exportLines.push("export * from './runtime-ssr.generated';");

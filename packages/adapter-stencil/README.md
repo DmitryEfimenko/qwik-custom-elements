@@ -206,7 +206,7 @@ This keeps `PACKAGE_NAME` ergonomic while preserving `CEM` as an explicit-contro
 
 ## Generated Runtime Modules
 
-For Stencil projects with a valid resolved loader import, generation now emits `runtime.generated.ts` alongside the component wrappers.
+For Stencil projects with a valid resolved loader import, generation now emits `runtime-csr.generated.ts` alongside the component wrappers.
 
 That generated client module provides:
 
@@ -220,7 +220,7 @@ For `PACKAGE_NAME`, those runtime imports may come from package-aware defaults o
 
 Keep the split intentional:
 
-- `runtime.generated.ts` is client-reachable and must remain loader-only.
+- `runtime-csr.generated.ts` is client-reachable and must remain loader-only.
 - `runtime-ssr.generated.ts` owns the hydrate-backed `renderToString` bridge and keeps hydrate loading behind a dynamic import boundary.
 
 When hydrate resolution fails, the client runtime module is still generated from the loader import so loader-only fallback flows remain usable.
