@@ -2,6 +2,29 @@
 
 # PRD-1 Progress Log
 
+## 2026-04-19 - Issue #33 partial: preserve named-slot metadata in generated Stencil wrappers
+
+- Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+- Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/33
+- Task completed:
+  - Extended core CEM parsing to preserve per-component slot metadata during Stencil wrapper generation.
+  - Updated generated Stencil `.tsx` wrappers to emit deterministic named `<Slot name="..." />` projections alongside the default slot.
+  - Deduplicated repeated slot names while keeping wrapper output stable across repeated generation runs.
+- Key decisions made:
+  - This slice stays at generated wrapper contract level only; it does not widen into the `/stencil/ssr/wrappers/` demo route migration or consumer-facing docs in the same run.
+  - Generated Stencil wrappers should always include the default Qwik `<Slot />` and then append any named slots discovered from CEM metadata in sorted order.
+  - Slot metadata should layer on top of the existing prop and event-derived wrapper contract rather than changing the wrapper component surface.
+- Files changed:
+  - `packages/core/src/generator.ts`
+  - `packages/core/src/__tests__/generator.test.ts`
+  - `.prd/progress/progress-for-prd-1.md`
+  - `docs/SYSTEM/findings-log.md`
+- Validation:
+  - `pnpm --filter @qwik-custom-elements/core exec vitest run src/__tests__/generator.test.ts -t "produces deterministic planned writes in dry-run mode without mutating files"`
+- Remaining for issue #33:
+  - Update the demo route at `/stencil/ssr/wrappers/` to consume generated wrappers end to end.
+  - Add consumer-facing documentation for generated wrapper artifact shape and usage.
+
 ## 2026-04-19 - Issue #33 partial: generate typed Stencil event props from CEM metadata
 
 - Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1

@@ -41,10 +41,15 @@ interface CemComponentEvent {
   type: string;
 }
 
+interface CemComponentSlot {
+  name: string;
+}
+
 interface CemComponentDefinition {
   tagName: string;
   props: CemComponentProp[];
   events: CemComponentEvent[];
+  slots: CemComponentSlot[];
 }
 
 export async function generateFromConfig(
@@ -960,6 +965,7 @@ async function readComponentDefinitionsFromCem(
         tagName,
         props: [],
         events: [],
+        slots: [],
       };
       const propsByName = new Map(
         definition.props.map((prop) => [prop.name, prop] as const),
@@ -967,11 +973,15 @@ async function readComponentDefinitionsFromCem(
       const eventsByName = new Map(
         definition.events.map((event) => [event.name, event] as const),
       );
+      const slotsByName = new Map(
+        definition.slots.map((slot) => [slot.name, slot] as const),
+      );
 
       const declarationRecord = declaration as {
         attributes?: unknown;
         members?: unknown;
         events?: unknown;
+        slots?: unknown;
       };
 
       for (const prop of readComponentPropsFromAttributes(
@@ -1002,10 +1012,21 @@ async function readComponentDefinitionsFromCem(
         }
       }
 
+      for (const slot of readComponentSlotsFromDeclaration(
+        declarationRecord.slots,
+      )) {
+        if (!slotsByName.has(slot.name)) {
+          slotsByName.set(slot.name, slot);
+        }
+      }
+
       definition.props = Array.from(propsByName.values()).sort((a, b) =>
         a.name.localeCompare(b.name),
       );
       definition.events = Array.from(eventsByName.values()).sort((a, b) =>
+        a.name.localeCompare(b.name),
+      );
+      definition.slots = Array.from(slotsByName.values()).sort((a, b) =>
         a.name.localeCompare(b.name),
       );
       definitions.set(tagName, definition);
@@ -1130,6 +1151,34 @@ function readComponentEventsFromDeclaration(
   return componentEvents;
 }
 
+function readComponentSlotsFromDeclaration(slots: unknown): CemComponentSlot[] {
+  if (!Array.isArray(slots)) {
+    return [];
+  }
+
+  const componentSlots: CemComponentSlot[] = [];
+
+  for (const slot of slots) {
+    if (typeof slot !== 'object' || slot === null) {
+      continue;
+    }
+
+    const slotRecord = slot as {
+      name?: unknown;
+    };
+
+    if (typeof slotRecord.name !== 'string' || slotRecord.name.trim() === '') {
+      continue;
+    }
+
+    componentSlots.push({
+      name: slotRecord.name.trim(),
+    });
+  }
+
+  return componentSlots;
+}
+
 function normalizeCemTypeText(typeText: unknown): string {
   return typeof typeText === 'string' && typeText.trim() !== ''
     ? typeText.trim()
@@ -1193,6 +1242,12 @@ function renderStencilComponentWrapper(
 ): string {
   const wrapperName = toWrapperName(componentDefinition.tagName);
   const propsTypeName = `${wrapperName}Props`;
+  const slotLines = [
+    '    <Slot />',
+    ...componentDefinition.slots.map(
+      (slot) => `    <Slot name=${JSON.stringify(slot.name)} />`,
+    ),
+  ];
   const propLines = componentDefinition.props.map((prop) => {
     const key = isValidIdentifier(prop.name) ? prop.name : `'${prop.name}'`;
     const optionalToken = prop.required ? '' : '?';
@@ -1234,7 +1289,7 @@ function renderStencilComponentWrapper(
           '  }',
           '',
           `  return <${componentDefinition.tagName} {...elementProps} {...eventProps}>`,
-          '    <Slot />',
+          ...slotLines,
           `  </${componentDefinition.tagName}>;`,
         ]
       : [
@@ -1245,7 +1300,7 @@ function renderStencilComponentWrapper(
           '  );',
           '',
           `  return <${componentDefinition.tagName} {...elementProps}>`,
-          '    <Slot />',
+          ...slotLines,
           `  </${componentDefinition.tagName}>;`,
         ];
 

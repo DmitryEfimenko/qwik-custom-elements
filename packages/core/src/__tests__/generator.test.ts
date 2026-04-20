@@ -84,6 +84,14 @@ describe('generateFromConfig', () => {
                         type: { text: 'CustomEvent<MouseEvent>' },
                       },
                     ],
+                    slots: [
+                      {
+                        name: 'footer',
+                      },
+                      {
+                        name: 'footer',
+                      },
+                    ],
                   },
                   { tagName: 'z-card' },
                 ],
@@ -168,6 +176,8 @@ describe('generateFromConfig', () => {
       expect(buttonWrite?.content).toContain(
         '  return <a-button {...elementProps} {...eventProps}>',
       );
+      expect(buttonWrite?.content).toContain('    <Slot />');
+      expect(buttonWrite?.content).toContain('    <Slot name="footer" />');
       expect(cardWrite?.content).toContain('export interface QwikZCardProps {');
       expect(runtimeBarrelWrite?.content).toContain(
         "export * from './runtime-csr.generated';",
