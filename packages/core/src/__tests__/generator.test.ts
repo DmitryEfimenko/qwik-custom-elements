@@ -727,6 +727,86 @@ describe('generateFromConfig', () => {
     });
   });
 
+  it('generates a loader-only runtime barrel and slim wrapper when PACKAGE_NAME hydrate resolution fails', async () => {
+    await withTempDir(async (tempDir) => {
+      const fixturePackageRoot = await createFixturePackage(
+        tempDir,
+        '@acme/stencil-lib',
+      );
+      await writeFile(
+        path.join(fixturePackageRoot, 'custom-elements.json'),
+        JSON.stringify({
+          modules: [{ declarations: [{ tagName: 'app-root' }] }],
+        }),
+        'utf8',
+      );
+      await mkdir(path.join(fixturePackageRoot, 'loader'), { recursive: true });
+      await writeFile(
+        path.join(fixturePackageRoot, 'loader', 'index.js'),
+        'export const defineCustomElements = () => undefined;\n',
+        'utf8',
+      );
+
+      const config: GeneratorConfig = {
+        dryRun: true,
+        projects: [
+          {
+            id: 'demo',
+            adapter: 'stencil',
+            adapterPackage: '@qwik-custom-elements/adapter-stencil',
+            source: {
+              type: 'PACKAGE_NAME',
+              packageName: '@acme/stencil-lib',
+            },
+            outDir: './src/generated',
+          },
+        ],
+      };
+
+      const result = await generateFromConfig(config, { cwd: tempDir });
+      const runtimeBarrelWrite = result.projects[0].plannedWrites.find(
+        (plannedWrite) =>
+          plannedWrite.path.endsWith(
+            path.join('src', 'generated', 'runtime.ts'),
+          ),
+      );
+      const wrapperWrite = result.projects[0].plannedWrites.find(
+        (plannedWrite) =>
+          plannedWrite.path.endsWith(
+            path.join('src', 'generated', 'app-root.tsx'),
+          ),
+      );
+
+      expect(result.projects[0].plannedWrites).not.toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            path: path.join(
+              tempDir,
+              'src',
+              'generated',
+              'runtime-ssr.generated.ts',
+            ),
+          }),
+        ]),
+      );
+      expect(runtimeBarrelWrite?.content).toContain(
+        "export * from './runtime-csr.generated';",
+      );
+      expect(runtimeBarrelWrite?.content).not.toContain(
+        "export * from './runtime-ssr.generated';",
+      );
+      expect(wrapperWrite?.content).toContain(
+        "import { useGeneratedStencilClientSetup } from './runtime';",
+      );
+      expect(wrapperWrite?.content).not.toContain('GeneratedStencilComponent');
+      expect(wrapperWrite?.content).toContain(
+        '  return <app-root {...elementProps}>',
+      );
+      expect(wrapperWrite?.content).toContain('    <Slot />');
+      expect(wrapperWrite?.content).toContain('  </app-root>;');
+    });
+  });
+
   it('generates a client runtime bootstrap from resolved PACKAGE_NAME loader imports', async () => {
     await withTempDir(async (tempDir) => {
       const fixturePackageRoot = await createFixturePackage(

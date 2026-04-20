@@ -1,5 +1,33 @@
 # PRD-1 Progress Log
 
+## 2026-04-20 - Issue #34 partial: lock loader-only Stencil generated surface coverage in core
+
+- Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+- Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/34
+- Task completed:
+  - Added focused `@qwik-custom-elements/core` coverage that exercises the real `@qwik-custom-elements/adapter-stencil` `PACKAGE_NAME` flow when loader resolution succeeds but hydrate resolution fails.
+  - Proved that loader-only generation still emits the stable generated `runtime.ts` barrel plus a slim wrapper surface, while omitting `runtime-ssr.generated.ts` and avoiding the SSR bridge component path.
+  - Re-ran the repository feedback loop after the test addition and confirmed the slice does not require a new system-level decision sync because the non-fatal hydrate-downgrade rule was already captured in `docs/SYSTEM/findings-log.md`.
+- Key decisions made:
+  - The smallest acceptance-gap slice for issue #34 was integration coverage for the loader-only generated surface, not another adapter implementation change.
+  - Loader-only fallback should be asserted at the core orchestration boundary so regressions in runtime barrel exports and wrapper rendering are caught even if the adapter internals are refactored.
+  - No new durable architecture rule emerged beyond the existing finding that unresolved PACKAGE_NAME hydrate imports downgrade SSR availability without aborting client-capable generation.
+- Files changed:
+  - `packages/core/src/__tests__/generator.test.ts`
+  - `.prd/progress/progress-for-prd-1.md`
+- Validation:
+  - `pnpm --filter @qwik-custom-elements/core exec vitest run src/__tests__/generator.test.ts -t "generates a loader-only runtime barrel and slim wrapper when PACKAGE_NAME hydrate resolution fails"`
+  - `pnpm format`
+  - `pnpm typecheck`
+  - `pnpm test`
+  - `pnpm build`
+  - `pnpm lint`
+  - `pnpm e2e`
+- Remaining for issue #34:
+  - Add or update consumer-facing documentation that explains loader-only mode versus full SSR mode.
+  - Add a demo-app path that explicitly proves the loader-only route end to end when hydrate is unavailable.
+  - Extend coverage for structured capability output and deterministic diagnostics at the user-facing/demo boundary if needed.
+
 ## 2026-04-20 - Issue #33 complete: document the generated Stencil wrapper artifact surface
 
 - Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
