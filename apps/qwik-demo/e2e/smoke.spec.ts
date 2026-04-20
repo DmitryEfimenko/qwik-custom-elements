@@ -1,23 +1,10 @@
 import { expect, test } from '@playwright/test';
 
-test('home route renders baseline content', async ({ page }) => {
-  await page.goto('/');
-
-  await expect(
-    page.getByRole('heading', {
-      level: 1,
-      name: 'Qwik Demo',
-    }),
-  ).toBeVisible();
-  await expect(
-    page.getByText('This app is running with a minimal baseline page.'),
-  ).toBeVisible();
-});
-
-test('stencil wrappers interaction contract: toggles handler and increments active counters', async ({
-  page,
-}) => {
-  await page.goto('/stencil/ssr/wrappers');
+async function assertStencilInteractionRoute(
+  page: Parameters<Parameters<typeof test>[1]>[0]['page'],
+  routePath: string,
+) {
+  await page.goto(routePath);
 
   await expect(page.locator('#active-handler')).toContainText(
     'Active handler: alpha',
@@ -54,7 +41,6 @@ test('stencil wrappers interaction contract: toggles handler and increments acti
     await locator.click();
   };
 
-  // Verify a triple-click is required: first two clicks do not fire the custom event.
   await firstButton.click();
   await expect(page.locator('#first-alpha-count')).toContainText(
     'First alpha count: 0',
@@ -97,4 +83,30 @@ test('stencil wrappers interaction contract: toggles handler and increments acti
   await expect(
     page.locator('#second-stencil-wrapper de-button[size="lg"]'),
   ).toBeVisible();
+}
+
+test('home route renders baseline content', async ({ page }) => {
+  await page.goto('/');
+
+  await expect(
+    page.getByRole('heading', {
+      level: 1,
+      name: 'Qwik Demo',
+    }),
+  ).toBeVisible();
+  await expect(
+    page.getByText('This app is running with a minimal baseline page.'),
+  ).toBeVisible();
+});
+
+test('stencil bridge interaction contract: toggles handler and increments active counters', async ({
+  page,
+}) => {
+  await assertStencilInteractionRoute(page, '/stencil/ssr/bridge');
+});
+
+test('stencil wrappers interaction contract: toggles handler and increments active counters', async ({
+  page,
+}) => {
+  await assertStencilInteractionRoute(page, '/stencil/ssr/wrappers');
 });

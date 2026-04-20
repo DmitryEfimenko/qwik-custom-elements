@@ -1,16 +1,10 @@
-import { $, component$, inlinedQrl, useSignal } from '@builder.io/qwik';
+import { $, component$, useSignal } from '@builder.io/qwik';
 import type { DocumentHead } from '@builder.io/qwik-city';
-import { createStencilSSRComponent } from '@qwik-custom-elements/adapter-stencil/ssr';
 
-import { QwikDeAlert, QwikDeButton } from '../../../../generated';
 import {
-  renderToString as generatedStencilRenderToString,
+  GeneratedStencilComponent,
   useGeneratedStencilClientSetup,
 } from '../../../../generated/runtime';
-
-const StencilJsLibSSRComponent = createStencilSSRComponent(
-  inlinedQrl(generatedStencilRenderToString, 'generatedStencilRenderToString'),
-);
 
 export default component$(() => {
   const buttonSize = useSignal<'md' | 'lg'>('md');
@@ -79,34 +73,34 @@ export default component$(() => {
       </button>
 
       <div id="buttons">
-        <StencilJsLibSSRComponent
+        <GeneratedStencilComponent
           id="first-stencil-wrapper"
-          tagName={QwikDeButton}
+          tagName="de-button"
           props={{ size: buttonSize.value }}
           events={firstEvents}
         >
           First SSR Button
-        </StencilJsLibSSRComponent>
+        </GeneratedStencilComponent>
 
-        <StencilJsLibSSRComponent
+        <GeneratedStencilComponent
           id="second-stencil-wrapper"
-          tagName={QwikDeButton}
+          tagName="de-button"
           props={{ size: buttonSize.value }}
           events={{ tripleClick: handleSecond$ }}
         >
           Second SSR Button
-        </StencilJsLibSSRComponent>
+        </GeneratedStencilComponent>
       </div>
 
-      <StencilJsLibSSRComponent
+      <GeneratedStencilComponent
         id="alert-stencil-wrapper"
-        tagName={QwikDeAlert}
+        tagName="de-alert"
         props={{ heading: 'Validation Alert' }}
         slots={['footer']}
       >
         <span>Alert body content</span>
         <span q:slot="footer">Alert footer content</span>
-      </StencilJsLibSSRComponent>
+      </GeneratedStencilComponent>
     </>
   );
 });

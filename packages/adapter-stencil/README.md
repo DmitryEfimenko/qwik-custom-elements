@@ -2,6 +2,20 @@
 
 Qwik runtime helpers for integrating Stencil custom elements.
 
+## Ownership Boundary
+
+`@qwik-custom-elements/adapter-stencil` owns Stencil-specific generation behavior and runtime integration.
+
+That ownership includes:
+
+- Stencil capability metadata
+- Stencil runtime import resolution and validation
+- Stencil SSR probing and SSR bridge behavior
+- adapter-owned generated barrels, runtime helper modules, wrapper modules, and file extensions
+- framework-specific output shape decisions that must not live in core
+
+Core may orchestrate the run and pass typed parsed component metadata into this adapter, but core should not branch on adapter identity to shape Stencil-generated output directly.
+
 ## Current Exports
 
 This package currently exposes two runtime entrypoints:
@@ -246,3 +260,5 @@ That fallback still provides value to consumers because generated Qwik component
 ## Documentation Expectations
 
 Consumer-facing behavior for source types, runtime discovery, SSR fallback, and generated output shape should be documented whenever changes land in this adapter or the core generator.
+
+Architecture ownership changes should also keep this README aligned with the package-level boundary: Stencil-specific generated output belongs here, not in `@qwik-custom-elements/core`.

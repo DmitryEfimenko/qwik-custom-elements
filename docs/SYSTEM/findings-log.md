@@ -2,6 +2,17 @@
 
 # Findings Log
 
+## 2026-04-20 - Adapter-owned generation must include the full generated file set, not only runtime leaves
+
+- Sources:
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+- Finding:
+  - Once adapters are allowed to contribute generated runtime modules, the same ownership boundary should extend to wrapper modules and generated barrels as well; otherwise core still leaks framework-specific output shaping through file extensions, wrapper structure, or export topology.
+- Durable guidance:
+  - Treat adapter generation as a primary adapter contract, not as an "additional" write hook layered on top of core-owned output shaping.
+  - Pass typed parsed component metadata from core into adapter generation hooks so adapters do not need to re-parse CEM files.
+  - Do not let core branch on adapter identity to decide generated filenames, wrapper structure, export topology, or fallback wrapper generation.
+
 ## 2026-04-19 - Generated Stencil wrapper files should consume generated runtime setup and derive prop typing from CEM metadata
 
 - Sources:

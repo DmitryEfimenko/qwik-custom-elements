@@ -1,5 +1,19 @@
 # Decisions
 
+## DEC-2026-04-20-ADAPTER-OWNED-GENERATED-OUTPUT
+- Status: Accepted
+- Sources:
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+- Decision:
+  - Core owns source discovery, CEM parsing, runtime-resolution orchestration, SSR capability probing, and adapter-hook coordination.
+  - Adapters own the full generated file set for their projects, including generated barrels, runtime helper modules, wrapper modules, file extensions, and framework-specific SSR/container integration.
+  - Core exposes typed parsed component metadata to adapters through a primary adapter generation contract instead of shaping framework-specific output itself.
+  - Core must not branch on adapter identity to decide generated file content, filenames, exports, or fallback wrapper generation.
+- Rationale:
+  - Keeps framework-specific code generation inside adapter domains instead of leaking it into core.
+  - Preserves a single authoritative metadata model while still letting adapters control their generated surface.
+  - Gives the architecture an enforceable ownership boundary that can be validated with tests.
+
 ## DEC-2026-04-09-ROOT-E2E-COMMAND-SURFACE
 - Status: Accepted
 - Sources:

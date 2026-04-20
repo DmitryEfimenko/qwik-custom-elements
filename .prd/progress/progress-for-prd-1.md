@@ -2,6 +2,76 @@
 
 # PRD-1 Progress Log
 
+## 2026-04-20 - PRD architecture sync: lock adapter-owned generated output boundary
+
+- Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+- Task completed:
+  - Synced the parent PRD with the architecture decisions that lock generated output ownership to adapters rather than core.
+  - Added a system decision entry and supporting findings-log guidance for the stricter boundary: core orchestrates and passes typed parsed metadata, while adapters own generated barrels, runtime helpers, wrapper modules, and framework-specific output shape.
+  - Reviewed existing PRD-1 child issues and concluded that this ownership refactor does not fit cleanly into the currently open Stencil wrapper slice or the already-closed contract/governance slices.
+- Key decisions made:
+  - The architecture rule is strict: core may read adapter metadata for orchestration, but it must not branch on adapter identity to shape generated output.
+  - Adapter ownership covers the full generated file set, not only runtime leaves.
+  - Migration-specific decisions stay out of the parent PRD sync; only architecture decisions were promoted.
+- Files changed:
+  - `docs/SYSTEM/decisions.md`
+  - `docs/SYSTEM/findings-log.md`
+  - `.prd/progress/progress-for-prd-1.md`
+- Validation:
+  - PRD issue #1 body reviewed before sync
+  - Current PRD-1 child issues reviewed via GitHub CLI
+- Follow-up:
+  - Created new PRD-1 child issue #36 for the cross-adapter ownership refactor rather than folding it into issue #33.
+
+## 2026-04-20 - Planning sync: tighten issue #36 and pause issue #33 behind the ownership refactor
+
+- Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+- Child issues:
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/36
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/33
+- Task completed:
+  - Refined issue #36 acceptance criteria so the slice explicitly enforces the grilled architecture decisions around adapter-owned generated output.
+  - Updated issue #33 so it is blocked by issue #36 before additional Stencil wrapper work resumes.
+  - Synced the new architecture ownership decision into package-level docs for core and both adapters.
+- Key decisions made:
+  - Issue #36 should test the strict boundary itself rather than describing the refactor loosely.
+  - Issue #33 is now intentionally paused behind the cross-adapter ownership work.
+  - Package docs should state the ownership boundary explicitly, not rely only on system-level decision logs.
+- Files changed:
+  - `packages/core/README.md`
+  - `packages/adapter-lit/README.md`
+  - `packages/adapter-stencil/README.md`
+  - `.prd/progress/progress-for-prd-1.md`
+- Validation:
+  - GitHub issue #36 reviewed before and after refinement
+  - GitHub issue #33 reviewed before and after blocker update
+  - Package entrypoints reviewed before package-doc sync
+
+## 2026-04-20 - Issue #33 follow-up: restore bridge demo route and keep separate bridge plus wrappers e2e coverage
+
+- Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+- Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/33
+- Task completed:
+  - Restored the `/stencil/ssr/bridge/` demo route to consume the generated bridge component from generated runtime output instead of constructing a local bridge inline.
+  - Kept the new `/stencil/ssr/wrappers/` route coverage and added separate end-to-end coverage so bridge and wrappers paths are both validated rather than replacing one with the other.
+  - Re-ran the full repository feedback loop on the current working tree and confirmed root-level format, typecheck, test, build, lint, and e2e all pass.
+- Key decisions made:
+  - The bridge route must keep validating the generated bridge surface directly.
+  - Wrapper-route coverage is additive and must not replace bridge-route coverage.
+- Files changed:
+  - `apps/qwik-demo/src/routes/stencil/ssr/bridge/index.tsx`
+  - `apps/qwik-demo/e2e/smoke.spec.ts`
+  - `.prd/progress/progress-for-prd-1.md`
+- Validation:
+  - `pnpm format`
+  - `pnpm typecheck`
+  - `pnpm test`
+  - `pnpm build`
+  - `pnpm lint`
+  - `pnpm e2e`
+- Remaining for issue #33:
+  - Add consumer-facing documentation for generated wrapper artifact shape and usage.
+
 ## 2026-04-20 - Issue #33 partial: wire generated Stencil wrappers into the SSR demo route
 
 - Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
