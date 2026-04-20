@@ -817,12 +817,13 @@ async function createAdapterPlannedWrites(
     adapterModule != null &&
     typeof adapterModule.createGeneratedOutput === 'function'
       ? adapterModule.createGeneratedOutput
-      : typeof adapterModule.createAdditionalPlannedWrites === 'function'
-        ? adapterModule.createAdditionalPlannedWrites
-        : undefined;
+      : undefined;
 
   if (createGeneratedOutput == null) {
-    return [];
+    throw new GenerationError(
+      'QCE_ADAPTER_GENERATION_CONTRACT_REQUIRED',
+      `Project "${project.id}" adapter "${project.adapterPackage}" must export createGeneratedOutput() as its primary generated-output contract.`,
+    );
   }
 
   try {

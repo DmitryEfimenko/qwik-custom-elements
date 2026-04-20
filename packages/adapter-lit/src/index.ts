@@ -21,5 +21,3 @@ export function createGeneratedOutput(input: {
 }> {
   return createLitPlannedWrites(input);
 }
-
-export const createAdditionalPlannedWrites = createGeneratedOutput;

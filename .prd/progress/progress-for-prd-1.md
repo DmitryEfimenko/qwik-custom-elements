@@ -1,5 +1,42 @@
 # PRD-1 Progress Log
 
+## 2026-04-20 - Issue #36 partial: remove the transitional adapter generation alias and enforce the primary contract
+
+- Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+- Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/36
+- Task completed:
+  - Removed the deprecated `createAdditionalPlannedWrites` export from the Stencil and Lit adapter entrypoints so adapter-owned generation now flows only through `createGeneratedOutput`.
+  - Tightened `@qwik-custom-elements/core` to require the primary adapter generation contract and fail deterministically when an adapter-backed project does not expose it.
+  - Added focused core coverage for the deprecated-alias rejection path and updated fixture adapters in generator and CLI tests to export an explicit no-op primary hook where those tests were exercising other behavior.
+- Key decisions made:
+  - The adapter-owned output boundary is only enforceable when core rejects the legacy alias instead of silently accepting it as a fallback.
+  - Adapters that intentionally generate no files for a slice should still export `createGeneratedOutput` and return an empty array rather than omitting the primary contract.
+  - This slice stays at contract enforcement and regression coverage only; issue #36 remains open for any remaining docs cleanup or broader acceptance-criteria closure.
+- Files changed:
+  - `packages/core/src/generator.ts`
+  - `packages/core/src/__tests__/generator.test.ts`
+  - `packages/core/src/__tests__/config.test.ts`
+  - `packages/adapter-stencil/src/index.ts`
+  - `packages/adapter-lit/src/index.ts`
+  - `packages/adapter-lit/src/ssr.ts`
+  - `docs/SYSTEM/findings-log.md`
+  - `.prd/progress/progress-for-prd-1.md`
+- Validation:
+  - `pnpm --filter @qwik-custom-elements/core exec vitest run src/__tests__/generator.test.ts -t "fails when an adapter only exposes the deprecated additional planned writes contract"`
+  - `pnpm --filter @qwik-custom-elements/core exec vitest run src/__tests__/generator.test.ts`
+  - `pnpm --filter @qwik-custom-elements/adapter-stencil exec vitest run src/index.test.ts`
+  - `pnpm --filter @qwik-custom-elements/adapter-lit run test`
+  - `pnpm --filter @qwik-custom-elements/core exec vitest run src/__tests__/config.test.ts -t "emits deterministic warning when adapter SSR falls back to CEM-only"`
+  - `pnpm format`
+  - `pnpm typecheck`
+  - `pnpm test`
+  - `pnpm build`
+  - `pnpm lint`
+  - `pnpm e2e`
+- Remaining for issue #36:
+  - Confirm whether any package-level docs cleanup is still needed now that the compatibility alias has been removed.
+  - Reassess the remaining unchecked acceptance criteria and close the issue only when the documentation and structural-boundary requirements are satisfied together.
+
 ## 2026-04-20 - Issue #36 partial: promote adapter-owned generation to a primary contract
 
 - Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1

@@ -408,6 +408,10 @@ describe('generateFromConfig', () => {
           '  return { available: false };',
           '}',
           '',
+          'export function createGeneratedOutput() {',
+          '  return [];',
+          '}',
+          '',
         ].join('\n'),
         'utf8',
       );
@@ -470,6 +474,47 @@ describe('generateFromConfig', () => {
     });
   });
 
+  it('fails when an adapter only exposes the deprecated additional planned writes contract', async () => {
+    await withTempDir(async (tempDir) => {
+      await writeFile(
+        path.join(tempDir, 'custom-elements.json'),
+        JSON.stringify({
+          modules: [{ declarations: [{ tagName: 'app-root' }] }],
+        }),
+        'utf8',
+      );
+      await writeFile(
+        path.join(tempDir, 'adapter-legacy-generation.mjs'),
+        [
+          'export const metadata = {',
+          "  supportedSourceTypes: ['CEM', 'PACKAGE_NAME'],",
+          '  supportsSsrProbe: false,',
+          '  ssrRuntimeSubpath: null,',
+          '};',
+          '',
+          'export function createAdditionalPlannedWrites({ projectId, componentDefinitions }) {',
+          '  return componentDefinitions.map((componentDefinition) => ({',
+          '    relativePath: `${componentDefinition.tagName}.txt`,',
+          '    content: `legacy:${projectId}:${componentDefinition.tagName}` ,',
+          '  }));',
+          '}',
+          '',
+        ].join('\n'),
+        'utf8',
+      );
+
+      const config = createSingleProjectConfig(tempDir, true);
+      config.projects[0].adapterPackage = './adapter-legacy-generation.mjs';
+
+      await expect(
+        generateFromConfig(config, { cwd: tempDir }),
+      ).rejects.toMatchObject({
+        code: 'QCE_ADAPTER_GENERATION_CONTRACT_REQUIRED',
+        message: expect.stringContaining('createGeneratedOutput'),
+      });
+    });
+  });
+
   it('passes adapter-resolved runtime imports into SSR probing', async () => {
     await withTempDir(async (tempDir) => {
       const fixturePackageRoot = await createFixturePackage(
@@ -501,6 +546,10 @@ describe('generateFromConfig', () => {
           '',
           'export async function probeSSR({ runtimeImports }) {',
           "  return { available: runtimeImports?.loaderImport === '@acme/stencil-lib/loader' && runtimeImports?.hydrateImport === '@acme/stencil-lib/hydrate' };",
+          '}',
+          '',
+          'export function createGeneratedOutput() {',
+          '  return [];',
           '}',
           '',
         ].join('\n'),
@@ -1016,6 +1065,10 @@ describe('generateFromConfig', () => {
           "  supportedSourceTypes: ['PACKAGE_NAME'],",
           '};',
           '',
+          'export function createGeneratedOutput() {',
+          '  return [];',
+          '}',
+          '',
         ].join('\n'),
         'utf8',
       );
@@ -1058,6 +1111,10 @@ describe('generateFromConfig', () => {
           "  id: 'custom-adapter',",
           "  supportedSourceTypes: ['PACKAGE_NAME'],",
           '};',
+          '',
+          'export function createGeneratedOutput() {',
+          '  return [];',
+          '}',
           '',
         ].join('\n'),
         'utf8',

@@ -404,6 +404,10 @@ describe('runCli', () => {
             '  return { available: false };',
             '}',
             '',
+            'export function createGeneratedOutput() {',
+            '  return [];',
+            '}',
+            '',
           ].join('\n'),
           'utf8',
         );

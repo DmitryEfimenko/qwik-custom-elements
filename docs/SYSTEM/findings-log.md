@@ -6,12 +6,14 @@
 
 - Sources:
   - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/36
 - Finding:
-  - Once adapters are allowed to contribute generated runtime modules, the same ownership boundary should extend to wrapper modules and generated barrels as well; otherwise core still leaks framework-specific output shaping through file extensions, wrapper structure, or export topology.
+  - Once adapters are allowed to contribute generated runtime modules, the same ownership boundary should extend to wrapper modules and generated barrels as well; otherwise core still leaks framework-specific output shaping through file extensions, wrapper structure, export topology, or transitional fallback contracts.
 - Durable guidance:
   - Treat adapter generation as a primary adapter contract, not as an "additional" write hook layered on top of core-owned output shaping.
   - Pass typed parsed component metadata from core into adapter generation hooks so adapters do not need to re-parse CEM files.
   - Do not let core branch on adapter identity to decide generated filenames, wrapper structure, export topology, or fallback wrapper generation.
+  - Once every in-repo adapter has migrated, remove compatibility aliases and make core fail deterministically when `createGeneratedOutput` is missing so the ownership boundary stays enforceable.
   - Preserve the current consumer-facing generated surface during the ownership migration by letting adapters claim stable wrapper/barrel paths directly rather than relying on any generic core fallback generation.
   - If an adapter exposes multiple entrypoints that can be used as `adapterPackage` values, each relevant entrypoint must own the same stable generated filenames and exports so core never has to special-case subpaths to preserve compatibility.
 

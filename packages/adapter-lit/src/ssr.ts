@@ -43,5 +43,3 @@ export function createGeneratedOutput(input: {
     renderComponentSsrHtml,
   });
 }
-
-export const createAdditionalPlannedWrites = createGeneratedOutput;
