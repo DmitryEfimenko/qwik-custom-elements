@@ -415,7 +415,7 @@ describe('generateFromConfig', () => {
       config.projects[0].adapterPackage = './adapter-unsupported.mjs';
       const result = await generateFromConfig(config, { cwd: tempDir });
       expect(result.projects[0].status).toBe('success');
-      expect(result.projects[0].plannedWrites).toHaveLength(2);
+      expect(result.projects[0].plannedWrites).toHaveLength(0);
       expect(result.projects[0].ssrCapabilities).toEqual({
         available: false,
         supportsSsrProbe: false,
@@ -945,8 +945,14 @@ describe('generateFromConfig', () => {
         ssrRuntimeSubpath: './ssr',
       });
       expect(result.projects[0].observedErrorCodes).toEqual([]);
+      const indexWrite = result.projects[0].plannedWrites.find((plannedWrite) =>
+        plannedWrite.path.endsWith(path.join('src', 'generated', 'index.ts')),
+      );
       expect(litWrapperWrite?.content).toContain(
         'export const QwikLitButtonSsrHtml = "<lit-button></lit-button>" as const;',
+      );
+      expect(indexWrite?.content).toContain(
+        "export { QwikLitButton } from './lit-button';",
       );
     });
   });

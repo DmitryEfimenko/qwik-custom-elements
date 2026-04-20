@@ -244,8 +244,19 @@ describe('adapter-stencil metadata contract', () => {
       ssrAvailable: false,
     });
 
+    const indexWrite = plannedWrites.find(
+      (plannedWrite) => plannedWrite.relativePath === 'index.ts',
+    );
+
     const wrapperWrite = plannedWrites.find(
       (plannedWrite) => plannedWrite.relativePath === 'de-button.tsx',
+    );
+
+    expect(indexWrite?.content).toContain(
+      'export const generatedComponentTags = ["de-button"] as const;',
+    );
+    expect(indexWrite?.content).toContain(
+      "export { QwikDeButton } from './de-button';",
     );
 
     expect(wrapperWrite?.content).toContain(

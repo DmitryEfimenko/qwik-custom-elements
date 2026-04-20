@@ -1,5 +1,36 @@
 # PRD-1 Progress Log
 
+## 2026-04-20 - Issue #36 partial: move Lit barrel and wrapper ownership into adapter-lit and remove core fallback writes
+
+- Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+- Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/36
+- Task completed:
+  - Added adapter-owned planned writes for `@qwik-custom-elements/adapter-lit` so both the root entrypoint and the `@qwik-custom-elements/adapter-lit/ssr` subpath now generate the stable `index.ts` barrel and per-component `*.ts` wrapper modules directly.
+  - Removed the remaining generic core fallback generation path so `@qwik-custom-elements/core` now returns only adapter-planned writes instead of shaping wrapper filenames, wrapper contents, or barrel exports itself.
+  - Added focused Lit adapter coverage plus updated core generator coverage to prove the stable Lit-generated surface still exists without relying on core-owned fallback writes.
+- Key decisions made:
+  - The ownership boundary is enforceable only when core emits no fallback wrapper or barrel files at all; adapter output must be the sole generated surface for adapter-backed projects.
+  - Lit ownership must cover both the base adapter entrypoint and the SSR subpath so existing adapter package references keep producing the same filenames and exports.
+  - Production builds for `adapter-lit` should exclude test sources while still exposing a deterministic package test command through the monorepo Vitest toolchain.
+- Files changed:
+  - `packages/adapter-lit/package.json`
+  - `packages/adapter-lit/src/generated-output.ts`
+  - `packages/adapter-lit/src/index.test.ts`
+  - `packages/adapter-lit/src/index.ts`
+  - `packages/adapter-lit/src/ssr.ts`
+  - `packages/adapter-lit/tsconfig.json`
+  - `packages/core/src/__tests__/generator.test.ts`
+  - `packages/core/src/generator.ts`
+  - `.prd/progress/progress-for-prd-1.md`
+  - `docs/SYSTEM/findings-log.md`
+- Validation:
+  - `pnpm --filter @qwik-custom-elements/adapter-lit run build`
+  - `pnpm --filter @qwik-custom-elements/adapter-lit run test`
+  - `pnpm --filter @qwik-custom-elements/core exec vitest run src/__tests__/generator.test.ts -t "falls back to CEM-only generation when adapter SSR is unavailable|loads the lit adapter SSR subpath package without fallback warning"`
+- Remaining for issue #36:
+  - Replace the transitional `createAdditionalPlannedWrites` shape with the stricter primary adapter generation contract described in the issue acceptance criteria.
+  - Update package-level docs for the final adapter-owned output contract after the primary contract lands.
+
 ## 2026-04-20 - Issue #36 partial: move Stencil wrapper output ownership into adapter-stencil
 
 - Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1

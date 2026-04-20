@@ -1,3 +1,5 @@
+import { createLitPlannedWrites } from './generated-output.js';
+
 export const metadata = {
   adapterId: 'lit',
   supportedSourceTypes: ['CEM', 'PACKAGE_NAME'],
@@ -26,4 +28,18 @@ export function renderComponentSsrHtml(
   const tagName = options.tagName.trim();
 
   return `<${tagName}></${tagName}>`;
+}
+
+export function createAdditionalPlannedWrites(input: {
+  projectId?: string;
+  componentDefinitions?: Array<{ tagName: string }>;
+  ssrAvailable?: boolean;
+}): Array<{
+  relativePath: string;
+  content: string;
+}> {
+  return createLitPlannedWrites({
+    ...input,
+    renderComponentSsrHtml,
+  });
 }

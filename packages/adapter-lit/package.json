@@ -21,7 +21,7 @@
     "format:check": "prettier --check . --config ../../.prettierrc.json --ignore-path ../../.prettierignore",
     "lint": "eslint \"**/*.{js,mjs,cjs,ts,mts,cts,tsx}\" --no-error-on-unmatched-pattern",
     "e2e": "node -e \"console.log('adapter-lit e2e noop')\"",
-    "test": "node -e \"console.log('adapter-lit test noop')\""
+    "test": "pnpm --filter @qwik-custom-elements/core exec vitest run --root .. adapter-lit/src/index.test.ts"
   },
   "files": [
     "dist"
