@@ -27,6 +27,10 @@
         "approve": true,
         "matchCommandLine": true,
       },
+      "/^node packages/core/dist/cli\\.js --config qwik-custom-elements\\.config\\.json$/": {
+        "approve": true,
+        "matchCommandLine": true,
+      },
     },
   },
 }

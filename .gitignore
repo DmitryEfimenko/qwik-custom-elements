@@ -13,3 +13,6 @@ packages/test-stencil-lib/www/
 
 # Local PRD execution logs
 .prd/progress/
+
+# Generated run summaries
+generated-run-summary.json
