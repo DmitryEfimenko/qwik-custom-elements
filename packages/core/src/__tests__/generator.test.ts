@@ -78,6 +78,12 @@ describe('generateFromConfig', () => {
                         type: { text: '"lg" | "md" | "sm"' },
                       },
                     ],
+                    events: [
+                      {
+                        name: 'tripleClick',
+                        type: { text: 'CustomEvent<MouseEvent>' },
+                      },
+                    ],
                   },
                   { tagName: 'z-card' },
                 ],
@@ -138,6 +144,9 @@ describe('generateFromConfig', () => {
         "import { Slot, component$ } from '@builder.io/qwik';",
       );
       expect(buttonWrite?.content).toContain(
+        "import type { QRL } from '@builder.io/qwik';",
+      );
+      expect(buttonWrite?.content).toContain(
         "import { useGeneratedStencilClientSetup } from './runtime';",
       );
       expect(buttonWrite?.content).toContain(
@@ -145,7 +154,19 @@ describe('generateFromConfig', () => {
       );
       expect(buttonWrite?.content).toContain('  size?: "lg" | "md" | "sm";');
       expect(buttonWrite?.content).toContain(
+        '  onTripleClick$?: QRL<(event: CustomEvent<MouseEvent>) => void>;',
+      );
+      expect(buttonWrite?.content).toContain(
         'export const QwikAButton = component$<QwikAButtonProps>',
+      );
+      expect(buttonWrite?.content).toContain(
+        '  const eventProps: Record<string, unknown> = {};',
+      );
+      expect(buttonWrite?.content).toContain(
+        '    if (isEventBindingKey(key)) {',
+      );
+      expect(buttonWrite?.content).toContain(
+        '  return <a-button {...elementProps} {...eventProps}>',
       );
       expect(cardWrite?.content).toContain('export interface QwikZCardProps {');
       expect(runtimeBarrelWrite?.content).toContain(

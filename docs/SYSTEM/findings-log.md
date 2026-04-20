@@ -13,6 +13,7 @@
   - Keep generated Stencil wrappers on the generated runtime surface instead of reintroducing app-local bridge helpers.
   - Preserve enough CEM component metadata in core generation to drive wrapper contracts, even if later slices add richer event or slot support.
   - Treat prop typing from CEM attributes and members as the baseline wrapper contract; layer event and slot metadata on top in later issue slices instead of blocking wrapper generation on full metadata parity.
+  - When CEM event metadata is available, emit typed `onEvent$` wrapper props from that metadata and keep those Qwik event bindings out of the plain custom-element prop spread.
 
 ## 2026-04-19 - Generated Stencil runtime barrels should be the app-facing integration surface
 

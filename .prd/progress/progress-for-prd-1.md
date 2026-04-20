@@ -2,6 +2,37 @@
 
 # PRD-1 Progress Log
 
+## 2026-04-19 - Issue #33 partial: generate typed Stencil event props from CEM metadata
+
+- Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+- Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/33
+- Task completed:
+  - Extended core CEM parsing to preserve Stencil component event metadata alongside prop metadata during wrapper generation.
+  - Updated generated Stencil `.tsx` wrappers to emit typed `onEvent$` props from CEM events.
+  - Kept generated Qwik event bindings separate from element prop spreading so `onEvent$` handlers continue to flow through Qwik rather than being collapsed into generic custom-element props.
+  - Added focused generator coverage for the emitted `QRL` event prop types and event-prop separation behavior.
+- Key decisions made:
+  - This slice stays at generated wrapper contract level only; it does not widen into named-slot metadata, demo route migration, or consumer docs in the same run.
+  - Event metadata should layer on top of the existing attribute/member-derived prop typing instead of replacing the current wrapper shape.
+  - Generated Stencil wrappers must keep Qwik event bindings out of the plain element prop bag whenever event props are present.
+- Files changed:
+  - `packages/core/src/generator.ts`
+  - `packages/core/src/__tests__/generator.test.ts`
+  - `.prd/progress/progress-for-prd-1.md`
+  - `docs/SYSTEM/findings-log.md`
+- Validation:
+  - `pnpm --filter @qwik-custom-elements/core exec vitest run src/__tests__/generator.test.ts`
+  - `pnpm format`
+  - `pnpm typecheck`
+  - `pnpm test`
+  - `pnpm build`
+  - `pnpm lint`
+  - `pnpm e2e`
+- Remaining for issue #33:
+  - Support named-slot metadata in generated wrappers.
+  - Update the demo route at `/stencil/ssr/wrappers/` to consume generated wrappers end-to-end.
+  - Add consumer-facing documentation for generated wrapper artifact shape and usage.
+
 ## 2026-04-19 - Issue #33 partial: generate typed Stencil wrapper components from CEM metadata
 
 - Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
