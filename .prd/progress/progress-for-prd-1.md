@@ -2,6 +2,39 @@
 
 # PRD-1 Progress Log
 
+## 2026-04-19 - Issue #33 partial: generate typed Stencil wrapper components from CEM metadata
+
+- Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+- Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/33
+- Task completed:
+  - Changed Stencil wrapper generation from tag-name constant files to generated `.tsx` Qwik wrapper components.
+  - Retained per-component CEM metadata during generation so wrapper files can derive prop interfaces from declared attributes and fields.
+  - Wired generated wrappers to the generated Stencil runtime barrel by calling `useGeneratedStencilClientSetup()` instead of assuming app-local bridge files.
+  - Added focused generator coverage for the new wrapper file shape and typed prop output.
+- Key decisions made:
+  - This slice stays client-bootstrap-focused: wrappers consume the generated runtime barrel for custom-element registration, but do not widen into generated SSR bridge composition, event wiring, or named-slot projection in the same run.
+  - Stencil wrapper files should be emitted as `.tsx` so the generated output can expose a real Qwik component surface instead of a string constant contract.
+  - CEM attribute and member metadata are sufficient for a first prop-typing slice; event and slot metadata remain follow-up work for issue #33.
+- Files changed:
+  - `packages/core/src/generator.ts`
+  - `packages/core/src/__tests__/generator.test.ts`
+  - `.prd/progress/progress-for-prd-1.md`
+  - `docs/SYSTEM/findings-log.md`
+- Validation:
+  - `pnpm --filter @qwik-custom-elements/core run check-types`
+  - `pnpm --filter @qwik-custom-elements/core exec vitest run src/__tests__/generator.test.ts`
+  - `pnpm format`
+  - `pnpm typecheck`
+  - `pnpm test`
+  - `pnpm build`
+  - `pnpm lint`
+  - `pnpm e2e`
+- Remaining for issue #33:
+  - Generate event handler wiring from CEM event metadata instead of forwarding only element props and default children.
+  - Support named-slot metadata in generated wrappers.
+  - Update the demo route at `/stencil/ssr/wrappers/` to consume generated wrappers end-to-end.
+  - Add consumer-facing documentation for generated wrapper artifact shape and usage.
+
 ## 2026-04-19 - Issue #32 follow-up: rename generated client runtime leaf to runtime-csr.generated.ts
 
 - Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1

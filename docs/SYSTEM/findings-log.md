@@ -2,6 +2,18 @@
 
 # Findings Log
 
+## 2026-04-19 - Generated Stencil wrapper files should consume generated runtime setup and derive prop typing from CEM metadata
+
+- Sources:
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/33
+- Finding:
+  - Once Stencil runtime setup is generated, per-component wrapper files should be emitted as generated `.tsx` Qwik components that consume `runtime.ts` for client bootstrap and derive their initial prop typing from CEM attribute/member metadata rather than collapsing to tag-name constants.
+- Durable guidance:
+  - Keep generated Stencil wrappers on the generated runtime surface instead of reintroducing app-local bridge helpers.
+  - Preserve enough CEM component metadata in core generation to drive wrapper contracts, even if later slices add richer event or slot support.
+  - Treat prop typing from CEM attributes and members as the baseline wrapper contract; layer event and slot metadata on top in later issue slices instead of blocking wrapper generation on full metadata parity.
+
 ## 2026-04-19 - Generated Stencil runtime barrels should be the app-facing integration surface
 
 - Sources:

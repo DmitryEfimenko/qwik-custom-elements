@@ -30,6 +30,17 @@ const PACKAGE_NAME_CEM_DISCOVERY_CANDIDATES = [
 ];
 const require = createRequire(import.meta.url);
 
+interface CemComponentProp {
+  name: string;
+  type: string;
+  required: boolean;
+}
+
+interface CemComponentDefinition {
+  tagName: string;
+  props: CemComponentProp[];
+}
+
 export async function generateFromConfig(
   config: GeneratorConfig,
   options: GenerateOptions = {},
@@ -168,7 +179,11 @@ async function generateProject(
 
   const sourcePath = resolveProjectSourcePath(project.id, project.source, cwd);
   const outDirPath = path.resolve(cwd, project.outDir);
-  const componentTags = await readComponentTagsFromCem(sourcePath);
+  const componentDefinitions =
+    await readComponentDefinitionsFromCem(sourcePath);
+  const componentTags = componentDefinitions.map(
+    (componentDefinition) => componentDefinition.tagName,
+  );
   const adapterSsrCapabilities = resolveAdapterSsrCapabilities(adapterModule);
   const ssrProbe = await probeProjectSsrAvailability(
     project,
@@ -186,7 +201,7 @@ async function generateProject(
   const plannedWrites = createPlannedWrites(
     project.id,
     outDirPath,
-    componentTags,
+    componentDefinitions,
     adapterModule,
     ssrProbe.available,
     adapterPlannedWrites,
@@ -771,18 +786,30 @@ function validateResolvedOutDirWithinWorkspace(
 function createPlannedWrites(
   projectId: string,
   outDirPath: string,
-  componentTags: string[],
+  componentDefinitions: CemComponentDefinition[],
   adapterModule: Record<string, unknown>,
   ssrAvailable: boolean,
   adapterPlannedWrites: Array<{ path: string; content: string }> = [],
 ): Array<{ path: string; content: string }> {
-  const wrapperWrites = componentTags.map((componentTag) => ({
-    path: path.join(outDirPath, `${componentTag}.ts`),
-    content: renderComponentWrapper(
-      projectId,
-      componentTag,
-      renderAdapterSsrMarkup(adapterModule, componentTag, ssrAvailable),
+  const adapterId = resolveAdapterId(adapterModule);
+  const componentTags = componentDefinitions.map(
+    (componentDefinition) => componentDefinition.tagName,
+  );
+  const wrapperWrites = componentDefinitions.map((componentDefinition) => ({
+    path: path.join(
+      outDirPath,
+      `${componentDefinition.tagName}${adapterId === 'stencil' ? '.tsx' : '.ts'}`,
     ),
+    content: renderComponentWrapper({
+      projectId,
+      componentDefinition,
+      adapterId,
+      ssrMarkup: renderAdapterSsrMarkup(
+        adapterModule,
+        componentDefinition.tagName,
+        ssrAvailable,
+      ),
+    }),
   }));
 
   return [
@@ -856,7 +883,9 @@ async function createAdapterPlannedWrites(
   }
 }
 
-async function readComponentTagsFromCem(sourcePath: string): Promise<string[]> {
+async function readComponentDefinitionsFromCem(
+  sourcePath: string,
+): Promise<CemComponentDefinition[]> {
   let parsed: unknown;
 
   try {
@@ -880,7 +909,7 @@ async function readComponentTagsFromCem(sourcePath: string): Promise<string[]> {
     );
   }
 
-  const tags = new Set<string>();
+  const definitions = new Map<string, CemComponentDefinition>();
 
   for (
     let moduleIndex = 0;
@@ -919,11 +948,135 @@ async function readComponentTagsFromCem(sourcePath: string): Promise<string[]> {
         );
       }
 
-      tags.add(declaration.tagName.trim());
+      const tagName = declaration.tagName.trim();
+      const existingDefinition = definitions.get(tagName);
+      const definition: CemComponentDefinition = existingDefinition ?? {
+        tagName,
+        props: [],
+      };
+      const propsByName = new Map(
+        definition.props.map((prop) => [prop.name, prop] as const),
+      );
+
+      const declarationRecord = declaration as {
+        attributes?: unknown;
+        members?: unknown;
+      };
+
+      for (const prop of readComponentPropsFromAttributes(
+        declarationRecord.attributes,
+      )) {
+        propsByName.set(prop.name, prop);
+      }
+
+      for (const prop of readComponentPropsFromMembers(
+        declarationRecord.members,
+      )) {
+        const existingProp = propsByName.get(prop.name);
+
+        if (
+          existingProp == null ||
+          existingProp.type === 'unknown' ||
+          existingProp.type.trim() === ''
+        ) {
+          propsByName.set(prop.name, prop);
+        }
+      }
+
+      definition.props = Array.from(propsByName.values()).sort((a, b) =>
+        a.name.localeCompare(b.name),
+      );
+      definitions.set(tagName, definition);
     }
   }
 
-  return Array.from(tags).sort((a, b) => a.localeCompare(b));
+  return Array.from(definitions.values()).sort((a, b) =>
+    a.tagName.localeCompare(b.tagName),
+  );
+}
+
+function readComponentPropsFromAttributes(
+  attributes: unknown,
+): CemComponentProp[] {
+  if (!Array.isArray(attributes)) {
+    return [];
+  }
+
+  const props: CemComponentProp[] = [];
+
+  for (const attribute of attributes) {
+    if (typeof attribute !== 'object' || attribute === null) {
+      continue;
+    }
+
+    const attributeRecord = attribute as {
+      name?: unknown;
+      fieldName?: unknown;
+      type?: { text?: unknown };
+    };
+    const rawName =
+      typeof attributeRecord.fieldName === 'string' &&
+      attributeRecord.fieldName.trim() !== ''
+        ? attributeRecord.fieldName
+        : attributeRecord.name;
+
+    if (typeof rawName !== 'string' || rawName.trim() === '') {
+      continue;
+    }
+
+    props.push({
+      name: rawName.trim(),
+      type: normalizeCemTypeText(attributeRecord.type?.text),
+      required: false,
+    });
+  }
+
+  return props;
+}
+
+function readComponentPropsFromMembers(members: unknown): CemComponentProp[] {
+  if (!Array.isArray(members)) {
+    return [];
+  }
+
+  const props: CemComponentProp[] = [];
+
+  for (const member of members) {
+    if (typeof member !== 'object' || member === null) {
+      continue;
+    }
+
+    const memberRecord = member as {
+      kind?: unknown;
+      name?: unknown;
+      type?: { text?: unknown };
+    };
+
+    if (memberRecord.kind !== 'field') {
+      continue;
+    }
+
+    if (
+      typeof memberRecord.name !== 'string' ||
+      memberRecord.name.trim() === ''
+    ) {
+      continue;
+    }
+
+    props.push({
+      name: memberRecord.name.trim(),
+      type: normalizeCemTypeText(memberRecord.type?.text),
+      required: false,
+    });
+  }
+
+  return props;
+}
+
+function normalizeCemTypeText(typeText: unknown): string {
+  return typeof typeText === 'string' && typeText.trim() !== ''
+    ? typeText.trim()
+    : 'unknown';
 }
 
 function renderGeneratedIndex(
@@ -945,12 +1098,20 @@ function renderGeneratedIndex(
   ].join('\n');
 }
 
-function renderComponentWrapper(
-  projectId: string,
-  componentTag: string,
-  ssrMarkup: string | null,
-): string {
+function renderComponentWrapper(input: {
+  projectId: string;
+  componentDefinition: CemComponentDefinition;
+  adapterId: string | null;
+  ssrMarkup: string | null;
+}): string {
+  const { projectId, componentDefinition, adapterId, ssrMarkup } = input;
+  const { tagName: componentTag } = componentDefinition;
   const wrapperName = toWrapperName(componentTag);
+
+  if (adapterId === 'stencil') {
+    return renderStencilComponentWrapper(projectId, componentDefinition);
+  }
+
   const lines = [
     `// Generated by @qwik-custom-elements/core. Project: ${projectId}.`,
     '// Do not edit this file directly. Use a manual extension layer.',
@@ -967,6 +1128,48 @@ function renderComponentWrapper(
   lines.push('');
 
   return lines.join('\n');
+}
+
+function renderStencilComponentWrapper(
+  projectId: string,
+  componentDefinition: CemComponentDefinition,
+): string {
+  const wrapperName = toWrapperName(componentDefinition.tagName);
+  const propsTypeName = `${wrapperName}Props`;
+  const propLines = componentDefinition.props.map((prop) => {
+    const key = isValidIdentifier(prop.name) ? prop.name : `'${prop.name}'`;
+    const optionalToken = prop.required ? '' : '?';
+
+    return `  ${key}${optionalToken}: ${prop.type};`;
+  });
+
+  propLines.push('  [key: string]: unknown;');
+
+  return [
+    `// Generated by @qwik-custom-elements/core. Project: ${projectId}.`,
+    '// Do not edit this file directly. Use a manual extension layer.',
+    '',
+    "import { Slot, component$ } from '@builder.io/qwik';",
+    "import { useGeneratedStencilClientSetup } from './runtime';",
+    '',
+    `export interface ${propsTypeName} {`,
+    ...propLines,
+    '}',
+    '',
+    `export const ${wrapperName} = component$<${propsTypeName}>((props) => {`,
+    '  useGeneratedStencilClientSetup();',
+    '  const elementProps = Object.fromEntries(',
+    '    Object.entries(props as Record<string, unknown>).filter(',
+    "      ([key]) => key !== 'children',",
+    '    ),',
+    '  );',
+    '',
+    `  return <${componentDefinition.tagName} {...elementProps}>`,
+    '    <Slot />',
+    `  </${componentDefinition.tagName}>;`,
+    '});',
+    '',
+  ].join('\n');
 }
 
 function renderAdapterSsrMarkup(
@@ -1002,6 +1205,23 @@ function toWrapperName(componentTag: string): string {
     .join('');
 
   return `Qwik${normalizedName}`;
+}
+
+function isValidIdentifier(name: string): boolean {
+  return /^[A-Za-z_$][A-Za-z0-9_$]*$/.test(name);
+}
+
+function resolveAdapterId(
+  adapterModule: Record<string, unknown>,
+): string | null {
+  const metadata =
+    'metadata' in adapterModule &&
+    typeof adapterModule.metadata === 'object' &&
+    adapterModule.metadata !== null
+      ? (adapterModule.metadata as { adapterId?: unknown })
+      : undefined;
+
+  return typeof metadata?.adapterId === 'string' ? metadata.adapterId : null;
 }
 
 function toErrorMessage(error: unknown): string {
