@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
-  createAdditionalPlannedWrites,
+  createGeneratedOutput,
   metadata,
   probeSSR,
   resolveRuntimeImports,
@@ -212,7 +212,7 @@ describe('adapter-stencil metadata contract', () => {
   });
 
   it('generates Stencil wrapper modules as adapter-owned planned writes', () => {
-    const plannedWrites = createAdditionalPlannedWrites({
+    const plannedWrites = createGeneratedOutput({
       projectId: 'demo',
       source: { type: 'CEM' },
       runtimeImports: {

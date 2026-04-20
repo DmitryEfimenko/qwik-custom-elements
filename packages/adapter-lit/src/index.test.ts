@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
-import { createAdditionalPlannedWrites, metadata, probeSSR } from './index.js';
+import { createGeneratedOutput, metadata, probeSSR } from './index.js';
 import {
-  createAdditionalPlannedWrites as createSsrAdditionalPlannedWrites,
+  createGeneratedOutput as createSsrGeneratedOutput,
   renderComponentSsrHtml,
 } from './ssr.js';
 
@@ -21,7 +21,7 @@ describe('adapter-lit metadata contract', () => {
   });
 
   it('generates the stable Lit barrel and wrapper surface from the root entrypoint', () => {
-    const plannedWrites = createAdditionalPlannedWrites({
+    const plannedWrites = createGeneratedOutput({
       projectId: 'demo',
       componentDefinitions: [{ tagName: 'lit-button' }],
       ssrAvailable: false,
@@ -58,7 +58,7 @@ describe('adapter-lit metadata contract', () => {
       '<lit-button></lit-button>',
     );
 
-    const plannedWrites = createSsrAdditionalPlannedWrites({
+    const plannedWrites = createSsrGeneratedOutput({
       projectId: 'demo',
       componentDefinitions: [{ tagName: 'lit-button' }],
       ssrAvailable: true,

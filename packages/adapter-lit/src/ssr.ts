@@ -30,7 +30,7 @@ export function renderComponentSsrHtml(
   return `<${tagName}></${tagName}>`;
 }
 
-export function createAdditionalPlannedWrites(input: {
+export function createGeneratedOutput(input: {
   projectId?: string;
   componentDefinitions?: Array<{ tagName: string }>;
   ssrAvailable?: boolean;
@@ -43,3 +43,5 @@ export function createAdditionalPlannedWrites(input: {
     renderComponentSsrHtml,
   });
 }
+
+export const createAdditionalPlannedWrites = createGeneratedOutput;

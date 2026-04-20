@@ -2,14 +2,13 @@ interface CemComponentDefinition {
   tagName: string;
 }
 
-interface CreateAdditionalPlannedWritesInput {
+interface CreateGeneratedOutputInput {
   projectId?: string;
   componentDefinitions?: CemComponentDefinition[];
   ssrAvailable?: boolean;
 }
 
-interface CreateLitPlannedWritesOptions
-  extends CreateAdditionalPlannedWritesInput {
+interface CreateLitPlannedWritesOptions extends CreateGeneratedOutputInput {
   renderComponentSsrHtml?: (options?: { tagName?: unknown }) => string | null;
 }
 

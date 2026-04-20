@@ -11,7 +11,7 @@ export async function probeSSR(): Promise<{ available: boolean }> {
   return { available: false };
 }
 
-export function createAdditionalPlannedWrites(input: {
+export function createGeneratedOutput(input: {
   projectId?: string;
   componentDefinitions?: Array<{ tagName: string }>;
   ssrAvailable?: boolean;
@@ -21,3 +21,5 @@ export function createAdditionalPlannedWrites(input: {
 }> {
   return createLitPlannedWrites(input);
 }
+
+export const createAdditionalPlannedWrites = createGeneratedOutput;

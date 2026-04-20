@@ -813,18 +813,20 @@ async function createAdapterPlannedWrites(
   runtimeImports: Record<string, unknown> | undefined,
   ssrAvailable: boolean,
 ): Promise<Array<{ path: string; content: string }>> {
-  const createAdditionalPlannedWrites =
+  const createGeneratedOutput =
     adapterModule != null &&
-    typeof adapterModule.createAdditionalPlannedWrites === 'function'
-      ? adapterModule.createAdditionalPlannedWrites
-      : undefined;
+    typeof adapterModule.createGeneratedOutput === 'function'
+      ? adapterModule.createGeneratedOutput
+      : typeof adapterModule.createAdditionalPlannedWrites === 'function'
+        ? adapterModule.createAdditionalPlannedWrites
+        : undefined;
 
-  if (createAdditionalPlannedWrites == null) {
+  if (createGeneratedOutput == null) {
     return [];
   }
 
   try {
-    const plannedWrites = (await createAdditionalPlannedWrites({
+    const plannedWrites = (await createGeneratedOutput({
       projectId: project.id,
       source: project.source,
       adapterOptions: project.adapterOptions ?? {},

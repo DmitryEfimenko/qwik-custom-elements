@@ -61,7 +61,7 @@ interface ProbeSsrInput {
   };
 }
 
-interface CreateAdditionalPlannedWritesInput {
+interface CreateGeneratedOutputInput {
   projectId?: string;
   source: {
     type: 'CEM' | 'PACKAGE_NAME';
@@ -196,12 +196,12 @@ export async function probeSSR({
   };
 }
 
-export function createAdditionalPlannedWrites({
+export function createGeneratedOutput({
   projectId,
   componentDefinitions,
   runtimeImports,
   ssrAvailable,
-}: CreateAdditionalPlannedWritesInput): Array<{
+}: CreateGeneratedOutputInput): Array<{
   relativePath: string;
   content: string;
 }> {
@@ -259,6 +259,8 @@ export function createAdditionalPlannedWrites({
 
   return plannedWrites;
 }
+
+export const createAdditionalPlannedWrites = createGeneratedOutput;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);

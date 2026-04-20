@@ -427,6 +427,49 @@ describe('generateFromConfig', () => {
     });
   });
 
+  it('uses the primary adapter generation contract when the adapter exposes createGeneratedOutput', async () => {
+    await withTempDir(async (tempDir) => {
+      await writeFile(
+        path.join(tempDir, 'custom-elements.json'),
+        JSON.stringify({
+          modules: [{ declarations: [{ tagName: 'app-root' }] }],
+        }),
+        'utf8',
+      );
+      await writeFile(
+        path.join(tempDir, 'adapter-primary-generation.mjs'),
+        [
+          'export const metadata = {',
+          "  supportedSourceTypes: ['CEM', 'PACKAGE_NAME'],",
+          '  supportsSsrProbe: false,',
+          '  ssrRuntimeSubpath: null,',
+          '};',
+          '',
+          'export function createGeneratedOutput({ projectId, componentDefinitions }) {',
+          '  return componentDefinitions.map((componentDefinition) => ({',
+          '    relativePath: `${componentDefinition.tagName}.txt`,',
+          '    content: `primary:${projectId}:${componentDefinition.tagName}` ,',
+          '  }));',
+          '}',
+          '',
+        ].join('\n'),
+        'utf8',
+      );
+
+      const config = createSingleProjectConfig(tempDir, true);
+      config.projects[0].adapterPackage = './adapter-primary-generation.mjs';
+
+      const result = await generateFromConfig(config, { cwd: tempDir });
+
+      expect(result.projects[0].plannedWrites).toEqual([
+        expect.objectContaining({
+          path: path.join(tempDir, 'src', 'generated', 'app-root.txt'),
+          content: 'primary:demo:app-root',
+        }),
+      ]);
+    });
+  });
+
   it('passes adapter-resolved runtime imports into SSR probing', async () => {
     await withTempDir(async (tempDir) => {
       const fixturePackageRoot = await createFixturePackage(

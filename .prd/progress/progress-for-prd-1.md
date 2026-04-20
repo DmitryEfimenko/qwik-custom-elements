@@ -1,5 +1,35 @@
 # PRD-1 Progress Log
 
+## 2026-04-20 - Issue #36 partial: promote adapter-owned generation to a primary contract
+
+- Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+- Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/36
+- Task completed:
+  - Promoted `createGeneratedOutput` to the primary adapter-owned generation contract in core while keeping `createAdditionalPlannedWrites` as a compatibility alias for the current migration window.
+  - Updated both `@qwik-custom-elements/adapter-stencil` and `@qwik-custom-elements/adapter-lit` entrypoints to export the new primary hook name and kept adapter tests aligned with the new contract.
+  - Added focused core coverage proving that adapters exposing only `createGeneratedOutput` still drive planned writes through the generator.
+- Key decisions made:
+  - The strict ownership boundary should be expressed at the contract name and loader level, not only in adapter implementation details.
+  - Core should prefer the primary adapter generation hook immediately, but preserve a legacy fallback alias until the rest of the ownership migration is complete.
+  - This slice stays at the contract boundary only; package docs and any remaining cleanup of transitional naming stay as follow-up work for issue #36.
+- Files changed:
+  - `packages/core/src/generator.ts`
+  - `packages/core/src/__tests__/generator.test.ts`
+  - `packages/adapter-stencil/src/index.ts`
+  - `packages/adapter-stencil/src/index.test.ts`
+  - `packages/adapter-lit/src/generated-output.ts`
+  - `packages/adapter-lit/src/index.ts`
+  - `packages/adapter-lit/src/index.test.ts`
+  - `packages/adapter-lit/src/ssr.ts`
+  - `.prd/progress/progress-for-prd-1.md`
+- Validation:
+  - `pnpm --filter @qwik-custom-elements/core exec vitest run src/__tests__/generator.test.ts -t "uses the primary adapter generation contract when the adapter exposes createGeneratedOutput"`
+  - `pnpm --filter @qwik-custom-elements/adapter-stencil exec vitest run src/index.test.ts`
+  - `pnpm --filter @qwik-custom-elements/adapter-lit run test`
+- Remaining for issue #36:
+  - Remove the transitional legacy alias after the remaining adapter-owned output migration is complete.
+  - Tighten docs around the primary adapter generation surface once the full ownership refactor is ready to present as the stable public contract.
+
 ## 2026-04-20 - Issue #36 partial: move Lit barrel and wrapper ownership into adapter-lit and remove core fallback writes
 
 - Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
