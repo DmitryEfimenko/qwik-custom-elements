@@ -1,5 +1,35 @@
 # PRD-1 Progress Log
 
+## 2026-04-21 - Issue #34 partial: make loader-only SSR fallback diagnostics explicitly success-oriented
+
+- Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+- Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/34
+- Task completed:
+  - Added focused `@qwik-custom-elements/core` CLI coverage that models loader-only success (`loaderImport` resolved, hydrate unresolved, planned writes present) and asserts explicit success-oriented fallback messaging.
+  - Updated fallback diagnostics in `runCli` so projects that downgrade to loader-only CSR mode report that SSR is unavailable while client-capable wrapper generation still succeeded.
+  - Kept the existing generic SSR fallback warning path for non-loader-only or non-Stencil adapter fallback cases.
+- Key decisions made:
+  - Treat the combined signal `QCE_SSR_UNSUPPORTED_FALLBACK` + `QCE_STENCIL_RUNTIME_HYDRATE_RESOLVE_FAILED` + non-empty planned writes as the deterministic loader-only-success diagnostic contract.
+  - Scope this run to one acceptance slice: deterministic diagnostics should make clear that SSR is unavailable but client-capable generation succeeded.
+  - Leave CSR wrappers-route consumption and broader capability-surface restructuring for follow-up slices.
+- Files changed:
+  - `packages/core/src/cli.ts`
+  - `packages/core/src/__tests__/config.test.ts`
+  - `.prd/progress/progress-for-prd-1.md`
+  - `docs/SYSTEM/findings-log.md`
+- Validation:
+  - `pnpm --filter @qwik-custom-elements/core exec vitest run src/__tests__/config.test.ts -t "loader-only success diagnostics"`
+  - `pnpm format`
+  - `pnpm typecheck`
+  - `pnpm test`
+  - `pnpm build`
+  - `pnpm lint`
+  - `pnpm e2e`
+- Remaining for issue #34:
+  - Move `/stencil/csr/wrappers` from route-local wrappers to generated CSR wrapper exports.
+  - Confirm and/or extend structured capability output coverage tied to CSR versus SSR generated surfaces.
+  - Reassess related unit/demo coverage once CSR wrapper-surface consumption lands.
+
 ## 2026-04-21 - Issue #34 partial: route loader-only generated wrappers through the dedicated CSR factory
 
 - Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1

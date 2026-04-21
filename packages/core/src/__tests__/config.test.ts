@@ -446,6 +446,80 @@ describe('runCli', () => {
       }
     });
   });
+  it('emits deterministic loader-only success diagnostics when hydrate runtime is unavailable', async () => {
+    await withTempDir(async (tempDir) => {
+      const previousCwd = process.cwd();
+      process.chdir(tempDir);
+      try {
+        const configPath = path.join(
+          tempDir,
+          'qwik-custom-elements.config.json',
+        );
+        await writeFile(
+          './custom-elements.json',
+          JSON.stringify({
+            modules: [{ declarations: [{ tagName: 'app-root' }] }],
+          }),
+          'utf8',
+        );
+        await writeFile(
+          './adapter-loader-only.mjs',
+          [
+            'export async function resolveRuntimeImports() {',
+            '  return {',
+            "    runtimeImports: { loaderImport: '@acme/stencil-lib/loader' },",
+            "    observedErrorCodes: ['QCE_STENCIL_RUNTIME_HYDRATE_RESOLVE_FAILED'],",
+            '  };',
+            '}',
+            '',
+            'export async function probeSSR() {',
+            '  return { available: false };',
+            '}',
+            '',
+            'export function createGeneratedOutput() {',
+            '  return [{ relativePath: "runtime-csr.generated.ts", content: "export {};" }];',
+            '}',
+            '',
+          ].join('\n'),
+          'utf8',
+        );
+        await writeFile(
+          configPath,
+          JSON.stringify(
+            {
+              dryRun: true,
+              projects: [
+                {
+                  id: 'loader-only-demo',
+                  adapter: 'stencil',
+                  adapterPackage: './adapter-loader-only.mjs',
+                  source: { type: 'CEM', path: './custom-elements.json' },
+                  outDir: './generated/demo',
+                },
+              ],
+            },
+            null,
+            2,
+          ),
+          'utf8',
+        );
+        vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+        const stderrSpy = vi
+          .spyOn(process.stderr, 'write')
+          .mockImplementation(() => true);
+        const exitCode = await runCli(['--config', configPath]);
+
+        expect(exitCode).toBe(0);
+        expect(stderrSpy).toHaveBeenCalledWith(
+          expect.stringContaining(
+            'SSR is unavailable, but client-capable wrapper generation succeeded',
+          ),
+        );
+      } finally {
+        process.chdir(previousCwd);
+      }
+    });
+  });
   it('prints buffered per-project logs in deterministic id order for parallel runs', async () => {
     await withTempDir(async (tempDir) => {
       const previousCwd = process.cwd();

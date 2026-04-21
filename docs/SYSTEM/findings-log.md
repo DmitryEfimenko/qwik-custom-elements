@@ -14,6 +14,7 @@
   - Keep exact output paths as implementation detail unless the repository explicitly decides to freeze them as public API.
   - Demo routes that claim to validate CSR output must consume the CSR generated surface directly instead of aliasing SSR routes or SSR-generated modules.
   - Preserve interface parity across capability-specific surfaces for typed props, typed event bindings, slot projection, and client bootstrap.
+  - When hydrate resolution fails but loader-based generation still succeeds, emit deterministic diagnostics that explicitly state SSR is unavailable while client-capable wrapper generation succeeded via the loader-only CSR surface.
 
 ## 2026-04-20 - Adapter-owned generation must include the full generated file set, not only runtime leaves
 
