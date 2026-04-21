@@ -455,6 +455,7 @@ describe('runCli', () => {
           tempDir,
           'qwik-custom-elements.config.json',
         );
+        const summaryPath = path.join(tempDir, 'generated-run-summary.json');
         await writeFile(
           './custom-elements.json',
           JSON.stringify({
@@ -508,6 +509,16 @@ describe('runCli', () => {
           .spyOn(process.stderr, 'write')
           .mockImplementation(() => true);
         const exitCode = await runCli(['--config', configPath]);
+        const summary = JSON.parse(await readFile(summaryPath, 'utf8')) as {
+          projects: Array<{
+            ssrCapabilities: {
+              available: boolean;
+              supportsSsrProbe: boolean;
+              ssrRuntimeSubpath: string | null;
+              loaderOnlyMode?: boolean;
+            };
+          }>;
+        };
 
         expect(exitCode).toBe(0);
         expect(stderrSpy).toHaveBeenCalledWith(
@@ -515,6 +526,12 @@ describe('runCli', () => {
             'SSR is unavailable, but client-capable wrapper generation succeeded',
           ),
         );
+        expect(summary.projects[0].ssrCapabilities).toEqual({
+          available: false,
+          supportsSsrProbe: false,
+          ssrRuntimeSubpath: null,
+          loaderOnlyMode: true,
+        });
       } finally {
         process.chdir(previousCwd);
       }

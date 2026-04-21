@@ -57,6 +57,7 @@ export interface ProjectSsrCapabilities {
   available: boolean;
   supportsSsrProbe: boolean;
   ssrRuntimeSubpath: string | null;
+  loaderOnlyMode?: boolean;
 }
 
 export interface GenerationProjectResult {

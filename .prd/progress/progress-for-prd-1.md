@@ -1,5 +1,39 @@
 # PRD-1 Progress Log
 
+## 2026-04-21 - Issue #34 partial: emit explicit loader-only capability signal in structured SSR output
+
+- Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+- Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/34
+- Task completed:
+  - Added explicit structured capability output for loader-only fallback runs by emitting `ssrCapabilities.loaderOnlyMode: true` when SSR is unavailable but loader-backed generation succeeds.
+  - Kept existing deterministic fallback diagnostics unchanged while making the selected generated surface mode machine-readable in summary output.
+  - Added focused core coverage at generator and CLI summary boundaries to lock the loader-only structured capability contract.
+- Key decisions made:
+  - Keep the new signal additive and backward-compatible by adding an optional capability field instead of changing existing `ssrCapabilities` fields.
+  - Compute `loaderOnlyMode` from existing deterministic signals (hydrate resolution failure + SSR unavailable + planned writes present) to avoid introducing adapter-specific branching in summary consumers.
+  - Scope this run to one acceptance slice only: structured output must distinguish loader-only generation from SSR-capable generation.
+- Files changed:
+  - `packages/core/src/types.ts`
+  - `packages/core/src/generator.ts`
+  - `packages/core/src/__tests__/generator.test.ts`
+  - `packages/core/src/__tests__/config.test.ts`
+  - `.prd/progress/progress-for-prd-1.md`
+- Validation:
+  - `pnpm --filter @qwik-custom-elements/core run lint`
+  - `pnpm --filter @qwik-custom-elements/core exec vitest run src/__tests__/generator.test.ts -t "records a hydrate runtime diagnostic and falls back when a PACKAGE_NAME stencil hydrate import cannot be resolved"`
+  - `pnpm --filter @qwik-custom-elements/core exec vitest run src/__tests__/config.test.ts -t "emits deterministic loader-only success diagnostics when hydrate runtime is unavailable"`
+  - `pnpm format`
+  - `pnpm typecheck`
+  - `pnpm test`
+  - `pnpm build`
+  - `pnpm lint` (first run failed on an introduced unused test variable; fixed and re-ran core lint)
+  - `pnpm e2e`
+- Durable sync:
+  - Promoted one durable finding to `docs/SYSTEM/findings-log.md` for the structured loader-only capability signal contract.
+- Remaining for issue #34:
+  - Confirm and complete remaining unchecked acceptance criteria around CSR surface split contract wording and consumer-facing documentation.
+  - Complete remaining acceptance coverage for loader-only CSR factory behavior and related unit/demo assertions where still unchecked.
+
 ## 2026-04-21 - Issue #34 partial: migrate CSR wrappers demo route from hand-written wrappers to generated wrappers
 
 - Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1

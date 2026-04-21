@@ -24,6 +24,8 @@ export class GenerationError extends Error {
 }
 
 const SSR_UNSUPPORTED_FALLBACK_CODE = 'QCE_SSR_UNSUPPORTED_FALLBACK';
+const STENCIL_HYDRATE_RESOLVE_FAILED_CODE =
+  'QCE_STENCIL_RUNTIME_HYDRATE_RESOLVE_FAILED';
 const PACKAGE_NAME_CEM_DISCOVERY_CANDIDATES = [
   'custom-elements.json',
   path.join('dist', 'custom-elements.json'),
@@ -232,6 +234,11 @@ async function generateProject(
     }
   }
 
+  const hasLoaderOnlySuccessSignal =
+    !ssrProbe.available &&
+    observedErrorCodes.includes(STENCIL_HYDRATE_RESOLVE_FAILED_CODE) &&
+    plannedWrites.length > 0;
+
   const generatedIndexPath = path.join(outDirPath, 'index.ts');
   const durationMs = Date.now() - startedAtMs;
 
@@ -250,6 +257,7 @@ async function generateProject(
       available: ssrProbe.available,
       supportsSsrProbe: adapterSsrCapabilities.supportsSsrProbe,
       ssrRuntimeSubpath: adapterSsrCapabilities.ssrRuntimeSubpath,
+      ...(hasLoaderOnlySuccessSignal ? { loaderOnlyMode: true } : {}),
     },
     observedErrorCodes,
   };

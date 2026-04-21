@@ -2,6 +2,18 @@
 
 # Findings Log
 
+## 2026-04-21 - Structured SSR capability output should explicitly mark loader-only generation mode
+
+- Sources:
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/34
+- Finding:
+  - Deterministic fallback diagnostics are useful for humans, but automation also needs a structured signal that distinguishes loader-only CSR generation from SSR-capable generation.
+- Durable guidance:
+  - Emit a structured loader-only mode flag on project SSR capability output when SSR is unavailable and loader-backed generation still succeeds.
+  - Keep existing SSR capability fields (`available`, `supportsSsrProbe`, `ssrRuntimeSubpath`) stable and additive for compatibility; prefer adding an explicit mode signal rather than overloading existing booleans.
+  - Derive the loader-only mode signal from existing deterministic planning/generation outcomes so summary consumers do not need to parse warning text.
+
 ## 2026-04-21 - Capability-specific generated surfaces should be documented when loader-only and SSR-capable Stencil outputs diverge
 
 - Sources:
