@@ -186,10 +186,17 @@ When editing issue bodies/checklists via `--body-file` in PowerShell, always wri
 
 - Do not use `Set-Content` without an explicit encoding when writing Markdown body files for `gh issue edit`.
 - Safe pattern:
-  - Build body text as lines and join with `` `n ``.
+  - Prefer `gh api repos/<owner>/<repo>/issues/<num> --jq '.body'` for body reads used in edit flows.
+  - Do not use lossy one-line body round-trips as edit input.
+  - Materialize content as an explicit line array, then join with `` `n ``.
   - Write with `[System.IO.File]::WriteAllText(<path>, <content>, [System.Text.UTF8Encoding]::new($false))`.
   - Then run `gh issue edit <num> --body-file <path>`.
-- After edit, verify formatting by re-reading body and confirming headings/lists render on separate lines.
+- Checklist update safety:
+  - Replace only full checklist lines in the line-array form (for example exact `- [ ] ...` to `- [x] ...`).
+  - Do not rewrite issue bodies from a flattened single-line string.
+- After edit, verify formatting by re-reading body and asserting:
+  - headings exist on separate lines (for example lines starting with `## `), and
+  - checklist lines exist on separate lines (lines starting with `- [`).
 
 # FINAL RULES
 
