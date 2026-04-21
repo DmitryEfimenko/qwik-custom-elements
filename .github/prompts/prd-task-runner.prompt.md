@@ -167,15 +167,20 @@ Use the format: `feat(<domain>): PRD-<parent-issue-number> #<child-issue-number>
 
 # THE ISSUE
 
-If the selected task completes the child issue's acceptance criteria, close the original GitHub issue after syncing and committing.
+Only update the GitHub child issue after the task is complete, the progress file is updated, durable sync is done, and the commit is created.
+
+Use this order:
+
+1. Review the child issue body `## Acceptance criteria` section.
+2. If the work completed in this run fully satisfies any unchecked acceptance-criteria item, edit the issue body and check those items. Do not check partial progress.
+3. Post a comment with what was done, what remains, and any new blockers. Always post this comment, whether or not the issue will be closed.
+4. If all acceptance criteria are now checked, close the original GitHub issue after posting the comment. Otherwise, leave it open.
 
 Reference for GitHub CLI usage and PowerShell multiline comment safety:
 
 - `../skills/gh-cli/SKILL.md`
 
 When adding multiline close/comment text in PowerShell, use a here-string or `--body-file` approach. Do not rely on escaped newline sequences inside a single quoted command argument.
-
-If the selected task does not complete the child issue, leave the issue open and comment with what was done, what remains, and any new blockers.
 
 # FINAL RULES
 
