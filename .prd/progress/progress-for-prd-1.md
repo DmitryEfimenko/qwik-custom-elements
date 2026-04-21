@@ -1,5 +1,34 @@
 # PRD-1 Progress Log
 
+## 2026-04-21 - Issue #34 partial: add explicit demo routes and smoke coverage for the loader-only Stencil path
+
+- Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+- Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/34
+- Task completed:
+  - Added explicit demo-app routes at `/stencil/csr/bridge` and `/stencil/csr/wrappers` so the Stencil loader-only/client-capable path is addressable separately from the full-SSR demo routes.
+  - Extended the Qwik demo Playwright smoke suite to cover both new CSR routes using the existing Stencil interaction contract assertions.
+  - Re-ran the repository feedback loop and confirmed the new route aliases and E2E coverage do not require a `docs/SYSTEM/*` sync because they exercise an already-documented loader-only fallback contract rather than introducing a new durable architecture rule.
+- Key decisions made:
+  - The smallest remaining honest slice for issue #34 was the demo boundary itself: add explicit CSR routes and prove they satisfy the same client-side interaction contract as the existing Stencil pages.
+  - Re-exporting the existing validated route implementations is sufficient for this slice because the acceptance gap was missing route/addressability and smoke coverage, not a different UI contract.
+  - No new durable API or architecture decision emerged from this run; existing findings about hydrate downgrade and adapter-owned runtime surfaces already cover the behavior.
+- Files changed:
+  - `apps/qwik-demo/e2e/smoke.spec.ts`
+  - `apps/qwik-demo/src/routes/stencil/csr/bridge/index.tsx`
+  - `apps/qwik-demo/src/routes/stencil/csr/wrappers/index.tsx`
+  - `.prd/progress/progress-for-prd-1.md`
+- Validation:
+  - `pnpm --filter qwik-demo exec playwright test e2e/smoke.spec.ts --grep "stencil csr"`
+  - `pnpm format`
+  - `pnpm typecheck`
+  - `pnpm test`
+  - `pnpm build`
+  - `pnpm lint`
+  - `pnpm e2e`
+- Remaining for issue #34:
+  - Reassess whether the remaining structured capability output and deterministic diagnostics acceptance points need additional demo-app or user-facing coverage beyond the existing docs and core tests.
+  - Close the issue only after the remaining acceptance criteria are explicitly checked against the current implementation surface.
+
 ## 2026-04-20 - Issue #34 partial: clarify consumer-facing loader-only versus full SSR behavior
 
 - Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1

@@ -110,3 +110,15 @@ test('stencil wrappers interaction contract: toggles handler and increments acti
 }) => {
   await assertStencilInteractionRoute(page, '/stencil/ssr/wrappers');
 });
+
+test('stencil csr bridge interaction contract: toggles handler and increments active counters', async ({
+  page,
+}) => {
+  await assertStencilInteractionRoute(page, '/stencil/csr/bridge');
+});
+
+test('stencil csr wrappers interaction contract: toggles handler and increments active counters', async ({
+  page,
+}) => {
+  await assertStencilInteractionRoute(page, '/stencil/csr/wrappers');
+});
