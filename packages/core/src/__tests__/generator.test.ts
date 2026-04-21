@@ -781,6 +781,12 @@ describe('generateFromConfig', () => {
             path.join('src', 'generated', 'runtime.ts'),
           ),
       );
+      const runtimeCsrWrite = result.projects[0].plannedWrites.find(
+        (plannedWrite) =>
+          plannedWrite.path.endsWith(
+            path.join('src', 'generated', 'runtime-csr.generated.ts'),
+          ),
+      );
       const wrapperWrite = result.projects[0].plannedWrites.find(
         (plannedWrite) =>
           plannedWrite.path.endsWith(
@@ -805,6 +811,15 @@ describe('generateFromConfig', () => {
       );
       expect(runtimeBarrelWrite?.content).not.toContain(
         "export * from './runtime-ssr.generated';",
+      );
+      expect(runtimeCsrWrite?.content).toContain(
+        "import { createStencilCSRComponent, createStencilClientSetup } from '@qwik-custom-elements/adapter-stencil/client';",
+      );
+      expect(runtimeCsrWrite?.content).toContain(
+        'export const GeneratedStencilCSRComponent = createStencilCSRComponent();',
+      );
+      expect(runtimeCsrWrite?.content).not.toContain(
+        'createStencilSSRComponent',
       );
       expect(wrapperWrite?.content).toContain(
         "import { GeneratedStencilCSRComponent, useGeneratedStencilClientSetup } from './runtime';",

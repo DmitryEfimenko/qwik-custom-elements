@@ -1,5 +1,32 @@
 # PRD-1 Progress Log
 
+## 2026-04-21 - Issue #34 partial: tighten loader-only CSR runtime contract coverage in generator tests
+
+- Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+- Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/34
+- Task completed:
+  - Strengthened the existing loader-only fallback test in core generator coverage to assert runtime-csr output explicitly imports and uses `createStencilCSRComponent`.
+  - Added a guard assertion that loader-only generated CSR runtime output does not reference `createStencilSSRComponent`.
+  - Kept scope to one acceptance-aligned testing slice without changing generation behavior.
+- Key decisions made:
+  - Treat this run as a tests-only tracer bullet for the loader-only contract, not a behavior-change run.
+  - Keep adapter-owned CSR/SSR output-selection boundaries unchanged while tightening observable contract assertions.
+- Files changed:
+  - `packages/core/src/__tests__/generator.test.ts`
+  - `.prd/progress/progress-for-prd-1.md`
+- Validation:
+  - `pnpm --filter @qwik-custom-elements/core test -- src/__tests__/generator.test.ts -t "loader-only runtime barrel and CSR wrapper"`
+  - `pnpm typecheck`
+  - `pnpm test`
+  - `pnpm build`
+  - `pnpm lint`
+  - `pnpm e2e`
+  - `pnpm format`
+- Durable sync:
+  - Reviewed `docs/SYSTEM/*` for sync; no new durable API, architecture, or cross-feature finding was introduced by this tests-only slice.
+- Remaining for issue #34:
+  - Complete unchecked acceptance criteria around explicit CSR-vs-SSR generated surface split and related coverage.
+
 ## 2026-04-21 - Issue #34 partial: remove stale forward-looking language from adapter-stencil README
 
 - Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
