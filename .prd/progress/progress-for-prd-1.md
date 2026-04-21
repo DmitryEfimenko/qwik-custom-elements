@@ -1,5 +1,30 @@
 # PRD-1 Progress Log
 
+## 2026-04-21 - Issue #34 partial: remove stale forward-looking language from adapter-stencil README
+
+- Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+- Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/34
+- Task completed:
+  - Removed stale "Issue #34 is correcting the planned loader-only contract... Until that work lands, do not treat createStencilCSRComponent as already-implemented" warning from the README.
+  - Added `createStencilCSRComponent()` to the Current Exports section of the README to reflect its actual availability.
+  - Updated "Generated Runtime Modules" section to remove "target direction" and "Issue #34 is narrowing the output contract" framing; replaced with present-tense description of current behavior.
+  - Updated "Generated Wrapper Artifacts" section to remove "Issue #34 is correcting the planned topology" and "target direction for Issue #34" language; replaced with current behavior description.
+  - Renamed "Planned SSR Fallback Behavior" section to "SSR Fallback Behavior" since the behavior is now implemented.
+  - Removed the nested `csr/ssr` subdirectory example (which was never implemented) and replaced with a note about the flat structure and how it differs between CSR and SSR modes.
+- Key decisions made:
+  - Keep the README fully accurate for consumers; the flat `src/generated/` layout is the implemented behavior, not nested csr/ssr subdirectories.
+  - No behavior changes in this run, documentation-only update.
+- Files changed:
+  - `packages/adapter-stencil/README.md`
+  - `.prd/progress/progress-for-prd-1.md`
+- Validation:
+  - `pnpm typecheck`
+  - `pnpm test`
+  - `pnpm lint`
+- Remaining for issue #34:
+  - Add a CSR-specific generated surface to the demo app so the `/stencil/csr/wrappers` route can consume genuine CSR-generated wrappers (criterion: CSR wrappers route consumes generated CSR Qwik wrapper components exported from the CSR surface).
+  - Verify and check remaining acceptance criteria that are implemented but not checked in the issue.
+
 ## 2026-04-21 - Issue #34 partial: replace framework-coupled loader-only capability naming with client-only contract
 
 - Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
