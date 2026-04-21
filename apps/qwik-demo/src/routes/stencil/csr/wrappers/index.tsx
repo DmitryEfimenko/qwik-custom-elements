@@ -1,67 +1,7 @@
-import {
-  $,
-  Slot,
-  component$,
-  useSignal,
-  useVisibleTask$,
-  type QRL,
-} from '@builder.io/qwik';
+import { $, component$, useSignal } from '@builder.io/qwik';
 import type { DocumentHead } from '@builder.io/qwik-city';
 
-import { useGeneratedStencilClientSetup } from '../../../../generated/runtime-csr.generated';
-
-interface CsrDeButtonProps {
-  size?: 'sm' | 'md' | 'lg';
-  onTripleClick$?: QRL<(event: CustomEvent<MouseEvent>) => void>;
-}
-
-const CsrDeButton = component$<CsrDeButtonProps>((props) => {
-  const hostRef = useSignal<HTMLDeButtonElement>();
-
-  useGeneratedStencilClientSetup();
-
-  useVisibleTask$(({ track, cleanup }) => {
-    track(() => hostRef.value);
-    track(() => props.onTripleClick$);
-
-    const host = hostRef.value;
-    const handlerQrl = props.onTripleClick$;
-    if (!host || !handlerQrl) {
-      return;
-    }
-
-    const handleTripleClick = (event: Event) => {
-      void handlerQrl
-        .resolve()
-        .then((handler) => handler(event as CustomEvent<MouseEvent>));
-    };
-
-    host.addEventListener('tripleClick', handleTripleClick);
-    cleanup(() => {
-      host.removeEventListener('tripleClick', handleTripleClick);
-    });
-  });
-
-  return (
-    <de-button ref={hostRef} size={props.size}>
-      <Slot />
-    </de-button>
-  );
-});
-
-interface CsrDeAlertProps {
-  heading?: string;
-}
-
-const CsrDeAlert = component$<CsrDeAlertProps>((props) => {
-  useGeneratedStencilClientSetup();
-
-  return (
-    <de-alert heading={props.heading}>
-      <Slot />
-    </de-alert>
-  );
-});
+import { QwikDeAlert, QwikDeButton } from '../../../../generated';
 
 export default component$(() => {
   const buttonSize = useSignal<'md' | 'lg'>('md');
@@ -127,26 +67,26 @@ export default component$(() => {
 
       <div id="buttons">
         <div id="first-stencil-wrapper">
-          <CsrDeButton
+          <QwikDeButton
             size={buttonSize.value}
             onTripleClick$={firstTripleClickHandler$}
           >
             First CSR Button
-          </CsrDeButton>
+          </QwikDeButton>
         </div>
 
         <div id="second-stencil-wrapper">
-          <CsrDeButton size={buttonSize.value} onTripleClick$={handleSecond$}>
+          <QwikDeButton size={buttonSize.value} onTripleClick$={handleSecond$}>
             Second CSR Button
-          </CsrDeButton>
+          </QwikDeButton>
         </div>
       </div>
 
       <div id="alert-stencil-wrapper">
-        <CsrDeAlert heading="Validation Alert">
+        <QwikDeAlert heading="Validation Alert">
           <span>Alert body content</span>
           <span q:slot="footer">Alert footer content</span>
-        </CsrDeAlert>
+        </QwikDeAlert>
       </div>
     </>
   );

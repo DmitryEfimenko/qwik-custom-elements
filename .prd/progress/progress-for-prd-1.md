@@ -1,5 +1,34 @@
 # PRD-1 Progress Log
 
+## 2026-04-21 - Issue #34 partial: migrate CSR wrappers demo route from hand-written wrappers to generated wrappers
+
+- Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+- Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/34
+- Task completed:
+  - Replaced route-local `CsrDeButton` and `CsrDeAlert` wrapper components on `/stencil/csr/wrappers` with generated wrappers imported from the generated surface (`QwikDeButton`, `QwikDeAlert`).
+  - Removed route-local custom-element event wiring and slot-wrapper duplication in favor of adapter-generated wrapper behavior.
+  - Kept the route interaction contract and existing smoke coverage intact while moving ownership to generated wrappers.
+- Key decisions made:
+  - Keep this run to one smallest acceptance slice: stop using hand-written route-local wrappers on the CSR wrappers route.
+  - Reuse the existing generated wrapper barrel for the demo route so behavior stays aligned with current generated artifacts.
+  - No new durable system-level decision was introduced; this run applies the existing issue #34 direction around generated-wrapper consumption.
+- Files changed:
+  - `apps/qwik-demo/src/routes/stencil/csr/wrappers/index.tsx`
+  - `.prd/progress/progress-for-prd-1.md`
+- Validation:
+  - `pnpm --filter qwik-demo exec playwright test e2e/smoke.spec.ts --grep "stencil csr wrappers"`
+  - `pnpm format`
+  - `pnpm typecheck`
+  - `pnpm test`
+  - `pnpm build`
+  - `pnpm lint`
+  - `pnpm e2e`
+- Durable sync:
+  - Reviewed `docs/SYSTEM/*` sync needs for this slice; no additional durable architecture/API finding changes to promote.
+- Remaining for issue #34:
+  - Confirm and/or implement explicit CSR-vs-SSR generated surface split contracts where acceptance criteria require a dedicated CSR surface.
+  - Finish the remaining unchecked acceptance criteria around loader-only rendering contract details, structured capability output, and consumer-facing documentation alignment.
+
 ## 2026-04-21 - Issue #34 partial: make loader-only SSR fallback diagnostics explicitly success-oriented
 
 - Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
