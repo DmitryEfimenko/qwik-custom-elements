@@ -1,5 +1,30 @@
 # PRD-1 Progress Log
 
+## 2026-04-21 - Issue #34 complete: reconcile acceptance checklist with implemented loader-only CSR/SSR split
+
+- Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+- Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/34
+- Task completed:
+  - Re-validated issue #34 acceptance criteria against current implementation and test coverage.
+  - Confirmed the remaining unchecked checklist items were already implemented across core, adapter-stencil, and demo/e2e coverage.
+  - Completed the single-task execution slice as issue-state synchronization: check implemented acceptance items, post closure summary, and close the issue.
+- Key decisions made:
+  - Treat this run as a PRD execution-state sync slice (no product-behavior change) after a full root validation loop.
+  - Keep durable system docs unchanged because no new cross-feature API/architecture decision was introduced.
+- Files changed:
+  - `.prd/progress/progress-for-prd-1.md`
+- Validation:
+  - `pnpm typecheck`
+  - `pnpm test`
+  - `pnpm build`
+  - `pnpm lint`
+  - `pnpm e2e`
+  - `pnpm format`
+- Durable sync:
+  - Reviewed `docs/SYSTEM/*` for sync; no new durable decisions/findings to promote from this issue-state reconciliation slice.
+- Remaining for issue #34:
+  - None. Acceptance criteria verified and issue can be closed after checklist/body sync and final status comment.
+
 ## 2026-04-21 - Issue #34 partial: tighten loader-only CSR runtime contract coverage in generator tests
 
 - Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
