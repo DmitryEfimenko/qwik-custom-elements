@@ -13,18 +13,23 @@ Comprehensive reference for GitHub CLI (gh) - work seamlessly with GitHub from t
 
 When editing GitHub issue bodies in PowerShell, avoid lossy round-trips that can collapse Markdown into one line.
 
-### Reliable rules
+Use one repository-standard workflow:
 
-- Prefer reading body text with `gh api repos/<owner>/<repo>/issues/<num> --jq '.body'`.
-- Build edited content from a line array and join with `` `n ``.
-- Write body files with explicit UTF-8 no BOM:
-  - `[System.IO.File]::WriteAllText($tmp, $content, [System.Text.UTF8Encoding]::new($false))`
-- Edit via `gh issue edit <num> --repo <owner>/<repo> --body-file $tmp`.
-- Verify post-edit body structure from a fresh read:
-  - headings on separate lines (`^## `)
-  - checklist lines on separate lines (`^- \[ \]|^- \[x\]`)
+- Use the helper script located next to this skill: `safe-issue-body-update.ps1`
+- Script path: `.github/skills/gh-cli/safe-issue-body-update.ps1`
+- The script normalizes line endings, writes UTF-8 no BOM, performs `gh issue edit --body-file`, and verifies heading/checklist structure after update.
 
-### Safe checklist-update template
+Minimal usage:
+
+```powershell
+Set-Location <repo-root>
+pwsh ./.github/skills/gh-cli/safe-issue-body-update.ps1 `
+  -Repo 'DmitryEfimenko/qwik-custom-elements' `
+  -Issue 35 `
+  -SourceBodyFile ./.tmp-issue-35-body.md
+```
+
+Checklist toggle pattern (prepare body file, then apply via script):
 
 ```powershell
 Set-Location <repo-root>
@@ -51,16 +56,10 @@ if (-not $found) { throw 'Expected checklist line was not found.' }
 
 $content = [string]::Join("`n", $updatedLines)
 [System.IO.File]::WriteAllText($tmp, $content, [System.Text.UTF8Encoding]::new($false))
-gh issue edit $issue --repo $repo --body-file $tmp
-
-$verify = gh api "repos/$repo/issues/$issue" --jq '.body'
-$verifyLines = $verify -split "`r?`n"
-if (($verifyLines | Where-Object { $_ -match '^## ' }).Count -lt 2) {
-  throw 'Heading structure verification failed.'
-}
-if (($verifyLines | Where-Object { $_ -match '^- \[( |x)\] ' }).Count -lt 1) {
-  throw 'Checklist structure verification failed.'
-}
+pwsh ./.github/skills/gh-cli/safe-issue-body-update.ps1 `
+  -Repo $repo `
+  -Issue $issue `
+  -SourceBodyFile $tmp
 
 Remove-Item $tmp -Force
 ```
