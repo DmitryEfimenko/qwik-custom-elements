@@ -311,4 +311,66 @@ describe('adapter-stencil metadata contract', () => {
     );
     expect(wrapperWrite?.content).toContain('    <Slot name="icon" />');
   });
+
+  it('generates SSR Stencil wrapper modules when ssrAvailable is true', () => {
+    const plannedWrites = createGeneratedOutput({
+      projectId: 'demo',
+      source: { type: 'CEM' },
+      runtimeImports: {
+        loaderImport: '@acme/stencil-lib/loader',
+        hydrateImport: '@acme/stencil-lib/hydrate',
+      },
+      componentDefinitions: [
+        {
+          tagName: 'de-button',
+          props: [
+            {
+              name: 'label',
+              type: 'string',
+              required: false,
+            },
+          ],
+          events: [
+            {
+              name: 'ready',
+              type: 'CustomEvent<void>',
+            },
+          ],
+          slots: [
+            {
+              name: 'icon',
+            },
+          ],
+        },
+      ],
+      ssrAvailable: true,
+    });
+
+    const wrapperWrite = plannedWrites.find(
+      (plannedWrite) => plannedWrite.relativePath === 'de-button.tsx',
+    );
+
+    const runtimeWrite = plannedWrites.find(
+      (plannedWrite) => plannedWrite.relativePath === 'runtime.ts',
+    );
+
+    const ssrRuntimeWrite = plannedWrites.find(
+      (plannedWrite) =>
+        plannedWrite.relativePath === 'runtime-ssr.generated.ts',
+    );
+
+    expect(wrapperWrite?.content).toContain(
+      "import { GeneratedStencilComponent, useGeneratedStencilClientSetup } from './runtime';",
+    );
+    expect(wrapperWrite?.content).toContain('    <GeneratedStencilComponent');
+    expect(wrapperWrite?.content).toContain('    </GeneratedStencilComponent>');
+
+    expect(runtimeWrite?.content).toContain(
+      "export * from './runtime-ssr.generated';",
+    );
+
+    expect(ssrRuntimeWrite).toBeDefined();
+    expect(ssrRuntimeWrite?.content).toContain('@acme/stencil-lib/hydrate');
+    expect(ssrRuntimeWrite?.content).toContain('GeneratedStencilComponent');
+  });
 });

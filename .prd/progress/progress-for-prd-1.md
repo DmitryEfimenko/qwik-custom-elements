@@ -1,5 +1,33 @@
 # PRD-1 Progress Log
 
+## 2026-04-21 - Issue #35 partial: add SSR-mode probe-to-generation alignment unit test
+
+- Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+- Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/35
+- Task completed:
+  - Added unit test `generates SSR Stencil wrapper modules when ssrAvailable is true` to `packages/adapter-stencil/src/index.test.ts`.
+  - Test verifies that `createGeneratedOutput` with `ssrAvailable: true` produces wrappers importing `GeneratedStencilComponent` (SSR variant), a runtime barrel that includes SSR runtime exports, and a `runtime-ssr.generated.ts` file containing the hydrate import.
+  - This explicitly validates probe-to-generation alignment for the SSR success path (criteria 1 and 4 for issue #35).
+- Key decisions made:
+  - Keep test scope strictly on the adapter public API (`createGeneratedOutput`) to match existing test style.
+  - No new implementation needed; the adapter behavior was already correct. The test documents and regression-protects the alignment.
+- Files changed:
+  - `packages/adapter-stencil/src/index.test.ts`
+  - `.prd/progress/progress-for-prd-1.md`
+- Validation:
+  - `pnpm typecheck`
+  - `pnpm test`
+  - `pnpm build`
+  - `pnpm lint`
+  - `pnpm e2e`
+  - `pnpm format`
+- Durable sync:
+  - No new durable architecture or API decisions. Existing PRD decisions cover the probe-to-generation alignment contract.
+- Remaining for issue #35:
+  - Structured project capability output assertions may benefit from an explicit integration test showing probe result → `ssrCapabilities.available` field alignment.
+  - Demo app verification coverage for probe-driven mode differences.
+  - Reassess remaining acceptance criteria after further slices.
+
 ## 2026-04-21 - Issue #35 partial: define Stencil "SSR available" semantics in consumer docs
 
 - Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
