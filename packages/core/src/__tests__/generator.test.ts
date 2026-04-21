@@ -155,7 +155,7 @@ describe('generateFromConfig', () => {
         "import type { QRL } from '@builder.io/qwik';",
       );
       expect(buttonWrite?.content).toContain(
-        "import { useGeneratedStencilClientSetup } from './runtime';",
+        "import { GeneratedStencilCSRComponent, useGeneratedStencilClientSetup } from './runtime';",
       );
       expect(buttonWrite?.content).toContain(
         'export interface QwikAButtonProps {',
@@ -174,8 +174,14 @@ describe('generateFromConfig', () => {
         '    if (isEventBindingKey(key)) {',
       );
       expect(buttonWrite?.content).toContain(
-        '  return <a-button {...elementProps} {...eventProps}>',
+        '    <GeneratedStencilCSRComponent',
       );
+      expect(buttonWrite?.content).toContain('      tagName="a-button"');
+      expect(buttonWrite?.content).toContain('      props={elementProps}');
+      expect(buttonWrite?.content).toContain('      events={mappedEvents}');
+      expect(buttonWrite?.content).toContain('      slots={["footer"]}');
+      expect(buttonWrite?.content).toContain('      {...passthroughEventProps}');
+      expect(buttonWrite?.content).toContain('    </GeneratedStencilCSRComponent>');
       expect(buttonWrite?.content).toContain('    <Slot />');
       expect(buttonWrite?.content).toContain('    <Slot name="footer" />');
       expect(cardWrite?.content).toContain('export interface QwikZCardProps {');
@@ -727,7 +733,7 @@ describe('generateFromConfig', () => {
     });
   });
 
-  it('generates a loader-only runtime barrel and slim wrapper when PACKAGE_NAME hydrate resolution fails', async () => {
+  it('generates a loader-only runtime barrel and CSR wrapper when PACKAGE_NAME hydrate resolution fails', async () => {
     await withTempDir(async (tempDir) => {
       const fixturePackageRoot = await createFixturePackage(
         tempDir,
@@ -796,14 +802,21 @@ describe('generateFromConfig', () => {
         "export * from './runtime-ssr.generated';",
       );
       expect(wrapperWrite?.content).toContain(
-        "import { useGeneratedStencilClientSetup } from './runtime';",
+        "import { GeneratedStencilCSRComponent, useGeneratedStencilClientSetup } from './runtime';",
       );
-      expect(wrapperWrite?.content).not.toContain('GeneratedStencilComponent');
       expect(wrapperWrite?.content).toContain(
-        '  return <app-root {...elementProps}>',
+        '    <GeneratedStencilCSRComponent',
       );
-      expect(wrapperWrite?.content).toContain('    <Slot />');
-      expect(wrapperWrite?.content).toContain('  </app-root>;');
+      expect(wrapperWrite?.content).toContain('      tagName="app-root"');
+      expect(wrapperWrite?.content).toContain('      props={elementProps}');
+      expect(wrapperWrite?.content).toContain('      events={mappedEvents}');
+      expect(wrapperWrite?.content).toContain('      slots={undefined}');
+      expect(wrapperWrite?.content).toContain(
+        '      {...passthroughEventProps}',
+      );
+      expect(wrapperWrite?.content).toContain(
+        '    </GeneratedStencilCSRComponent>',
+      );
     });
   });
 

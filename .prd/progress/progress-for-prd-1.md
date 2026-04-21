@@ -1,5 +1,35 @@
 # PRD-1 Progress Log
 
+## 2026-04-21 - Issue #34 partial: route loader-only generated wrappers through the dedicated CSR factory
+
+- Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+- Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/34
+- Task completed:
+  - Updated adapter-stencil wrapper generation so loader-only mode now renders generated wrappers through `GeneratedStencilCSRComponent` instead of rendering raw custom element tags directly.
+  - Preserved SSR-capable wrapper behavior by continuing to render through `GeneratedStencilComponent` when hydrate-backed SSR is available.
+  - Added and updated test coverage in core and adapter-stencil to lock the loader-only CSR wrapper factory contract in place.
+- Key decisions made:
+  - Keep one wrapper-generation code path for both runtime modes and switch only the generated bridge component symbol (`GeneratedStencilCSRComponent` versus `GeneratedStencilComponent`) from SSR capability.
+  - Keep wrapper-facing contract parity (`tagName`, `props`, `events`, `slots`) across loader-only and SSR-capable surfaces by routing both through generated bridge components.
+  - Keep this run scoped to one acceptance slice: generated loader-only wrappers must target the CSR surface directly.
+- Files changed:
+  - `packages/adapter-stencil/src/index.ts`
+  - `packages/adapter-stencil/src/index.test.ts`
+  - `packages/core/src/__tests__/generator.test.ts`
+  - `.prd/progress/progress-for-prd-1.md`
+- Validation:
+  - `pnpm --filter @qwik-custom-elements/core exec vitest run src/__tests__/generator.test.ts -t "generates a loader-only runtime barrel and CSR wrapper when PACKAGE_NAME hydrate resolution fails"`
+  - `pnpm --filter @qwik-custom-elements/adapter-stencil run test`
+  - `pnpm format`
+  - `pnpm typecheck`
+  - `pnpm test`
+  - `pnpm build`
+  - `pnpm lint`
+  - `pnpm e2e`
+- Remaining for issue #34:
+  - Update the demo wrappers route to consume generated CSR wrapper exports from the CSR generated surface rather than route-local wrappers.
+  - Reassess remaining acceptance criteria around structured capability output and diagnostics messaging to determine if additional user-facing coverage is required.
+
 ## 2026-04-21 - Issue #34 partial: add generated CSR bridge component factory and consume it in the CSR bridge demo route
 
 - Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1

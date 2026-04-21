@@ -260,7 +260,7 @@ describe('adapter-stencil metadata contract', () => {
     );
 
     expect(wrapperWrite?.content).toContain(
-      "import { useGeneratedStencilClientSetup } from './runtime';",
+      "import { GeneratedStencilCSRComponent, useGeneratedStencilClientSetup } from './runtime';",
     );
     expect(wrapperWrite?.content).toContain(
       'export interface QwikDeButtonProps {',
@@ -270,8 +270,14 @@ describe('adapter-stencil metadata contract', () => {
       '  onReady$?: QRL<(event: CustomEvent<void>) => void>;',
     );
     expect(wrapperWrite?.content).toContain(
-      '  return <de-button {...elementProps} {...eventProps}>',
+      '    <GeneratedStencilCSRComponent',
     );
+    expect(wrapperWrite?.content).toContain('      tagName="de-button"');
+    expect(wrapperWrite?.content).toContain('      props={elementProps}');
+    expect(wrapperWrite?.content).toContain('      events={mappedEvents}');
+    expect(wrapperWrite?.content).toContain('      slots={["icon"]}');
+    expect(wrapperWrite?.content).toContain('      {...passthroughEventProps}');
+    expect(wrapperWrite?.content).toContain('    </GeneratedStencilCSRComponent>');
     expect(wrapperWrite?.content).toContain('    <Slot name="icon" />');
   });
 });
