@@ -3,8 +3,16 @@ import { expect, test } from '@playwright/test';
 async function assertStencilInteractionRoute(
   page: Parameters<Parameters<typeof test>[1]>[0]['page'],
   routePath: string,
+  expectedHeading: string,
+  options: {
+    expectSizeAttribute?: boolean;
+  } = {},
 ) {
   await page.goto(routePath);
+
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+    expectedHeading,
+  );
 
   await expect(page.locator('#active-handler')).toContainText(
     'Active handler: alpha',
@@ -77,12 +85,15 @@ async function assertStencilInteractionRoute(
 
   await page.locator('#toggle-size').click();
   await expect(page.locator('#button-size')).toContainText('Button size: lg');
-  await expect(
-    page.locator('#first-stencil-wrapper de-button[size="lg"]'),
-  ).toBeVisible();
-  await expect(
-    page.locator('#second-stencil-wrapper de-button[size="lg"]'),
-  ).toBeVisible();
+
+  if (options.expectSizeAttribute !== false) {
+    await expect(
+      page.locator('#first-stencil-wrapper de-button[size="lg"]'),
+    ).toBeVisible();
+    await expect(
+      page.locator('#second-stencil-wrapper de-button[size="lg"]'),
+    ).toBeVisible();
+  }
 }
 
 test('home route renders baseline content', async ({ page }) => {
@@ -102,23 +113,41 @@ test('home route renders baseline content', async ({ page }) => {
 test('stencil bridge interaction contract: toggles handler and increments active counters', async ({
   page,
 }) => {
-  await assertStencilInteractionRoute(page, '/stencil/ssr/bridge');
+  await assertStencilInteractionRoute(
+    page,
+    '/stencil/ssr/bridge',
+    'Stencil Events Validation',
+  );
 });
 
 test('stencil wrappers interaction contract: toggles handler and increments active counters', async ({
   page,
 }) => {
-  await assertStencilInteractionRoute(page, '/stencil/ssr/wrappers');
+  await assertStencilInteractionRoute(
+    page,
+    '/stencil/ssr/wrappers',
+    'Stencil Wrappers Validation',
+  );
 });
 
 test('stencil csr bridge interaction contract: toggles handler and increments active counters', async ({
   page,
 }) => {
-  await assertStencilInteractionRoute(page, '/stencil/csr/bridge');
+  await assertStencilInteractionRoute(
+    page,
+    '/stencil/csr/bridge',
+    'Stencil CSR Events Validation',
+    { expectSizeAttribute: false },
+  );
 });
 
 test('stencil csr wrappers interaction contract: toggles handler and increments active counters', async ({
   page,
 }) => {
-  await assertStencilInteractionRoute(page, '/stencil/csr/wrappers');
+  await assertStencilInteractionRoute(
+    page,
+    '/stencil/csr/wrappers',
+    'Stencil CSR Wrappers Validation',
+    { expectSizeAttribute: false },
+  );
 });

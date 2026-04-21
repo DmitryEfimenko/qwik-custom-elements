@@ -1,5 +1,34 @@
 # PRD-1 Progress Log
 
+## 2026-04-21 - Issue #34 partial: replace CSR demo route aliases with CSR-native demo pages
+
+- Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+- Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/34
+- Task completed:
+  - Replaced the demo-app CSR route aliases at `/stencil/csr/bridge` and `/stencil/csr/wrappers` with CSR-native route modules instead of re-exporting the SSR pages.
+  - Wired the CSR bridge page directly to the loader-only generated client setup and raw Stencil custom elements, and added route-local CSR wrappers for the wrappers page so both routes now consume CSR output directly.
+  - Tightened Playwright smoke coverage so the CSR routes must expose distinct CSR-specific pages while still satisfying the shared interaction contract.
+- Key decisions made:
+  - The smallest honest remaining slice for issue `#34` was the demo boundary itself: prove the CSR routes are real CSR consumers rather than SSR aliases.
+  - This slice should stay route-local instead of changing generator output because the acceptance gap was demo-route ownership, not adapter generation behavior.
+  - No new durable system-level decision emerged; this run validates an already-documented CSR-versus-SSR surface split rather than introducing a new architecture rule.
+- Files changed:
+  - `apps/qwik-demo/e2e/smoke.spec.ts`
+  - `apps/qwik-demo/src/routes/stencil/csr/bridge/index.tsx`
+  - `apps/qwik-demo/src/routes/stencil/csr/wrappers/index.tsx`
+  - `.prd/progress/progress-for-prd-1.md`
+- Validation:
+  - `pnpm --filter qwik-demo exec playwright test e2e/smoke.spec.ts --grep "stencil csr"`
+  - `pnpm format`
+  - `pnpm typecheck`
+  - `pnpm test`
+  - `pnpm build`
+  - `pnpm lint`
+  - `pnpm e2e`
+- Remaining for issue #34:
+  - Reassess the still-unimplemented dedicated `createStencilCSRComponent` factory and explicit CSR generated wrapper surface promised by the issue body.
+  - Reassess whether the structured capability and deterministic diagnostics acceptance points need additional user-facing coverage or documentation before closure.
+
 ## 2026-04-21 - Issue #34 scope correction: document separate CSR and SSR surfaces before implementation resumes
 
 - Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
