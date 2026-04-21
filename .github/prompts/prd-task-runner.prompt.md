@@ -182,6 +182,15 @@ Reference for GitHub CLI usage and PowerShell multiline comment safety:
 
 When adding multiline close/comment text in PowerShell, use a here-string or `--body-file` approach. Do not rely on escaped newline sequences inside a single quoted command argument.
 
+When editing issue bodies/checklists via `--body-file` in PowerShell, always write the file as UTF-8 (prefer `utf8NoBOM`) and preserve line breaks explicitly.
+
+- Do not use `Set-Content` without an explicit encoding when writing Markdown body files for `gh issue edit`.
+- Safe pattern:
+  - Build body text as lines and join with `` `n ``.
+  - Write with `[System.IO.File]::WriteAllText(<path>, <content>, [System.Text.UTF8Encoding]::new($false))`.
+  - Then run `gh issue edit <num> --body-file <path>`.
+- After edit, verify formatting by re-reading body and confirming headings/lists render on separate lines.
+
 # FINAL RULES
 
 ONLY WORK ON A SINGLE TASK.

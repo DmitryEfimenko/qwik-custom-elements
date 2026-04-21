@@ -676,6 +676,36 @@ gh repo license mit --fullname "John Doe"
 
 ## Issues (gh issue)
 
+### PowerShell Markdown Safety (`--body-file`)
+
+When using `gh issue edit --body-file` or `gh issue comment --body-file` from Windows PowerShell, make encoding and line breaks explicit.
+
+- Root cause to avoid: `Set-Content` default encoding in Windows PowerShell can produce UTF-16 content, which can corrupt Markdown formatting in GitHub issue bodies.
+- Always write body files as UTF-8 without BOM.
+- Preserve line breaks explicitly; avoid string rewrites that collapse the body into one line.
+
+Safe pattern:
+
+```powershell
+$path = 'tmp\issue-body.md'
+$lines = @(
+  '## Section',
+  '',
+  '- [x] Checklist item',
+  '- [ ] Another item'
+)
+$content = $lines -join "`n"
+[System.IO.File]::WriteAllText($path, $content, [System.Text.UTF8Encoding]::new($false))
+gh issue edit 123 --repo owner/repo --body-file $path
+```
+
+Checklist toggle workflow (recommended):
+
+- Read current body (`gh issue view <n> --json body --jq .body`).
+- Modify only the targeted checklist line.
+- Write with explicit UTF-8 no BOM.
+- Re-read and validate that headings/lists still appear on separate lines.
+
 ### Create Issue
 
 ```bash
