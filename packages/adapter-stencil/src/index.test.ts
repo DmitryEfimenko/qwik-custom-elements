@@ -178,6 +178,7 @@ describe('adapter-stencil metadata contract', () => {
         loaderImport: '@acme/stencil-lib/loader',
       },
       observedErrorCodes: ['QCE_STENCIL_RUNTIME_HYDRATE_RESOLVE_FAILED'],
+      clientOnlyMode: true,
     });
   });
 

@@ -1,5 +1,36 @@
 # PRD-1 Progress Log
 
+## 2026-04-21 - Issue #34 partial: replace framework-coupled loader-only capability naming with client-only contract
+
+- Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+- Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/34
+- Task completed:
+  - Renamed structured SSR capability output from `ssrCapabilities.loaderOnlyMode` to framework-agnostic `ssrCapabilities.clientOnlyMode`.
+  - Removed Stencil-specific fallback detection from core (`generator.ts`, `cli.ts`) and switched core to consume an explicit adapter-provided `clientOnlyMode` signal.
+  - Updated adapter-stencil runtime import resolution to emit `clientOnlyMode: true` when hydrate runtime is unavailable but client-capable generation can proceed.
+  - Updated focused core and adapter tests to validate the new client-only signal contract.
+- Key decisions made:
+  - Keep framework-specific detection logic out of core and preserve ownership boundaries by treating capability-mode signaling as adapter-owned.
+  - Keep deterministic fallback diagnostics while using `clientOnlyMode` as the machine-readable contract for automation.
+  - Apply a one-step rename with no dual-field compatibility period.
+- Files changed:
+  - `packages/core/src/types.ts`
+  - `packages/core/src/generator.ts`
+  - `packages/core/src/cli.ts`
+  - `packages/core/src/__tests__/generator.test.ts`
+  - `packages/core/src/__tests__/config.test.ts`
+  - `packages/adapter-stencil/src/index.ts`
+  - `packages/adapter-stencil/src/index.test.ts`
+  - `docs/SYSTEM/findings-log.md`
+  - `.prd/progress/progress-for-prd-1.md`
+- Validation:
+  - `pnpm --filter @qwik-custom-elements/core run lint`
+  - `pnpm --filter @qwik-custom-elements/core exec vitest run src/__tests__/generator.test.ts -t "records a hydrate runtime diagnostic and falls back when a PACKAGE_NAME stencil hydrate import cannot be resolved"`
+  - `pnpm --filter @qwik-custom-elements/core exec vitest run src/__tests__/config.test.ts -t "emits deterministic loader-only success diagnostics when hydrate runtime is unavailable"`
+  - `pnpm --filter @qwik-custom-elements/adapter-stencil run test`
+- Remaining for issue #34:
+  - Confirm and complete remaining unchecked acceptance criteria around CSR/SSR surface split contract wording and consumer-facing documentation.
+
 ## 2026-04-21 - Issue #34 partial: emit explicit loader-only capability signal in structured SSR output
 
 - Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1

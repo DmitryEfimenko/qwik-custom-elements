@@ -470,6 +470,7 @@ describe('runCli', () => {
             '  return {',
             "    runtimeImports: { loaderImport: '@acme/stencil-lib/loader' },",
             "    observedErrorCodes: ['QCE_STENCIL_RUNTIME_HYDRATE_RESOLVE_FAILED'],",
+            '    clientOnlyMode: true,',
             '  };',
             '}',
             '',
@@ -515,7 +516,7 @@ describe('runCli', () => {
               available: boolean;
               supportsSsrProbe: boolean;
               ssrRuntimeSubpath: string | null;
-              loaderOnlyMode?: boolean;
+              clientOnlyMode?: boolean;
             };
           }>;
         };
@@ -530,7 +531,7 @@ describe('runCli', () => {
           available: false,
           supportsSsrProbe: false,
           ssrRuntimeSubpath: null,
-          loaderOnlyMode: true,
+          clientOnlyMode: true,
         });
       } finally {
         process.chdir(previousCwd);

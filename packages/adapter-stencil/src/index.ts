@@ -30,6 +30,7 @@ interface ResolveRuntimeImportsResult {
 interface ResolveRuntimeImportsOutcome {
   runtimeImports: ResolveRuntimeImportsResult;
   observedErrorCodes?: string[];
+  clientOnlyMode?: boolean;
 }
 
 interface CemComponentProp {
@@ -183,6 +184,7 @@ export function resolveRuntimeImports({
   return {
     runtimeImports,
     observedErrorCodes,
+    clientOnlyMode: true,
   };
 }
 

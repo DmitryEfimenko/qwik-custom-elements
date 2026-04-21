@@ -24,8 +24,6 @@ export class GenerationError extends Error {
 }
 
 const SSR_UNSUPPORTED_FALLBACK_CODE = 'QCE_SSR_UNSUPPORTED_FALLBACK';
-const STENCIL_HYDRATE_RESOLVE_FAILED_CODE =
-  'QCE_STENCIL_RUNTIME_HYDRATE_RESOLVE_FAILED';
 const PACKAGE_NAME_CEM_DISCOVERY_CANDIDATES = [
   'custom-elements.json',
   path.join('dist', 'custom-elements.json'),
@@ -234,9 +232,9 @@ async function generateProject(
     }
   }
 
-  const hasLoaderOnlySuccessSignal =
+  const hasClientOnlySuccessSignal =
+    runtimeImportResult.clientOnlyMode === true &&
     !ssrProbe.available &&
-    observedErrorCodes.includes(STENCIL_HYDRATE_RESOLVE_FAILED_CODE) &&
     plannedWrites.length > 0;
 
   const generatedIndexPath = path.join(outDirPath, 'index.ts');
@@ -257,7 +255,7 @@ async function generateProject(
       available: ssrProbe.available,
       supportsSsrProbe: adapterSsrCapabilities.supportsSsrProbe,
       ssrRuntimeSubpath: adapterSsrCapabilities.ssrRuntimeSubpath,
-      ...(hasLoaderOnlySuccessSignal ? { loaderOnlyMode: true } : {}),
+      ...(hasClientOnlySuccessSignal ? { clientOnlyMode: true } : {}),
     },
     observedErrorCodes,
   };
@@ -321,6 +319,7 @@ async function resolveAdapterRuntimeImports(
 ): Promise<{
   runtimeImports: Record<string, unknown> | undefined;
   observedErrorCodes: string[];
+  clientOnlyMode: boolean;
 }> {
   const resolveRuntimeImports =
     adapterModule != null &&
@@ -332,6 +331,7 @@ async function resolveAdapterRuntimeImports(
     return {
       runtimeImports: undefined,
       observedErrorCodes: [],
+      clientOnlyMode: false,
     };
   }
 
@@ -359,10 +359,12 @@ async function resolveAdapterRuntimeImports(
     const runtimeImports = extractResolvedRuntimeImports(
       resolvedRuntimeImports,
     );
+    const clientOnlyMode = extractClientOnlyModeSignal(resolvedRuntimeImports);
 
     return {
       runtimeImports,
       observedErrorCodes,
+      clientOnlyMode,
     };
   } catch (error) {
     if (error instanceof GenerationError) {
@@ -417,6 +419,18 @@ function extractResolvedRuntimeImports(
   }
 
   return resolvedRuntimeImports as Record<string, unknown>;
+}
+
+function extractClientOnlyModeSignal(resolvedRuntimeImports: unknown): boolean {
+  if (
+    resolvedRuntimeImports == null ||
+    typeof resolvedRuntimeImports !== 'object' ||
+    !('clientOnlyMode' in resolvedRuntimeImports)
+  ) {
+    return false;
+  }
+
+  return resolvedRuntimeImports.clientOnlyMode === true;
 }
 
 function validateAdapterSourceCompatibility(

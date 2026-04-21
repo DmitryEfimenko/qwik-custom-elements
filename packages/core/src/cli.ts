@@ -14,8 +14,6 @@ import type {
 const RUN_SUMMARY_SCHEMA_VERSION = '1.0.0';
 const DEFAULT_RUN_SUMMARY_PATH = './generated-run-summary.json';
 const SSR_UNSUPPORTED_FALLBACK_CODE = 'QCE_SSR_UNSUPPORTED_FALLBACK';
-const STENCIL_HYDRATE_RESOLVE_FAILED_CODE =
-  'QCE_STENCIL_RUNTIME_HYDRATE_RESOLVE_FAILED';
 const CORE_PACKAGE_JSON_PATH = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   '..',
@@ -174,14 +172,14 @@ export async function runCli(argv: string[]): Promise<number> {
 
     for (const project of generationResult.projects) {
       const observedCodeSet = new Set(project.observedErrorCodes);
-      const hasLoaderOnlySuccessSignal =
+      const hasClientOnlySuccessSignal =
+        project.ssrCapabilities.clientOnlyMode === true &&
         observedCodeSet.has(SSR_UNSUPPORTED_FALLBACK_CODE) &&
-        observedCodeSet.has(STENCIL_HYDRATE_RESOLVE_FAILED_CODE) &&
         project.plannedWrites.length > 0;
 
-      if (hasLoaderOnlySuccessSignal) {
+      if (hasClientOnlySuccessSignal) {
         process.stderr.write(
-          `${SSR_UNSUPPORTED_FALLBACK_CODE}: Project "${project.projectId}" SSR is unavailable, but client-capable wrapper generation succeeded via the loader-only CSR surface.
+          `${SSR_UNSUPPORTED_FALLBACK_CODE}: Project "${project.projectId}" SSR is unavailable, but client-capable wrapper generation succeeded via the client-only CSR surface.
 `,
         );
         continue;

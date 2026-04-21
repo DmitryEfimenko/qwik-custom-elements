@@ -729,7 +729,7 @@ describe('generateFromConfig', () => {
         available: false,
         supportsSsrProbe: true,
         ssrRuntimeSubpath: './ssr',
-        loaderOnlyMode: true,
+        clientOnlyMode: true,
       });
       expect(result.projects[0].observedErrorCodes).toEqual([
         'QCE_SSR_UNSUPPORTED_FALLBACK',
