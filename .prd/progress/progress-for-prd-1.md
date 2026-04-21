@@ -1,5 +1,27 @@
 # PRD-1 Progress Log
 
+## 2026-04-21 - Issue #34 scope correction: document separate CSR and SSR surfaces before implementation resumes
+
+- Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+- Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/34
+- Task completed:
+  - Corrected the local documentation trail for issue `#34` so loader-only Stencil generation is no longer described as a degraded reuse of the shared SSR bridge.
+  - Scoped the intended loader-only direction around a dedicated `createStencilCSRComponent`, distinct CSR versus SSR generated surfaces, and CSR demo routes that must consume CSR output directly rather than aliasing SSR routes.
+  - Narrowed the expected system-doc sync for this correction to `docs/SYSTEM/findings-log.md`, leaving `docs/SYSTEM/decisions.md` unchanged because the adapter-owned generation boundary was already captured there.
+- Key decisions made:
+  - Separate CSR and SSR generated surfaces are part of the intended issue `#34` contract, but exact output directory names stay implementation detail for now.
+  - The public CSR factory name should be `createStencilCSRComponent` so the loader-only contract is explicit and symmetric with `createStencilSSRComponent`.
+  - Earlier issue `#34` notes that treated `/stencil/csr/*` as acceptable aliases of the SSR routes were incorrect and should be treated as superseded planning, not as the target implementation direction.
+- Files changed:
+  - `packages/adapter-stencil/README.md`
+  - `docs/SYSTEM/findings-log.md`
+  - `.prd/progress/progress-for-prd-1.md`
+- Validation:
+  - Documentation-only scope correction; no implementation, generation, or test changes were started in this run.
+- Remaining for issue #34:
+  - Update the GitHub issue body and parent PRD issue text so the remote source of truth matches the corrected local documentation direction.
+  - Implement the corrected loader-only architecture only after the issue and documentation scope are aligned.
+
 ## 2026-04-21 - Issue #34 partial: add explicit demo routes and smoke coverage for the loader-only Stencil path
 
 - Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1

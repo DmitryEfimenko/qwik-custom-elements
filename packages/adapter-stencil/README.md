@@ -18,7 +18,7 @@ Core may orchestrate the run and pass typed parsed component metadata into this 
 
 ## Current Exports
 
-This package currently exposes two runtime entrypoints:
+This package currently exposes two implemented runtime entrypoints:
 
 - `@qwik-custom-elements/adapter-stencil/client`
   - `createStencilClientSetup(...)`
@@ -26,7 +26,9 @@ This package currently exposes two runtime entrypoints:
   - `createStencilSSRComponent(...)`
   - SSR model and style helpers
 
-These APIs let an app or generated wrapper layer bootstrap Stencil custom elements on the client and render them through a shared Qwik SSR bridge.
+These APIs let an app or generated wrapper layer bootstrap Stencil custom elements on the client and render them through a Qwik SSR bridge when hydrate-backed SSR is available.
+
+Issue `#34` is correcting the planned loader-only contract. The intended loader-only direction is a dedicated CSR factory named `createStencilCSRComponent`, not a degraded reuse of the SSR bridge. Until that work lands, do not treat `createStencilCSRComponent` or separate CSR/SSR generated surfaces as already-implemented exports.
 
 ## Manual Runtime Usage
 
@@ -220,9 +222,9 @@ This keeps `PACKAGE_NAME` ergonomic while preserving `CEM` as an explicit-contro
 
 ## Generated Runtime Modules
 
-For Stencil projects with a valid resolved loader import, generation now emits `runtime-csr.generated.ts` alongside the component wrappers.
+For Stencil projects with a valid resolved loader import, generated client bootstrap remains valuable even when hydrate-backed SSR is unavailable.
 
-That generated client module provides:
+The current generated client module provides:
 
 - a resolved `defineCustomElements` wrapper bound to the package-aware loader import
 - `defineCustomElementsQrl`
@@ -232,15 +234,22 @@ When a resolved hydrate import is also available, generation additionally emits 
 
 For `PACKAGE_NAME`, those runtime imports may come from package-aware defaults or explicit overrides. For `CEM`, they come from the explicit `adapterOptions.runtime` contract. This keeps generated runtime modules aligned with the same resolved runtime import contract already used for validation and SSR probing.
 
-Keep the split intentional:
+Issue `#34` is narrowing the intended output contract further. The target direction is not one shared generated runtime layer that happens to omit the SSR leaf. Instead, Stencil generation should expose two capability-specific consumer surfaces when runtime modes differ materially:
+
+- a CSR surface for loader-only generation that boots the client runtime and backs wrappers with `createStencilCSRComponent`
+- an SSR surface for hydrate-capable generation that includes the hydrate bridge and backs wrappers with `createStencilSSRComponent`
+
+Paths such as `generated/csr` and `generated/ssr` are useful examples for that split, but the exact directory names should remain implementation detail until the implementation lands.
+
+Keep the current runtime leaf split intentional:
 
 - `runtime-csr.generated.ts` is client-reachable and must remain loader-only.
 - `runtime-ssr.generated.ts` owns the hydrate-backed `renderToString` bridge and keeps hydrate loading behind a dynamic import boundary.
 
-Generation mode depends on which resolved runtime imports are actually available:
+Generation mode depends on which resolved runtime imports are actually available, but the final Issue `#34` contract should not require loader-only wrappers to target the same bridge/runtime surface as SSR-capable wrappers:
 
-- Full SSR mode: both loader and hydrate resolve, so generation emits both runtime leaves and `runtime.ts` re-exports the client and SSR helpers together.
-- Loader-only mode: loader resolves but hydrate does not, so generation still emits `runtime-csr.generated.ts` and typed wrappers, but omits `runtime-ssr.generated.ts` and keeps `runtime.ts` client-only.
+- Full SSR mode: both loader and hydrate resolve, so generation emits an SSR-capable surface whose wrappers render through `createStencilSSRComponent`.
+- Loader-only mode: loader resolves but hydrate does not, so generation still emits a client-capable surface, but that surface should be backed by `createStencilCSRComponent` rather than a degraded SSR bridge.
 
 When hydrate resolution fails, the client runtime module is still generated from the loader import so loader-only fallback flows remain usable.
 
@@ -248,7 +257,9 @@ When hydrate resolution fails, the client runtime module is still generated from
 
 When the generator has enough Stencil runtime information, `@qwik-custom-elements/adapter-stencil` owns the full generated surface under the target `outDir`.
 
-For equivalent resolved runtime inputs, `PACKAGE_NAME` and `CEM` projects produce the same consumer-facing artifact shape:
+For equivalent resolved runtime inputs, `PACKAGE_NAME` and `CEM` projects should still produce the same consumer-facing wrapper contract, but Issue `#34` is correcting the planned topology so that CSR and SSR generation can expose distinct surfaces when their runtime behavior diverges.
+
+The current flat shape is only part of the checked-in implementation story today:
 
 - `index.ts`
   - Barrel that re-exports each generated Qwik wrapper plus the shared runtime helpers.
@@ -261,16 +272,23 @@ For equivalent resolved runtime inputs, `PACKAGE_NAME` and `CEM` projects produc
 - `*.tsx`
   - One generated Qwik wrapper per discovered Stencil component.
 
+The target direction for Issue `#34` is stricter:
+
+- loader-only generation should expose a CSR surface backed by `createStencilCSRComponent`
+- SSR-capable generation should expose an SSR surface backed by `createStencilSSRComponent`
+- exact surface paths are implementation detail, but examples such as `generated/csr` and `generated/ssr` are acceptable mental models
+- wrappers in both surfaces must preserve the same public interface for typed props, typed `onEvent$` bindings, and slot projection
+
 Generated wrapper components follow a stable contract:
 
 - Prop typing starts from available CEM attribute and member metadata.
 - Custom events become typed `onEvent$` QRL props when event metadata is available.
 - Wrapper components call `useGeneratedStencilClientSetup()` so client bootstrap stays centralized in generated runtime output.
-- When SSR runtime is available, wrappers render through the shared generated `GeneratedStencilComponent` bridge instead of requiring app-local handwritten bridge files.
-- When only the loader runtime is available, wrappers stay on the same generated runtime layer but degrade to a slim proxy that renders the custom-element tag directly and forwards props, typed `onEvent$` bindings, and slot metadata without Stencil server rendering.
+- When SSR runtime is available, wrappers should render through the SSR surface backed by `createStencilSSRComponent` instead of requiring app-local handwritten bridge files.
+- When only the loader runtime is available, wrappers should target the CSR surface backed by `createStencilCSRComponent`, rendering the custom-element tag directly while preserving props, typed `onEvent$` bindings, slot metadata, and client bootstrap.
 - Slot metadata is projected with deterministic Qwik `<Slot />` output, including named slot support when the source metadata declares it.
 
-Example generated surface:
+Example current flat generated surface:
 
 ```text
 src/generated/
@@ -281,6 +299,25 @@ src/generated/
   de-button.tsx
   de-alert.tsx
 ```
+
+Example target direction for distinct capability-specific surfaces:
+
+```text
+src/generated/
+  csr/
+    index.ts
+    runtime.ts
+    runtime-csr.generated.ts
+    de-button.tsx
+  ssr/
+    index.ts
+    runtime.ts
+    runtime-csr.generated.ts
+    runtime-ssr.generated.ts
+    de-button.tsx
+```
+
+Those example paths illustrate the intended separation only. The contract is the presence of distinct CSR and SSR surfaces, not the literal folder names.
 
 Example consumer usage:
 
@@ -311,6 +348,8 @@ export default component$(() => {
 
 The checked-in demo route at `apps/qwik-demo/src/routes/stencil/ssr/wrappers/` is the reference integration path for this generated surface. It validates that generated wrappers, generated runtime setup, typed event handlers, and slot projection all work together without a handwritten app-local bridge layer.
 
+Issue `#34` also requires the checked-in CSR demo routes to consume CSR output directly rather than re-exporting or aliasing the SSR demo routes.
+
 ## Planned SSR Fallback Behavior
 
 Support SSR where available, but do not make SSR availability a prerequisite for generating useful wrappers.
@@ -318,13 +357,13 @@ Support SSR where available, but do not make SSR availability a prerequisite for
 The intended behavior for Stencil projects is:
 
 - If both loader and hydrate are available, generate the shared bridge plus typed Qwik wrappers with SSR support.
-- If only loader is available and hydrate/SSR support is unavailable, still generate the shared bridge plus typed Qwik wrappers.
-- In the loader-only case, the bridge should degrade to a minimal proxy that renders the custom element tag and forwards props, events, and slot metadata without server-side Stencil rendering.
+- If only loader is available and hydrate/SSR support is unavailable, still generate typed Qwik wrappers and client bootstrap.
+- In the loader-only case, generation should use a dedicated CSR surface backed by `createStencilCSRComponent`, not a degraded reuse of `createStencilSSRComponent`.
 
-Consumers should treat those two modes as the same generated wrapper surface with different SSR capabilities:
+Consumers should treat those two modes as separate capability-specific surfaces with the same wrapper-facing contract:
 
-- Full SSR mode includes `runtime-ssr.generated.ts`, exposes hydrate-backed `renderToString`, and lets wrappers render through the shared generated SSR bridge.
-- Loader-only mode keeps `runtime-csr.generated.ts`, omits the SSR runtime leaf, and still produces usable typed wrappers for client-side upgrade and interaction.
+- Full SSR mode exposes an SSR-capable surface whose wrappers render through `createStencilSSRComponent`.
+- Loader-only mode exposes a CSR surface whose wrappers render through `createStencilCSRComponent` and never depend on Stencil server rendering.
 - In both modes, wrapper props, event bindings, slot projection, and client bootstrap stay adapter-owned and deterministic.
 
 That fallback still provides value to consumers because generated Qwik components remain:

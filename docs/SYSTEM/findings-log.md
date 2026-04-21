@@ -2,6 +2,19 @@
 
 # Findings Log
 
+## 2026-04-21 - Capability-specific generated surfaces should be documented when loader-only and SSR-capable Stencil outputs diverge
+
+- Sources:
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/34
+- Finding:
+  - When loader-only and SSR-capable Stencil generation expose materially different runtime/component contracts, the distinction should be treated as a consumer-facing surface split rather than as an implementation detail hidden behind one shared bridge.
+- Durable guidance:
+  - Document separate CSR and SSR generated surfaces at the contract level when the loader-only path uses a dedicated CSR component factory and the SSR path uses a hydrate-backed SSR component factory.
+  - Keep exact output paths as implementation detail unless the repository explicitly decides to freeze them as public API.
+  - Demo routes that claim to validate CSR output must consume the CSR generated surface directly instead of aliasing SSR routes or SSR-generated modules.
+  - Preserve interface parity across capability-specific surfaces for typed props, typed event bindings, slot projection, and client bootstrap.
+
 ## 2026-04-20 - Adapter-owned generation must include the full generated file set, not only runtime leaves
 
 - Sources:
@@ -62,8 +75,9 @@
 - Finding:
   - The generated Stencil client runtime leaf is easier to reason about when its filename explicitly signals that it is the client-side counterpart to `runtime-ssr.generated.ts`.
 - Durable guidance:
-  - Use `runtime-csr.generated.ts` for the generated client runtime leaf while keeping `runtime.ts` as the stable app-facing barrel.
+  - Use `runtime-csr.generated.ts` for the generated client runtime leaf while keeping `runtime.ts` as the stable app-facing barrel when a single surface is sufficient.
   - Reserve `runtime-ssr.generated.ts` for SSR-only helpers and keep the client leaf loader-only.
+  - If loader-only and SSR-capable generation later expose different component-factory contracts, prefer distinct capability-specific generated surfaces over forcing both modes through one shared bridge shape.
 
 ## 2026-04-19 - Adapter-specific generated runtime modules should use a generic core planned-write hook
 
