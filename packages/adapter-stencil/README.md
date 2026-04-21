@@ -219,6 +219,12 @@ The current contract is:
 - `CEM` may omit `adapterOptions.runtime.hydrateImport` when SSR hydrate support is unavailable or intentionally deferred.
 - Core consumes the adapter-resolved runtime imports when invoking adapter SSR probing, so runtime resolution and SSR capability checks use the same resolved inputs.
 
+`SSR available` has a specific meaning for Stencil projects:
+
+- The resolved hydrate module can be imported by the probe, and the module exports `renderToString` as a function.
+- If hydrate import fails or `renderToString` is missing/non-function, SSR is treated as unavailable.
+- When SSR is unavailable but the loader import is valid, generation remains successful in loader-only mode with the CSR surface.
+
 This keeps `PACKAGE_NAME` ergonomic while preserving `CEM` as an explicit-control mode for advanced or nonstandard setups.
 
 ## Generated Runtime Modules

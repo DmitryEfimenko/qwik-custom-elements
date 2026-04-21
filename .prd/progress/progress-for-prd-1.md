@@ -1,5 +1,33 @@
 # PRD-1 Progress Log
 
+## 2026-04-21 - Issue #35 partial: define Stencil "SSR available" semantics in consumer docs
+
+- Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+- Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/35
+- Task completed:
+  - Updated `@qwik-custom-elements/adapter-stencil` consumer documentation to explicitly define when Stencil SSR is considered available.
+  - Documented probe semantics: SSR is available only when the resolved hydrate module is importable and exports `renderToString` as a function.
+  - Documented deterministic fallback semantics: when SSR is unavailable but loader import is valid, generation still succeeds in loader-only CSR mode.
+- Key decisions made:
+  - Keep the definition of "SSR available" tied to adapter probe behavior and resolved runtime inputs rather than vague "hydrate present" wording.
+  - Keep this run scope docs-only for one unchecked acceptance criterion.
+- Files changed:
+  - `packages/adapter-stencil/README.md`
+  - `.prd/progress/progress-for-prd-1.md`
+- Validation:
+  - `pnpm typecheck`
+  - `pnpm test`
+  - `pnpm build`
+  - `pnpm lint`
+  - `pnpm e2e`
+  - `pnpm format`
+- Durable sync:
+  - Reviewed `docs/SYSTEM/*`; no new durable architecture/API decision or finding was introduced by this docs-clarification slice.
+- Remaining for issue #35:
+  - Confirm/update structured project capability output assertions are fully aligned with probe-driven mode selection.
+  - Confirm demo verification coverage where probe-driven mode differences affect integration behavior.
+  - Reassess and check remaining acceptance criteria after follow-up slices.
+
 ## 2026-04-21 - Issue #35 partial: replace stubbed Stencil SSR probe with hydrate-capability probing
 
 - Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
