@@ -1,5 +1,36 @@
 # PRD-1 Progress Log
 
+## 2026-04-21 - Issue #35 partial: replace stubbed Stencil SSR probe with hydrate-capability probing
+
+- Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+- Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/35
+- Task completed:
+  - Replaced adapter-stencil `probeSSR` stub behavior (string-presence check) with real hydrate capability probing.
+  - Implemented runtime hydrate-module import in `probeSSR` and marked SSR available only when `renderToString` is exported as a function.
+  - Added focused unit coverage for probe success, probe failure when `renderToString` is missing, and probe failure when hydrate import throws.
+- Key decisions made:
+  - Keep SSR-capability probing adapter-owned and preserve the existing core-facing probe contract (`{ available: boolean }`).
+  - Treat hydrate import/shape failures as deterministic `available: false` outcomes so existing fallback behavior remains intact.
+  - Keep this run scoped to one issue-35 slice: real probing signal accuracy, not generator-surface or docs changes.
+- Files changed:
+  - `packages/adapter-stencil/src/index.ts`
+  - `packages/adapter-stencil/src/index.test.ts`
+  - `.prd/progress/progress-for-prd-1.md`
+- Validation:
+  - `pnpm --filter @qwik-custom-elements/adapter-stencil run test -- src/index.test.ts`
+  - `pnpm typecheck`
+  - `pnpm test`
+  - `pnpm build`
+  - `pnpm lint`
+  - `pnpm e2e`
+  - `pnpm format`
+- Durable sync:
+  - Reviewed `docs/SYSTEM/*`; no new durable architecture/API decision or finding beyond existing PRD guidance was introduced in this narrow probe-implementation slice.
+- Remaining for issue #35:
+  - Update structured project capability output assertions (if needed) for probe-driven SSR availability.
+  - Add/confirm consumer-facing docs for the precise definition of "SSR available" for Stencil projects.
+  - Reassess and check remaining issue acceptance criteria after follow-up slices.
+
 ## 2026-04-21 - Issue #34 complete: reconcile acceptance checklist with implemented loader-only CSR/SSR split
 
 - Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1

@@ -191,11 +191,25 @@ export function resolveRuntimeImports({
 export async function probeSSR({
   runtimeImports,
 }: ProbeSsrInput = {}): Promise<{ available: boolean }> {
-  return {
-    available:
-      isNonEmptyString(runtimeImports?.loaderImport) &&
-      isNonEmptyString(runtimeImports?.hydrateImport),
-  };
+  if (!isNonEmptyString(runtimeImports?.loaderImport)) {
+    return { available: false };
+  }
+
+  if (!isNonEmptyString(runtimeImports?.hydrateImport)) {
+    return { available: false };
+  }
+
+  try {
+    const hydrateRuntimeModule = (await import(
+      /* @vite-ignore */ runtimeImports.hydrateImport
+    )) as { renderToString?: unknown };
+
+    return {
+      available: typeof hydrateRuntimeModule.renderToString === 'function',
+    };
+  } catch {
+    return { available: false };
+  }
 }
 
 export function createGeneratedOutput({

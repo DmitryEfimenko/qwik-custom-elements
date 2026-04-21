@@ -19,14 +19,42 @@ describe('adapter-stencil metadata contract', () => {
   });
 
   it('reports SSR availability when loader and hydrate imports are both resolvable', async () => {
+    const hydrateModuleSpecifier =
+      "data:text/javascript,export%20const%20renderToString%20%3D%20()%20%3D%3E%20''%3B";
+
     await expect(
       probeSSR({
         runtimeImports: {
           loaderImport: '@acme/stencil-lib/loader',
-          hydrateImport: '@acme/stencil-lib/hydrate',
+          hydrateImport: hydrateModuleSpecifier,
         },
       }),
     ).resolves.toEqual({ available: true });
+  });
+
+  it('reports SSR as unavailable when hydrate module lacks renderToString', async () => {
+    const hydrateModuleSpecifier =
+      'data:text/javascript,export%20const%20noop%20%3D%20()%20%3D%3E%20undefined%3B';
+
+    await expect(
+      probeSSR({
+        runtimeImports: {
+          loaderImport: '@acme/stencil-lib/loader',
+          hydrateImport: hydrateModuleSpecifier,
+        },
+      }),
+    ).resolves.toEqual({ available: false });
+  });
+
+  it('reports SSR as unavailable when hydrate module import fails', async () => {
+    await expect(
+      probeSSR({
+        runtimeImports: {
+          loaderImport: '@acme/stencil-lib/loader',
+          hydrateImport: 'qce-does-not-exist/hydrate',
+        },
+      }),
+    ).resolves.toEqual({ available: false });
   });
 
   it('reports SSR as unavailable when the loader import is missing', async () => {
