@@ -277,7 +277,9 @@ describe('adapter-stencil metadata contract', () => {
     expect(wrapperWrite?.content).toContain('      events={mappedEvents}');
     expect(wrapperWrite?.content).toContain('      slots={["icon"]}');
     expect(wrapperWrite?.content).toContain('      {...passthroughEventProps}');
-    expect(wrapperWrite?.content).toContain('    </GeneratedStencilCSRComponent>');
+    expect(wrapperWrite?.content).toContain(
+      '    </GeneratedStencilCSRComponent>',
+    );
     expect(wrapperWrite?.content).toContain('    <Slot name="icon" />');
   });
 });

@@ -180,8 +180,12 @@ describe('generateFromConfig', () => {
       expect(buttonWrite?.content).toContain('      props={elementProps}');
       expect(buttonWrite?.content).toContain('      events={mappedEvents}');
       expect(buttonWrite?.content).toContain('      slots={["footer"]}');
-      expect(buttonWrite?.content).toContain('      {...passthroughEventProps}');
-      expect(buttonWrite?.content).toContain('    </GeneratedStencilCSRComponent>');
+      expect(buttonWrite?.content).toContain(
+        '      {...passthroughEventProps}',
+      );
+      expect(buttonWrite?.content).toContain(
+        '    </GeneratedStencilCSRComponent>',
+      );
       expect(buttonWrite?.content).toContain('    <Slot />');
       expect(buttonWrite?.content).toContain('    <Slot name="footer" />');
       expect(cardWrite?.content).toContain('export interface QwikZCardProps {');
