@@ -1,7 +1,10 @@
-import { $, component$, useSignal, useVisibleTask$ } from '@builder.io/qwik';
+import { $, component$, useSignal } from '@builder.io/qwik';
 import type { DocumentHead } from '@builder.io/qwik-city';
 
-import { useGeneratedStencilClientSetup } from '../../../../generated/runtime-csr.generated';
+import {
+  GeneratedStencilCSRComponent,
+  useGeneratedStencilClientSetup,
+} from '../../../../generated/runtime-csr.generated';
 
 export default component$(() => {
   const buttonSize = useSignal<'md' | 'lg'>('md');
@@ -9,9 +12,6 @@ export default component$(() => {
   const firstBetaCount = useSignal(0);
   const secondCount = useSignal(0);
   const activeHandler = useSignal<'alpha' | 'beta'>('alpha');
-  const firstButtonRef = useSignal<HTMLDeButtonElement>();
-  const secondButtonRef = useSignal<HTMLDeButtonElement>();
-
   useGeneratedStencilClientSetup();
 
   const handleFirstAlpha$ = $(() => {
@@ -34,46 +34,10 @@ export default component$(() => {
     activeHandler.value = activeHandler.value === 'alpha' ? 'beta' : 'alpha';
   });
 
-  useVisibleTask$(({ track, cleanup }) => {
-    track(() => firstButtonRef.value);
-
-    const host = firstButtonRef.value;
-    if (!host) {
-      return;
-    }
-
-    const handleTripleClick = () => {
-      if (activeHandler.value === 'alpha') {
-        void handleFirstAlpha$();
-        return;
-      }
-
-      void handleFirstBeta$();
-    };
-
-    host.addEventListener('tripleClick', handleTripleClick);
-    cleanup(() => {
-      host.removeEventListener('tripleClick', handleTripleClick);
-    });
-  });
-
-  useVisibleTask$(({ track, cleanup }) => {
-    track(() => secondButtonRef.value);
-
-    const host = secondButtonRef.value;
-    if (!host) {
-      return;
-    }
-
-    const handleTripleClick = () => {
-      void handleSecond$();
-    };
-
-    host.addEventListener('tripleClick', handleTripleClick);
-    cleanup(() => {
-      host.removeEventListener('tripleClick', handleTripleClick);
-    });
-  });
+  const firstEvents = {
+    tripleClick:
+      activeHandler.value === 'alpha' ? handleFirstAlpha$ : handleFirstBeta$,
+  };
 
   return (
     <>
@@ -109,23 +73,35 @@ export default component$(() => {
 
       <div id="buttons">
         <div id="first-stencil-wrapper">
-          <de-button ref={firstButtonRef} size={buttonSize.value}>
+          <GeneratedStencilCSRComponent
+            tagName="de-button"
+            props={{ size: buttonSize.value }}
+            events={firstEvents}
+          >
             First CSR Button
-          </de-button>
+          </GeneratedStencilCSRComponent>
         </div>
 
         <div id="second-stencil-wrapper">
-          <de-button ref={secondButtonRef} size={buttonSize.value}>
+          <GeneratedStencilCSRComponent
+            tagName="de-button"
+            props={{ size: buttonSize.value }}
+            events={{ tripleClick: handleSecond$ }}
+          >
             Second CSR Button
-          </de-button>
+          </GeneratedStencilCSRComponent>
         </div>
       </div>
 
       <div id="alert-stencil-wrapper">
-        <de-alert heading="Validation Alert">
+        <GeneratedStencilCSRComponent
+          tagName="de-alert"
+          props={{ heading: 'Validation Alert' }}
+          slots={['footer']}
+        >
           <span>Alert body content</span>
           <span q:slot="footer">Alert footer content</span>
-        </de-alert>
+        </GeneratedStencilCSRComponent>
       </div>
     </>
   );

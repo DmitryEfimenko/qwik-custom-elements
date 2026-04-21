@@ -1139,7 +1139,13 @@ describe('generateFromConfig', () => {
         "import { defineCustomElements as runtimeDefineCustomElements } from './runtime/acme-loader';",
       );
       expect(runtimeWrite!.content).toContain(
+        "import { createStencilCSRComponent, createStencilClientSetup } from '@qwik-custom-elements/adapter-stencil/client';",
+      );
+      expect(runtimeWrite!.content).toContain(
         'export const useGeneratedStencilClientSetup =',
+      );
+      expect(runtimeWrite!.content).toContain(
+        'export const GeneratedStencilCSRComponent = createStencilCSRComponent();',
       );
     });
   });

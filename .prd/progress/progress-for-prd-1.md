@@ -1,5 +1,39 @@
 # PRD-1 Progress Log
 
+## 2026-04-21 - Issue #34 partial: add generated CSR bridge component factory and consume it in the CSR bridge demo route
+
+- Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+- Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/34
+- Task completed:
+  - Added adapter-owned `createStencilCSRComponent` in `@qwik-custom-elements/adapter-stencil/client` so loader-capable generation has a dedicated CSR bridge component factory.
+  - Updated generated CSR runtime output to export `GeneratedStencilCSRComponent` from the CSR surface.
+  - Migrated `/stencil/csr/bridge` to consume the generated CSR bridge component directly from `runtime-csr.generated` instead of route-local custom-element event wiring.
+- Key decisions made:
+  - Keep CSR and SSR bridge component exports distinct (`GeneratedStencilCSRComponent` versus `GeneratedStencilComponent`) to avoid runtime barrel export collisions.
+  - Scope this run to one acceptance slice: generated CSR bridge availability plus CSR bridge route consumption.
+  - No new system-level architectural decision was introduced; this run implements previously documented issue #34 direction.
+- Files changed:
+  - `packages/adapter-stencil/src/client/stencil-csr.tsx`
+  - `packages/adapter-stencil/src/client/index.ts`
+  - `packages/adapter-stencil/src/index.ts`
+  - `packages/core/src/__tests__/generator.test.ts`
+  - `apps/qwik-demo/src/generated/runtime-csr.generated.ts`
+  - `apps/qwik-demo/src/routes/stencil/csr/bridge/index.tsx`
+  - `.prd/progress/progress-for-prd-1.md`
+- Validation:
+  - `pnpm --filter @qwik-custom-elements/core exec vitest run src/__tests__/generator.test.ts -t "generates a client runtime bootstrap from explicit CEM loader imports"`
+  - `pnpm --filter @qwik-custom-elements/adapter-stencil exec vitest run src/client/client-setup.test.ts`
+  - `pnpm --filter qwik-demo exec playwright test e2e/smoke.spec.ts --grep "stencil csr bridge"`
+  - `pnpm format`
+  - `pnpm typecheck`
+  - `pnpm test`
+  - `pnpm build`
+  - `pnpm lint`
+  - `pnpm e2e`
+- Remaining for issue #34:
+  - Update the CSR wrappers route to consume generated CSR wrappers from a dedicated CSR surface rather than route-local wrapper components.
+  - Confirm and/or add coverage for structured capability output and deterministic diagnostics tied to the selected CSR versus SSR surface.
+
 ## 2026-04-21 - Issue #34 partial: replace CSR demo route aliases with CSR-native demo pages
 
 - Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
