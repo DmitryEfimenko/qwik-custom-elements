@@ -289,7 +289,10 @@ describe('adapter-stencil metadata contract', () => {
     );
 
     expect(wrapperWrite?.content).toContain(
-      "import { GeneratedStencilCSRComponent, useGeneratedStencilClientSetup } from './runtime';",
+      "import { GeneratedStencilCSRComponent } from './runtime';",
+    );
+    expect(wrapperWrite?.content).not.toContain(
+      'useGeneratedStencilClientSetup();',
     );
     expect(wrapperWrite?.content).toContain(
       'export interface QwikDeButtonProps {',
@@ -360,7 +363,10 @@ describe('adapter-stencil metadata contract', () => {
     );
 
     expect(wrapperWrite?.content).toContain(
-      "import { GeneratedStencilComponent, useGeneratedStencilClientSetup } from './runtime';",
+      "import { GeneratedStencilComponent } from './runtime';",
+    );
+    expect(wrapperWrite?.content).not.toContain(
+      'useGeneratedStencilClientSetup();',
     );
     expect(wrapperWrite?.content).toContain('    <GeneratedStencilComponent');
     expect(wrapperWrite?.content).toContain('    </GeneratedStencilComponent>');

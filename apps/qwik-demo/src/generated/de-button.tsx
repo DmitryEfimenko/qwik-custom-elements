@@ -3,7 +3,7 @@
 
 import { Slot, component$ } from '@builder.io/qwik';
 import type { QRL } from '@builder.io/qwik';
-import { GeneratedStencilComponent, useGeneratedStencilClientSetup } from './runtime';
+import { GeneratedStencilComponent } from './runtime';
 
 export interface QwikDeButtonProps {
   size?: "lg" | "md" | "sm";
@@ -12,7 +12,6 @@ export interface QwikDeButtonProps {
 }
 
 export const QwikDeButton = component$<QwikDeButtonProps>((props) => {
-  useGeneratedStencilClientSetup();
   const isEventBindingKey = (key: string) =>
     /^on[A-Z].*\$$/.test(key) || key.includes(':');
   const eventProps: Record<string, unknown> = {};

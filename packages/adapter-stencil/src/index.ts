@@ -417,7 +417,7 @@ function renderStencilComponentWrapper(
   }
 
   importLines.push(
-    `import { ${generatedStencilComponentName}, useGeneratedStencilClientSetup } from './runtime';`,
+    `import { ${generatedStencilComponentName} } from './runtime';`,
   );
 
   const splitPropsLines = [
@@ -492,7 +492,6 @@ function renderStencilComponentWrapper(
     '}',
     '',
     `export const ${wrapperName} = component$<${propsTypeName}>((props) => {`,
-    '  useGeneratedStencilClientSetup();',
     ...bodyLines,
     '});',
     '',

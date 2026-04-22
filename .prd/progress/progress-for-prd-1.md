@@ -3479,3 +3479,52 @@
 ### Blockers / notes for next iteration
 
 - Child #10 remains open; next smallest slice is per-project failed/skipped status representation in summary `projects[]` rather than failure-only run-level fallback.
+
+## 2026-04-22 - PRD #1 / Child #38 - move Stencil client setup to page-level usage
+
+### Task completed
+
+- Removed generated wrapper-level `useGeneratedStencilClientSetup()` import/call emission from adapter-stencil wrapper templates.
+- Updated adapter and core generation tests to assert wrappers no longer import/call setup hooks directly.
+- Regenerated demo wrappers so generated components only import `GeneratedStencilComponent` and do not call setup inside wrapper bodies.
+- Added page-level `useGeneratedStencilClientSetup()` invocation in both wrapper validation routes:
+  - `stencil/ssr/wrappers`
+  - `stencil/csr/wrappers`
+- Resolved wrapper-route e2e regression by keeping SSR-capable generated wrappers on `GeneratedStencilComponent` (not CSR-only component), while still removing per-wrapper setup calls.
+
+### Key decisions
+
+- Setup ownership for generated wrappers is route/page-level, not per-wrapper component body.
+- In SSR-capable generation, wrappers must continue targeting `GeneratedStencilComponent`; issue #38 scope is setup-call location only.
+- Validation required full root feedback loop after fix confirmation.
+
+### Key findings
+
+- Per-wrapper setup removal is safe only when setup is invoked once at route/page level before wrapper interaction assertions.
+- Wrapper-route click timeout came from an unintended generated-surface change (`GeneratedStencilComponent` -> `GeneratedStencilCSRComponent`), not from the setup-location change itself.
+
+### Validation loops run
+
+- `pnpm typecheck`
+- `pnpm test`
+- `pnpm build`
+- `pnpm lint`
+- `pnpm e2e`
+- `pnpm format`
+
+### Files changed
+
+- `packages/adapter-stencil/src/index.ts`
+- `packages/adapter-stencil/src/index.test.ts`
+- `packages/core/src/__tests__/generator.test.ts`
+- `apps/qwik-demo/src/generated/de-button.tsx`
+- `apps/qwik-demo/src/generated/de-alert.tsx`
+- `apps/qwik-demo/src/generated/de-button-shadow.tsx`
+- `apps/qwik-demo/src/generated/de-alert-shadow.tsx`
+- `apps/qwik-demo/src/routes/stencil/ssr/wrappers/index.tsx`
+- `apps/qwik-demo/src/routes/stencil/csr/wrappers/index.tsx`
+- `.prd/progress/progress-for-prd-1.md`
+
+### Blockers / notes for next iteration
+
+- No blocker for this slice.

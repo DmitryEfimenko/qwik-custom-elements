@@ -2,8 +2,11 @@ import { $, component$, useSignal } from '@builder.io/qwik';
 import type { DocumentHead } from '@builder.io/qwik-city';
 
 import { QwikDeAlert, QwikDeButton } from '../../../../generated';
+import { useGeneratedStencilClientSetup } from '../../../../generated/runtime';
 
 export default component$(() => {
+  useGeneratedStencilClientSetup();
+
   const buttonSize = useSignal<'md' | 'lg'>('md');
   const firstAlphaCount = useSignal(0);
   const firstBetaCount = useSignal(0);

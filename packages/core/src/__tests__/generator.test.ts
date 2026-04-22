@@ -156,7 +156,10 @@ describe('generateFromConfig', () => {
         "import type { QRL } from '@builder.io/qwik';",
       );
       expect(buttonWrite?.content).toContain(
-        "import { GeneratedStencilCSRComponent, useGeneratedStencilClientSetup } from './runtime';",
+        "import { GeneratedStencilCSRComponent } from './runtime';",
+      );
+      expect(buttonWrite?.content).not.toContain(
+        'useGeneratedStencilClientSetup();',
       );
       expect(buttonWrite?.content).toContain(
         'export interface QwikAButtonProps {',
@@ -823,7 +826,10 @@ describe('generateFromConfig', () => {
         'createStencilSSRComponent',
       );
       expect(wrapperWrite?.content).toContain(
-        "import { GeneratedStencilCSRComponent, useGeneratedStencilClientSetup } from './runtime';",
+        "import { GeneratedStencilCSRComponent } from './runtime';",
+      );
+      expect(wrapperWrite?.content).not.toContain(
+        'useGeneratedStencilClientSetup();',
       );
       expect(wrapperWrite?.content).toContain(
         '    <GeneratedStencilCSRComponent',
@@ -1067,7 +1073,10 @@ describe('generateFromConfig', () => {
       expect(runtimeSsrWrite).toBeDefined();
       expect(buttonWrite).toBeDefined();
       expect(buttonWrite!.content).toContain(
-        "import { GeneratedStencilComponent, useGeneratedStencilClientSetup } from './runtime';",
+        "import { GeneratedStencilComponent } from './runtime';",
+      );
+      expect(buttonWrite!.content).not.toContain(
+        'useGeneratedStencilClientSetup();',
       );
       expect(buttonWrite!.content).toContain(
         '  const events: Record<string, QRL<(...args: any[]) => void>> = {};',

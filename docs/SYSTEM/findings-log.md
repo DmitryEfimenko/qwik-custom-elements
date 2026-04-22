@@ -2,6 +2,18 @@
 
 # Findings Log
 
+## 2026-04-22 - Generated Stencil wrapper setup should be page-level, while SSR-capable wrappers must keep SSR component surface
+
+- Sources:
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/38
+- Finding:
+  - Generated wrapper bodies should not call `useGeneratedStencilClientSetup()` per wrapper; setup should be invoked once at route/page level. During this migration, preserving SSR-capable wrapper rendering through `GeneratedStencilComponent` is required to avoid wrapper-route interaction regressions.
+- Durable guidance:
+  - Keep generated wrapper templates free of setup-hook calls and import only the generated component factory.
+  - Call generated setup hooks at page/route integration boundaries that own wrapper composition.
+  - Do not couple setup-call relocation with generated-surface switching; in SSR-capable mode wrappers must remain on `GeneratedStencilComponent` unless explicitly changing capability mode contract.
+
 ## 2026-04-21 - Structured SSR capability output should explicitly mark client-only generation mode
 
 - Sources:
