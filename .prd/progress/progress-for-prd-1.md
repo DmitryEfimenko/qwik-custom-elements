@@ -1,5 +1,35 @@
 # PRD-1 Progress Log
 
+## 2026-04-21 - Issue #35 partial: make demo verification explicitly probe-driven for CSR bridge route
+
+- Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+- Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/35
+- Task completed:
+  - Updated demo app E2E verification flow to assert SSR-probe-driven integration behavior explicitly where it is observable.
+  - Replaced the previous boolean size-attribute assertion switch with an explicit `expectedSizeAttribute` mode (`present | absent | ignore`) in demo smoke tests.
+  - For `/stencil/csr/bridge`, added an explicit assertion that `de-button[size="lg"]` is absent after toggle (CSR bridge path).
+  - For `/stencil/csr/wrappers`, kept size-attribute assertion intentionally ignored to preserve current route behavior and avoid false assumptions.
+  - Stabilized one existing core integration test fixture to match real SSR probe semantics by providing an importable hydrate module URL for the SSR-available test path.
+- Key decisions made:
+  - Keep this run scoped to one unchecked acceptance slice: demo verification updates for probe-driven integration behavior.
+  - Assert absence only for the CSR bridge route where probe-driven behavior is currently observable in the demo, not broadly across all CSR routes.
+  - Keep core behavior unchanged; adjust only tests/fixtures that became invalid under real probe semantics.
+- Files changed:
+  - `apps/qwik-demo/e2e/smoke.spec.ts`
+  - `packages/core/src/__tests__/generator.test.ts`
+  - `.prd/progress/progress-for-prd-1.md`
+- Validation:
+  - `pnpm typecheck`
+  - `pnpm test`
+  - `pnpm build`
+  - `pnpm lint`
+  - `pnpm e2e`
+  - `pnpm format`
+- Durable sync:
+  - Reviewed `docs/SYSTEM/*`; no new durable architecture/API decision or findings update required for this test/verification-focused slice.
+- Remaining for issue #35:
+  - Re-check acceptance checklist state and close issue if all criteria are now complete.
+
 ## 2026-04-21 - Issue #35 partial: assert real SSR probe result in structured project capability output
 
 - Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1

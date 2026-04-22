@@ -5,7 +5,7 @@ async function assertStencilInteractionRoute(
   routePath: string,
   expectedHeading: string,
   options: {
-    expectSizeAttribute?: boolean;
+    expectedSizeAttribute?: 'present' | 'absent' | 'ignore';
   } = {},
 ) {
   await page.goto(routePath);
@@ -86,13 +86,22 @@ async function assertStencilInteractionRoute(
   await page.locator('#toggle-size').click();
   await expect(page.locator('#button-size')).toContainText('Button size: lg');
 
-  if (options.expectSizeAttribute !== false) {
+  const expectedSizeAttribute = options.expectedSizeAttribute ?? 'present';
+
+  if (expectedSizeAttribute === 'present') {
     await expect(
       page.locator('#first-stencil-wrapper de-button[size="lg"]'),
     ).toBeVisible();
     await expect(
       page.locator('#second-stencil-wrapper de-button[size="lg"]'),
     ).toBeVisible();
+  } else if (expectedSizeAttribute === 'absent') {
+    await expect(
+      page.locator('#first-stencil-wrapper de-button[size="lg"]'),
+    ).toHaveCount(0);
+    await expect(
+      page.locator('#second-stencil-wrapper de-button[size="lg"]'),
+    ).toHaveCount(0);
   }
 }
 
@@ -137,7 +146,7 @@ test('stencil csr bridge interaction contract: toggles handler and increments ac
     page,
     '/stencil/csr/bridge',
     'Stencil CSR Events Validation',
-    { expectSizeAttribute: false },
+    { expectedSizeAttribute: 'absent' },
   );
 });
 
@@ -148,6 +157,6 @@ test('stencil csr wrappers interaction contract: toggles handler and increments 
     page,
     '/stencil/csr/wrappers',
     'Stencil CSR Wrappers Validation',
-    { expectSizeAttribute: false },
+    { expectedSizeAttribute: 'ignore' },
   );
 });

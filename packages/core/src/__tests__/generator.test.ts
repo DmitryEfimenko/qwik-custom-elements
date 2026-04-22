@@ -1,6 +1,7 @@
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { GenerationError, generateFromConfig } from '../generator.js';
 import type { GeneratorConfig } from '../types.js';
@@ -970,6 +971,18 @@ describe('generateFromConfig', () => {
 
   it('renders Stencil wrappers through the generated SSR component when hydrate runtime is available', async () => {
     await withTempDir(async (tempDir) => {
+      const hydrateModulePath = path.join(
+        tempDir,
+        'runtime',
+        'acme-hydrate.mjs',
+      );
+      await mkdir(path.dirname(hydrateModulePath), { recursive: true });
+      await writeFile(
+        hydrateModulePath,
+        'export async function renderToString() { return { html: "" }; }\n',
+        'utf8',
+      );
+
       await writeFile(
         path.join(tempDir, 'custom-elements.json'),
         JSON.stringify(
@@ -1023,7 +1036,7 @@ describe('generateFromConfig', () => {
             adapterOptions: {
               runtime: {
                 loaderImport: './runtime/acme-loader',
-                hydrateImport: './runtime/acme-hydrate',
+                hydrateImport: pathToFileURL(hydrateModulePath).href,
               },
             },
           },
@@ -1033,7 +1046,9 @@ describe('generateFromConfig', () => {
       const result = await generateFromConfig(config, { cwd: tempDir });
       expect(result.projects[0].ssrCapabilities.available).toBe(true);
       expect(result.projects[0].ssrCapabilities.supportsSsrProbe).toBe(true);
-      expect(result.projects[0].ssrCapabilities.ssrRuntimeSubpath).toBe('ssr');
+      expect(result.projects[0].ssrCapabilities.ssrRuntimeSubpath).toBe(
+        './ssr',
+      );
       expect(result.projects[0].ssrCapabilities.clientOnlyMode).toBeUndefined();
 
       const runtimeSsrWrite = result.projects[0].plannedWrites.find(
