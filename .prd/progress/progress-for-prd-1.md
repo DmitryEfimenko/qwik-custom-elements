@@ -1,5 +1,38 @@
 # PRD-1 Progress Log
 
+## 2026-04-22 - Issue #39 partial: add dedicated loader-only demo generation target and emit CSR output surface
+
+- Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+- Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/39
+- Task completed:
+  - Added a second generator project (`demo-csr`) to `qwik-custom-elements.config.json` that targets Stencil loader-only runtime input and writes to a distinct output directory: `apps/qwik-demo/src/generated-csr`.
+  - Regenerated artifacts from config so dedicated CSR output is emitted under `apps/qwik-demo/src/generated-csr`.
+  - Confirmed generated wrappers in dedicated CSR output render through `GeneratedStencilCSRComponent`.
+- Key decisions made:
+  - Keep this run scoped to one tracer-bullet slice: generation config + generated output emission only.
+  - Do not modify CSR route imports or E2E assertions in this run; leave those for follow-up slices.
+- Files changed:
+  - `qwik-custom-elements.config.json`
+  - `apps/qwik-demo/src/generated-csr/*`
+  - `apps/qwik-demo/src/generated/de-alert.tsx`
+  - `apps/qwik-demo/src/generated/de-alert-shadow.tsx`
+  - `apps/qwik-demo/src/generated/de-button.tsx`
+  - `apps/qwik-demo/src/generated/de-button-shadow.tsx`
+  - `.prd/progress/progress-for-prd-1.md`
+- Validation:
+  - `pnpm typecheck`
+  - `pnpm test`
+  - `pnpm build`
+  - `pnpm lint`
+  - `pnpm e2e`
+  - `pnpm format`
+- Durable sync:
+  - Reviewed `docs/SYSTEM/*`; no new durable architecture/API decision or finding beyond existing CSR/SSR split guidance.
+- Remaining for issue #39:
+  - Wire `/stencil/csr/wrappers` to import wrappers from `src/generated-csr`.
+  - Wire `/stencil/csr/bridge` to import runtime symbols from `src/generated-csr`.
+  - Re-run and, if needed, extend demo/e2e assertions specifically against dedicated CSR surface routing.
+
 ## 2026-04-21 - Issue #35 partial: make demo verification explicitly probe-driven for CSR bridge route
 
 - Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
