@@ -1031,6 +1031,17 @@ describe('generateFromConfig', () => {
       };
 
       const result = await generateFromConfig(config, { cwd: tempDir });
+      expect(result.projects[0].ssrCapabilities.available).toBe(true);
+      expect(result.projects[0].ssrCapabilities.supportsSsrProbe).toBe(true);
+      expect(result.projects[0].ssrCapabilities.ssrRuntimeSubpath).toBe('ssr');
+      expect(result.projects[0].ssrCapabilities.clientOnlyMode).toBeUndefined();
+
+      const runtimeSsrWrite = result.projects[0].plannedWrites.find(
+        (plannedWrite) =>
+          plannedWrite.path.endsWith(
+            path.join('src', 'generated', 'runtime-ssr.generated.ts'),
+          ),
+      );
       const buttonWrite = result.projects[0].plannedWrites.find(
         (plannedWrite) =>
           plannedWrite.path.endsWith(
@@ -1038,6 +1049,7 @@ describe('generateFromConfig', () => {
           ),
       );
 
+      expect(runtimeSsrWrite).toBeDefined();
       expect(buttonWrite).toBeDefined();
       expect(buttonWrite!.content).toContain(
         "import { GeneratedStencilComponent, useGeneratedStencilClientSetup } from './runtime';",

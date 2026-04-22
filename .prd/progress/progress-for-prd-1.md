@@ -1,5 +1,31 @@
 # PRD-1 Progress Log
 
+## 2026-04-21 - Issue #35 partial: assert real SSR probe result in structured project capability output
+
+- Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+- Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/35
+- Task completed:
+  - Expanded the existing core generator integration test for the SSR-available Stencil path to assert structured capability output directly.
+  - Added assertions that `ssrCapabilities.available` is `true`, `supportsSsrProbe` is `true`, `ssrRuntimeSubpath` is `'ssr'`, and `clientOnlyMode` is not present for SSR-available runs.
+  - Added assertion that `runtime-ssr.generated.ts` is planned in the same SSR-available run to keep output-surface checks aligned with capability output.
+- Key decisions made:
+  - Keep this run strictly as one acceptance-slice test expansion at the `generateFromConfig` boundary.
+  - Do not broaden scope to demo-route behavior in this run; that remains the next unchecked criterion.
+- Files changed:
+  - `packages/core/src/__tests__/generator.test.ts`
+  - `.prd/progress/progress-for-prd-1.md`
+- Validation:
+  - `pnpm typecheck`
+  - `pnpm test`
+  - `pnpm build`
+  - `pnpm lint`
+  - `pnpm e2e`
+  - `pnpm format`
+- Durable sync:
+  - Reviewed `docs/SYSTEM/*`; no new durable architecture/API decision or findings update was needed for this test-coverage slice.
+- Remaining for issue #35:
+  - Update demo integration/verification flow for probe-driven behavior differences and then re-check final acceptance state.
+
 ## 2026-04-21 - Issue #35 partial: add SSR-mode probe-to-generation alignment unit test
 
 - Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
