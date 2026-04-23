@@ -1,5 +1,33 @@
 # PRD-1 Progress Log
 
+## 2026-04-22 - Issue #39 partial: wire CSR demo routes to dedicated CSR generated surface
+
+- Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+- Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/39
+- Task completed:
+  - Updated `/stencil/csr/wrappers` route imports to consume wrappers/runtime setup from `src/generated-csr` instead of SSR-capable `src/generated` surface.
+  - Updated `/stencil/csr/bridge` route imports to consume runtime symbols from `src/generated-csr/runtime`.
+  - Stabilized CSR wrappers route first-button event binding to keep interaction contract deterministic after handler toggles.
+- Key decisions made:
+  - Keep this run scoped to CSR route consumption wiring plus minimal route-local stabilization needed for existing interaction contract.
+  - Keep generated outputs and adapter contracts unchanged; consume existing dedicated CSR generated surface only.
+- Files changed:
+  - `apps/qwik-demo/src/routes/stencil/csr/bridge/index.tsx`
+  - `apps/qwik-demo/src/routes/stencil/csr/wrappers/index.tsx`
+  - `.prd/progress/progress-for-prd-1.md`
+- Validation:
+  - `pnpm typecheck`
+  - `pnpm test`
+  - `pnpm build`
+  - `pnpm lint`
+  - `pnpm --filter qwik-demo run e2e -- e2e/smoke.spec.ts --grep "stencil csr" --reporter=line`
+  - `pnpm format`
+- Durable sync:
+  - Reviewed `docs/SYSTEM/*`; no new durable architecture/API/findings updates required for this routing-integration slice.
+- Remaining for issue #39:
+  - Confirm/check acceptance items for CSR route import wiring and SSR-surface decoupling in issue body.
+  - Re-run full root `pnpm e2e` loop in next slice and capture final pass artifact for issue closeout.
+
 ## 2026-04-22 - Issue #39 partial: add dedicated loader-only demo generation target and emit CSR output surface
 
 - Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1

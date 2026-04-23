@@ -1,8 +1,8 @@
 import { $, component$, useSignal } from '@builder.io/qwik';
 import type { DocumentHead } from '@builder.io/qwik-city';
 
-import { QwikDeAlert, QwikDeButton } from '../../../../generated';
-import { useGeneratedStencilClientSetup } from '../../../../generated/runtime';
+import { QwikDeAlert, QwikDeButton } from '../../../../generated-csr';
+import { useGeneratedStencilClientSetup } from '../../../../generated-csr/runtime';
 
 export default component$(() => {
   useGeneratedStencilClientSetup();
@@ -33,8 +33,14 @@ export default component$(() => {
     activeHandler.value = activeHandler.value === 'alpha' ? 'beta' : 'alpha';
   });
 
-  const firstTripleClickHandler$ =
-    activeHandler.value === 'alpha' ? handleFirstAlpha$ : handleFirstBeta$;
+  const handleFirst$ = $(() => {
+    if (activeHandler.value === 'alpha') {
+      firstAlphaCount.value += 1;
+      return;
+    }
+
+    firstBetaCount.value += 1;
+  });
 
   return (
     <>
@@ -70,10 +76,7 @@ export default component$(() => {
 
       <div id="buttons">
         <div id="first-stencil-wrapper">
-          <QwikDeButton
-            size={buttonSize.value}
-            onTripleClick$={firstTripleClickHandler$}
-          >
+          <QwikDeButton size={buttonSize.value} onTripleClick$={handleFirst$}>
             First CSR Button
           </QwikDeButton>
         </div>
