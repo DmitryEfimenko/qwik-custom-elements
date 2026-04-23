@@ -1,5 +1,29 @@
 # PRD-1 Progress Log
 
+## 2026-04-22 - Issue #37 partial: add red E2E regression for CSR bridge prop-update style/interaction loss
+
+- Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+- Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/37
+- Task completed:
+  - Added focused Playwright regression test for `/stencil/csr/bridge` that exercises repeated size toggles and asserts the rendered `de-button` remains visible/interactive.
+  - Captured red failure before implementation fix: after repeated `#toggle-size` clicks, `#first-stencil-wrapper de-button button` is no longer found/visible.
+  - Updated issue #37 acceptance criteria with explicit E2E requirement for post-toggle visibility/interaction coverage.
+- Key decisions made:
+  - Keep this run test-first only (red phase), no runtime behavior changes.
+  - Keep coverage at route-level public behavior to validate user-observable regression before touching adapter internals.
+- Files changed:
+  - `apps/qwik-demo/e2e/smoke.spec.ts`
+  - `.prd/progress/progress-for-prd-1.md`
+- Validation:
+  - `pnpm --filter qwik-demo run e2e -- e2e/smoke.spec.ts --grep "stencil csr bridge regression" --reporter=line` (fails as expected in red phase)
+  - Root loops were started (`pnpm typecheck`, `pnpm test`, `pnpm build`, `pnpm lint`, `pnpm e2e`) and progressed through earlier stages; red regression failure remains expected blocker for full green pass.
+- Durable sync:
+  - Reviewed `docs/SYSTEM/*`; no durable architecture/API/findings updates required for this red-test-only slice.
+- Remaining for issue #37:
+  - Implement CSR runtime prop-update fix so host remains stable and styled/interactive after repeated size toggles.
+  - Add/adjust unit coverage for CSR prop-update behavior in adapter client runtime path.
+  - Re-run full validation loop to green and then check/close issue criteria.
+
 ## 2026-04-22 - Issue #39 partial: wire CSR demo routes to dedicated CSR generated surface
 
 - Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
