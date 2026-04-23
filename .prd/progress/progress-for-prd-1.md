@@ -1,5 +1,38 @@
 # PRD-1 Progress Log
 
+## 2026-04-22 - Issue #37 partial: preserve CSR bridge host instance on prop updates
+
+- Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+- Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/37
+- Task completed:
+  - Updated adapter-stencil CSR component runtime to avoid JSX prop spreading onto the custom-element host, preventing remounts on reactive prop updates.
+  - Added explicit CSR host-prop application helper and wired it into `createStencilCSRComponent` via `useVisibleTask$` so prop updates apply to the mounted host instance.
+  - Added focused unit tests for CSR host prop-application behavior and event-prop filtering.
+- Key decisions made:
+  - Keep CSR bridge event contract unchanged; only adjust prop-update path to preserve host identity.
+  - Assign CSR props as host properties (not attribute-driven spread render) for deterministic instance preservation.
+  - Keep this run scoped to adapter CSR runtime + unit coverage; no route/component API changes.
+- Files changed:
+  - `packages/adapter-stencil/src/client/stencil-csr.tsx`
+  - `packages/adapter-stencil/src/client/stencil-csr-props.ts`
+  - `packages/adapter-stencil/src/client/stencil-csr-props.test.ts`
+  - `.prd/progress/progress-for-prd-1.md`
+- Validation:
+  - `pnpm --filter @qwik-custom-elements/adapter-stencil run test -- src/client/stencil-csr-props.test.ts`
+  - `pnpm --filter qwik-demo run e2e -- e2e/smoke.spec.ts --grep "stencil csr bridge regression" --reporter=line`
+  - `pnpm typecheck`
+  - `pnpm test`
+  - `pnpm build`
+  - `pnpm lint`
+  - `pnpm e2e` (fails in unrelated existing SSR wrappers smoke assertion on `/stencil/ssr/wrappers` size-attribute expectation)
+  - `pnpm format`
+  - `pnpm --filter qwik-demo run e2e -- e2e/smoke.spec.ts --grep "stencil csr bridge interaction contract|stencil csr bridge regression" --reporter=line`
+- Durable sync:
+  - Reviewed `docs/SYSTEM/*`; no new durable architecture/API/findings updates required for this CSR runtime bugfix slice.
+- Remaining for issue #37:
+  - Reconcile root-level unrelated SSR wrappers e2e expectation drift outside this issue scope.
+  - If no further issue-37 scope items remain, sync acceptance checklist and close issue.
+
 ## 2026-04-22 - Issue #37 partial: add red E2E regression for CSR bridge prop-update style/interaction loss
 
 - Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1

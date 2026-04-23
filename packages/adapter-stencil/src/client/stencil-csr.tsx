@@ -6,6 +6,8 @@ import {
   type QRL,
 } from '@builder.io/qwik';
 
+import { updateStencilCSRHostProps } from './stencil-csr-props';
+
 const EVENT_QRL_IDS = new WeakMap<object, number>();
 let eventQrlIdCounter = 0;
 
@@ -55,6 +57,13 @@ export function createStencilCSRComponent() {
     ({ tagName, props, events, slots, ...restProps }) => {
       const hostRef = useSignal<HTMLElement>();
       const namedSlots = slots ?? [];
+
+      useVisibleTask$(({ track }) => {
+        const host = track(() => hostRef.value);
+        const latestProps = track(() => props);
+
+        updateStencilCSRHostProps(host, latestProps);
+      });
 
       useVisibleTask$(({ track, cleanup }) => {
         const host = track(() => hostRef.value);
@@ -106,7 +115,7 @@ export function createStencilCSRComponent() {
       const ElementTag = tagName as any;
 
       return (
-        <ElementTag ref={hostRef} {...(props ?? {})} {...restProps}>
+        <ElementTag ref={hostRef} {...restProps}>
           <Slot />
           {namedSlots.map((name) => (
             <Slot name={name} key={name} />
