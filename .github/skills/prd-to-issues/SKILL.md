@@ -106,6 +106,53 @@ Reference by number from the parent PRD:
 
 Do NOT close or modify the parent PRD issue.
 
-### 6. Create progress.md
+### 6. Link issues as actual child issues of the PRD
+
+After creating all child issues, you MUST also create real parent/child links in GitHub (Sub-issues), not only labels and issue-body references.
+
+Use GraphQL `addSubIssue` for each child issue.
+
+Rules:
+
+- Create child issues first, collect their issue numbers, then link each one to the parent PRD.
+- Keep issue creation in dependency order (for blocker references), but linking can be done in any order.
+- If linking fails for one child, report the failure and continue attempting remaining children.
+- Labels like `prd-<number>` remain required for deterministic local tooling, but they do not replace sub-issue links.
+
+Use the dedicated helper script in this skill:
+
+- `scripts/link-sub-issues.ps1`
+
+PowerShell usage:
+
+```powershell
+Set-Location <repo-root>
+./.github/skills/prd-to-issues/scripts/link-sub-issues.ps1 `
+  -Owner <owner> `
+  -Repo <repo> `
+  -ParentIssueNumber <prdIssueNumber> `
+  -ChildIssueNumbers 101,102,103
+```
+
+Optional strict mode (stop on first failed link):
+
+```powershell
+./.github/skills/prd-to-issues/scripts/link-sub-issues.ps1 `
+  -Owner <owner> `
+  -Repo <repo> `
+  -ParentIssueNumber <prdIssueNumber> `
+  -ChildIssueNumbers 101,102,103 `
+  -Strict
+```
+
+Verification (optional but recommended):
+
+```powershell
+gh issue view <prdIssueNumber> --repo <owner>/<repo>
+```
+
+Confirm the Sub-issues section contains the created child issues.
+
+### 7. Create progress.md
 
 Create a file in the `.prd/progress` directory. Name the file `progress-for-prd-<number>.md` where `<number>` is the original PRD issue number. This is the canonical local progress file consumed by `prd-task-runner` and `sync-to-system-prd`.
