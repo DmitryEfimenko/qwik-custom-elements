@@ -4,13 +4,19 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "node -e \"console.log('test-lit-lib build noop')\"",
-    "check-types": "node -e \"console.log('test-lit-lib check-types noop')\"",
-    "dev": "node -e \"console.log('test-lit-lib dev noop')\"",
+    "build": "npm run check-types && node ./scripts/write-cem.mjs",
+    "check-types": "tsc --noEmit -p tsconfig.json",
+    "dev": "tsc --watch --noEmit -p tsconfig.json",
     "format": "prettier --write . --config ../../.prettierrc.json --ignore-path ../../.prettierignore",
     "format:check": "prettier --check . --config ../../.prettierrc.json --ignore-path ../../.prettierignore",
     "lint": "eslint \"**/*.{js,mjs,cjs,ts,mts,cts,tsx}\" --no-error-on-unmatched-pattern",
     "e2e": "node -e \"console.log('test-lit-lib e2e noop')\"",
     "test": "node -e \"console.log('test-lit-lib test noop')\""
+  },
+  "dependencies": {
+    "lit": "^3.3.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
   }
 }
