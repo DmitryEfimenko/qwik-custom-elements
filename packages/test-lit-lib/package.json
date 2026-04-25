@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "npm run check-types && node ./scripts/write-cem.mjs",
+    "build": "npm run check-types && cem analyze --litelement --globs \"src/**/*.ts\" --outdir .",
     "check-types": "tsc --noEmit -p tsconfig.json",
     "dev": "tsc --watch --noEmit -p tsconfig.json",
     "format": "prettier --write . --config ../../.prettierrc.json --ignore-path ../../.prettierignore",
@@ -17,6 +17,8 @@
     "lit": "^3.3.1"
   },
   "devDependencies": {
+    "@custom-elements-manifest/analyzer": "^0.11.0",
     "typescript": "^5.9.3"
-  }
+  },
+  "customElements": "custom-elements.json"
 }

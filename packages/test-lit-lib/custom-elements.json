@@ -4,38 +4,89 @@
   "modules": [
     {
       "kind": "javascript-module",
+      "path": "src/index.ts",
+      "declarations": [],
+      "exports": [
+        {
+          "kind": "custom-element-definition",
+          "name": "de-button",
+          "declaration": {
+            "name": "DeButton",
+            "module": "/src/components/de-button.js"
+          }
+        },
+        {
+          "kind": "custom-element-definition",
+          "name": "de-alert",
+          "declaration": {
+            "name": "DeAlert",
+            "module": "/src/components/de-alert.js"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "DeAlert",
+          "declaration": {
+            "name": "DeAlert",
+            "module": "src/index.ts"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "DeButton",
+          "declaration": {
+            "name": "DeButton",
+            "module": "src/index.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
       "path": "src/components/de-alert.ts",
       "declarations": [
         {
           "kind": "class",
+          "description": "",
           "name": "DeAlert",
-          "tagName": "de-alert",
-          "attributes": [
-            {
-              "name": "heading",
-              "fieldName": "heading",
-              "type": {
-                "text": "string"
-              }
-            }
-          ],
           "members": [
             {
               "kind": "field",
               "name": "heading",
+              "privacy": "public",
               "type": {
                 "text": "string"
-              }
+              },
+              "default": "'Alert'",
+              "attribute": "heading"
             }
           ],
-          "slots": [
+          "attributes": [
             {
-              "name": ""
-            },
-            {
-              "name": "footer"
+              "name": "heading",
+              "type": {
+                "text": "string"
+              },
+              "default": "'Alert'",
+              "fieldName": "heading"
             }
-          ]
+          ],
+          "superclass": {
+            "name": "LitElement",
+            "package": "lit"
+          },
+          "tagName": "de-alert",
+          "customElement": true
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "DeAlert",
+          "declaration": {
+            "name": "DeAlert",
+            "module": "src/components/de-alert.ts"
+          }
         }
       ]
     },
@@ -45,39 +96,82 @@
       "declarations": [
         {
           "kind": "class",
+          "description": "",
           "name": "DeButton",
-          "tagName": "de-button",
-          "attributes": [
-            {
-              "name": "size",
-              "fieldName": "size",
-              "type": {
-                "text": "'sm' | 'md' | 'lg'"
-              }
-            }
-          ],
           "members": [
             {
               "kind": "field",
               "name": "size",
+              "privacy": "public",
               "type": {
                 "text": "'sm' | 'md' | 'lg'"
-              }
+              },
+              "default": "'md'",
+              "attribute": "size",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "#clicks",
+              "privacy": "private",
+              "type": {
+                "text": "number"
+              },
+              "default": "0"
+            },
+            {
+              "kind": "method",
+              "name": "#handleClick",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "void"
+                }
+              },
+              "parameters": [
+                {
+                  "name": "event",
+                  "type": {
+                    "text": "MouseEvent"
+                  }
+                }
+              ]
             }
           ],
           "events": [
             {
               "name": "tripleClick",
               "type": {
-                "text": "CustomEvent<MouseEvent>"
+                "text": "CustomEvent"
               }
             }
           ],
-          "slots": [
+          "attributes": [
             {
-              "name": ""
+              "name": "size",
+              "type": {
+                "text": "'sm' | 'md' | 'lg'"
+              },
+              "default": "'md'",
+              "fieldName": "size"
             }
-          ]
+          ],
+          "superclass": {
+            "name": "LitElement",
+            "package": "lit"
+          },
+          "tagName": "de-button",
+          "customElement": true
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "DeButton",
+          "declaration": {
+            "name": "DeButton",
+            "module": "src/components/de-button.ts"
+          }
         }
       ]
     }
