@@ -4,7 +4,7 @@ import type { DocumentHead } from '@builder.io/qwik-city';
 import {
   GeneratedStencilComponent,
   useGeneratedStencilClientSetup,
-} from '../../../../generated/runtime';
+} from '../../../../generated/ssr/runtime';
 
 export default component$(() => {
   const buttonSize = useSignal<'md' | 'lg'>('md');

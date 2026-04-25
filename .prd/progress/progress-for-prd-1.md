@@ -1,5 +1,46 @@
 # PRD-1 Progress Log
 
+## 2026-04-24 - Issue #39 partial: migrate generated output paths to nested SSR/CSR capability-specific folders
+
+- Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+- Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/39
+- Task completed:
+  - Updated generator config `outDir` paths to nested capability-specific subdirectories: `demo` project now outputs to `./apps/qwik-demo/src/generated/ssr`, `demo-csr` project now outputs to `./apps/qwik-demo/src/generated/csr`.
+  - Migrated SSR routes (`/stencil/ssr/wrappers`, `/stencil/ssr/bridge`) imports to consume wrappers and runtime from `../../../../generated/ssr` instead of flat `../../../../generated`.
+  - Migrated CSR routes (`/stencil/csr/wrappers`, `/stencil/csr/bridge`) imports to consume wrappers and runtime from `../../../../generated/csr` instead of flat `../../../../generated-csr`.
+  - Removed legacy flat output folders (`apps/qwik-demo/src/generated` and `apps/qwik-demo/src/generated-csr`) and regenerated fresh outputs into nested structure.
+- Key decisions made:
+  - Keep this run scoped to one slice: path migration + route consumption rewiring + validation only.
+  - Do not couple with changes to generated wrapper behavior, adapter runtime logic, or demo route handler logic.
+  - Nested SSR/CSR paths align with existing PRD findings that distinguish capability-specific generated surfaces.
+- Files changed:
+  - `qwik-custom-elements.config.json` (updated demo and demo-csr `outDir` values)
+  - `apps/qwik-demo/src/routes/stencil/ssr/wrappers/index.tsx` (updated imports from flat to nested SSR path)
+  - `apps/qwik-demo/src/routes/stencil/ssr/bridge/index.tsx` (updated imports from flat to nested SSR path)
+  - `apps/qwik-demo/src/routes/stencil/csr/wrappers/index.tsx` (updated imports from flat to nested CSR path)
+  - `apps/qwik-demo/src/routes/stencil/csr/bridge/index.tsx` (updated imports from flat to nested CSR path)
+  - `apps/qwik-demo/src/generated/ssr/*` (fresh generated SSR output)
+  - `apps/qwik-demo/src/generated/csr/*` (fresh generated CSR output)
+- Validation:
+  - `pnpm typecheck` ✓ all packages passed
+  - `pnpm test` ✓ all test suites passed (52 tests in core, 30 in adapter-stencil, 4 in adapter-lit, 5 in test-stencil-lib)
+  - `pnpm build` ✓ all packages built successfully
+  - `pnpm lint` ✓ all packages linted successfully
+  - `pnpm format` ✓ formatter ran successfully across all packages
+  - `pnpm e2e` : 5 of 6 tests passed; 1 pre-existing failure in `/stencil/ssr/wrappers` size-attribute expectation (unrelated SSR blocker documented in prior progress runs)
+    - ✓ home route renders baseline content
+    - ✓ stencil bridge interaction contract: toggles handler and increments active counters
+    - ✗ stencil wrappers interaction contract: toggles handler and increments active counters (pre-existing out-of-scope failure)
+    - ✓ stencil csr bridge interaction contract: toggles handler and increments active counters
+    - ✓ stencil csr bridge regression: size toggles preserve mounted host instance and interaction
+    - ✓ stencil csr wrappers interaction contract: toggles handler and increments active counters
+- Durable sync:
+  - Reviewed `docs/SYSTEM/*`; no new durable architecture/API decisions introduced by this path-migration slice.
+  - Path migration aligns with existing findings on capability-specific generated surfaces; no updates needed.
+- Remaining for issue #39:
+  - Root-level e2e failure in SSR wrappers route remains out-of-scope blocker (pre-existing, documented in prior runs).
+  - Re-assess issue #39 acceptance criteria against current implementation state.
+
 ## 2026-04-22 - Issue #37 partial: preserve CSR bridge host instance on prop updates
 
 - Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1

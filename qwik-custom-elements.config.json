@@ -14,7 +14,7 @@
           "hydrateImport": "@qwik-custom-elements/test-stencil-lib/hydrate"
         }
       },
-      "outDir": "./apps/qwik-demo/src/generated",
+      "outDir": "./apps/qwik-demo/src/generated/ssr",
       "cleanOutput": true
     },
     {
@@ -30,7 +30,7 @@
           "loaderImport": "@qwik-custom-elements/test-stencil-lib/loader"
         }
       },
-      "outDir": "./apps/qwik-demo/src/generated-csr",
+      "outDir": "./apps/qwik-demo/src/generated/csr",
       "cleanOutput": true
     }
   ]

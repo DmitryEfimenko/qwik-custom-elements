@@ -1,8 +1,8 @@
 import { $, component$, useSignal } from '@builder.io/qwik';
 import type { DocumentHead } from '@builder.io/qwik-city';
 
-import { QwikDeAlert, QwikDeButton } from '../../../../generated-csr';
-import { useGeneratedStencilClientSetup } from '../../../../generated-csr/runtime';
+import { QwikDeAlert, QwikDeButton } from '../../../../generated/csr';
+import { useGeneratedStencilClientSetup } from '../../../../generated/csr/runtime';
 
 export default component$(() => {
   useGeneratedStencilClientSetup();
