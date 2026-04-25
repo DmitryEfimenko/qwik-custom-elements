@@ -50,6 +50,9 @@ importers:
       '@qwik-custom-elements/adapter-stencil':
         specifier: workspace:*
         version: link:../../packages/adapter-stencil
+      '@qwik-custom-elements/test-lit-lib':
+        specifier: workspace:*
+        version: link:../../packages/test-lit-lib
       '@qwik-custom-elements/test-stencil-lib':
         specifier: workspace:*
         version: link:../../packages/test-stencil-lib

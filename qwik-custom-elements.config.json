@@ -32,6 +32,17 @@
       },
       "outDir": "./apps/qwik-demo/src/generated/csr",
       "cleanOutput": true
+    },
+    {
+      "id": "demo-lit-ssr",
+      "adapter": "lit",
+      "adapterPackage": "@qwik-custom-elements/adapter-lit",
+      "source": {
+        "type": "CEM",
+        "path": "./packages/test-lit-lib/custom-elements.json"
+      },
+      "outDir": "./apps/qwik-demo/src/generated/lit/ssr",
+      "cleanOutput": true
     }
   ]
 }

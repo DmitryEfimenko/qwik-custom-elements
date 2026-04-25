@@ -18,6 +18,9 @@
     "noEmit": true,
     "paths": {
       "~/*": ["./src/*"],
+      "@qwik-custom-elements/test-lit-lib": [
+        "../../packages/test-lit-lib/src/index.ts"
+      ],
       "@qwik-custom-elements/adapter-stencil/client": [
         "../../packages/adapter-stencil/src/client/index.ts"
       ],
