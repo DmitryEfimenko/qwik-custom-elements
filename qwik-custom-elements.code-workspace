@@ -43,6 +43,10 @@
         "approve": true,
         "matchCommandLine": true,
       },
+      "/^Set-Location c:/Source/qwik-custom-elements; pnpm --filter @qwik-custom-elements/core run build; node packages/core/dist/cli\\.js --config qwik-custom-elements\\.config\\.json$/": {
+        "approve": true,
+        "matchCommandLine": true,
+      },
     },
   },
 }
