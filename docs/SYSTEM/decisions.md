@@ -1,5 +1,17 @@
 # Decisions
 
+## DEC-2026-04-28-LIT-SSR-ADAPTER-SUBPATH-GATE
+- Status: Accepted
+- Sources:
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/44
+- Decision:
+  - Lit projects that are intended to emit SSR-capable generated runtime surfaces must target `@qwik-custom-elements/adapter-lit/ssr` as `adapterPackage`.
+  - Using root `@qwik-custom-elements/adapter-lit` is treated as client-capable fallback mode and must not be relied on for SSR runtime surface generation.
+- Rationale:
+  - The root Lit adapter entrypoint intentionally reports SSR unavailable, which downgrades generation to fallback behavior and omits SSR runtime bridge files.
+  - SSR bridge contract ownership for Lit lives under adapter-lit SSR subpath and should be explicit in project configuration to keep mode signaling deterministic.
+
 ## DEC-2026-04-28-STENCIL-WRAPPER-MODE-GATE
 - Status: Accepted
 - Sources:

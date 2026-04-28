@@ -73,6 +73,43 @@ describe('adapter-lit metadata contract', () => {
     );
   });
 
+  it('generates Lit SSR runtime bridge contract and consumes it in wrappers', () => {
+    const plannedWrites = createSsrGeneratedOutput({
+      projectId: 'demo',
+      componentDefinitions: [{ tagName: 'lit-button' }],
+      ssrAvailable: true,
+    });
+
+    const runtimeBarrelWrite = plannedWrites.find(
+      (plannedWrite: { relativePath: string }) =>
+        plannedWrite.relativePath === 'runtime.ts',
+    );
+    const runtimeSsrWrite = plannedWrites.find(
+      (plannedWrite: { relativePath: string }) =>
+        plannedWrite.relativePath === 'runtime-ssr.generated.ts',
+    );
+    const wrapperWrite = plannedWrites.find(
+      (plannedWrite: { relativePath: string }) =>
+        plannedWrite.relativePath === 'lit-button.ts',
+    );
+
+    expect(runtimeBarrelWrite?.content).toContain(
+      "export * from './runtime-ssr.generated';",
+    );
+    expect(runtimeSsrWrite?.content).toContain(
+      "import { createLitSSRComponent, renderComponentSsrHtml } from '@qwik-custom-elements/adapter-lit/ssr';",
+    );
+    expect(runtimeSsrWrite?.content).toContain(
+      'export const GeneratedLitComponent = createLitSSRComponent(renderComponentSsrHtml);',
+    );
+    expect(wrapperWrite?.content).toContain(
+      "import { GeneratedLitComponent } from './runtime';",
+    );
+    expect(wrapperWrite?.content).toContain(
+      'export const QwikLitButtonSsrHtmlFromBridge = GeneratedLitComponent({ tagName: "lit-button" });',
+    );
+  });
+
   it('returns fallback null when no SSR tagName input is provided', () => {
     expect(renderComponentSsrHtml()).toBeNull();
   });

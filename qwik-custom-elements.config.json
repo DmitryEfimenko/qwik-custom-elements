@@ -36,7 +36,7 @@
     {
       "id": "demo-lit-ssr",
       "adapter": "lit",
-      "adapterPackage": "@qwik-custom-elements/adapter-lit",
+      "adapterPackage": "@qwik-custom-elements/adapter-lit/ssr",
       "source": {
         "type": "CEM",
         "path": "./packages/test-lit-lib/custom-elements.json"

@@ -36,6 +36,22 @@ export function renderComponentSsrHtml(
   return `<${tagName}></${tagName}>`;
 }
 
+export type LitSsrComponentRenderer = (options?: {
+  tagName?: unknown;
+}) => string | null;
+
+export type LitGeneratedSsrComponent = (options: {
+  tagName: string;
+}) => string | null;
+
+export function createLitSSRComponent(
+  render: LitSsrComponentRenderer,
+): LitGeneratedSsrComponent {
+  return ({ tagName }) => {
+    return render({ tagName });
+  };
+}
+
 function createContractError(
   code: string,
   message: string,

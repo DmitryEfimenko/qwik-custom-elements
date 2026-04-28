@@ -1,6 +1,16 @@
 # Findings Log
 
-# Findings Log
+## 2026-04-28 - Lit SSR generated runtime surface requires adapter SSR subpath selection
+
+- Sources:
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/44
+- Finding:
+  - Configuring Lit SSR generation projects with root `@qwik-custom-elements/adapter-lit` causes deterministic fallback mode (`probeSSR().available === false`) and prevents emission of SSR runtime bridge files.
+  - Configuring the same project with `@qwik-custom-elements/adapter-lit/ssr` enables adapter-owned SSR bridge contract generation (`runtime.ts`, `runtime-ssr.generated.ts`) and wrapper bridge consumption.
+- Durable guidance:
+  - For any Lit project that claims SSR-capable generated output, set `adapterPackage` to `@qwik-custom-elements/adapter-lit/ssr`.
+  - Reserve root `@qwik-custom-elements/adapter-lit` for client-capable fallback output only.
 
 ## 2026-04-28 - Stencil SSR probe unavailability at generation time does not mean hydrate runtime is absent
 
