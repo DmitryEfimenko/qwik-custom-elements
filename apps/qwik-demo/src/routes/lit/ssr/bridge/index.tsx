@@ -1,11 +1,13 @@
 import { $, component$, useOnDocument } from '@builder.io/qwik';
 import type { DocumentHead } from '@builder.io/qwik-city';
 
-
 export default component$(() => {
-  useOnDocument('readystatechange', $(() => {
-    void import('@qwik-custom-elements/test-lit-lib');
-  }));
+  useOnDocument(
+    'readystatechange',
+    $(() => {
+      void import('@qwik-custom-elements/test-lit-lib');
+    }),
+  );
 
   return (
     <>
