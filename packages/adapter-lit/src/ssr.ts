@@ -16,18 +16,33 @@ export async function probeSSR(): Promise<{ available: boolean }> {
 export function renderComponentSsrHtml(
   options: { tagName?: unknown } = {},
 ): string | null {
-  // Placeholder output for tracer-bullet contract wiring only.
-  // TODO(#13): replace tag-only output with true adapter-owned Lit SSR output.
+  // Keep fallback and hard-failure deterministic for contract tests.
+  if (options.tagName == null) {
+    return null;
+  }
+
   if (
     typeof options.tagName !== 'string' ||
     options.tagName.trim().length === 0
   ) {
-    return null;
+    throw createContractError(
+      'QCE_LIT_RUNTIME_TAGNAME_INVALID',
+      'Lit SSR render contract requires options.tagName to be a non-empty string when provided.',
+    );
   }
 
   const tagName = options.tagName.trim();
 
   return `<${tagName}></${tagName}>`;
+}
+
+function createContractError(
+  code: string,
+  message: string,
+): Error & { code: string } {
+  const error = new Error(message) as Error & { code: string };
+  error.code = code;
+  return error;
 }
 
 export function createGeneratedOutput(input: {

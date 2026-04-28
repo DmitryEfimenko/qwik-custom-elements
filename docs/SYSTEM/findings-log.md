@@ -13,6 +13,18 @@
   - In Lit first-path e2e tests, assert page-level route signals (heading/status) plus runtime readiness (`customElements.get(...) != null`) plus visible host render under deterministic wrapper ids.
   - Keep this smoke contract small and route-local; defer event-contract or richer interaction assertions to later Lit tracer bullets.
 
+## 2026-04-28 - Lit SSR render contract should separate missing-input fallback from invalid-input hard failures
+
+- Sources:
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/43
+- Finding:
+  - For Lit SSR adapter render contract, conflating absent `tagName` with invalid provided `tagName` hides contract violations and weakens deterministic diagnostics. Fallback and hard-failure paths should be distinct and testable.
+- Durable guidance:
+  - Treat absent `options.tagName` as explicit fallback (`null`) when the caller did not provide SSR tag input.
+  - Treat provided invalid `tagName` values (non-string/blank string) as hard failures with stable error code and deterministic message.
+  - Keep this validation and diagnostics behavior adapter-owned (`adapter-lit`) so core remains framework-agnostic.
+
 ## 2026-04-22 - Generated Stencil wrapper setup should be page-level, while SSR-capable wrappers must keep SSR component surface
 
 - Sources:

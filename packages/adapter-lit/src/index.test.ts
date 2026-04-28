@@ -72,4 +72,18 @@ describe('adapter-lit metadata contract', () => {
       'export const QwikLitButtonSsrHtml = "<lit-button></lit-button>" as const;',
     );
   });
+
+  it('returns fallback null when no SSR tagName input is provided', () => {
+    expect(renderComponentSsrHtml()).toBeNull();
+  });
+
+  it('throws deterministic contract error for blank SSR tagName input', () => {
+    expect(() => renderComponentSsrHtml({ tagName: '   ' })).toThrowError(
+      expect.objectContaining({
+        code: 'QCE_LIT_RUNTIME_TAGNAME_INVALID',
+        message:
+          'Lit SSR render contract requires options.tagName to be a non-empty string when provided.',
+      }),
+    );
+  });
 });
