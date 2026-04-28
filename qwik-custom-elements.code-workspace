@@ -47,6 +47,10 @@
         "approve": true,
         "matchCommandLine": true,
       },
+      "/^node \\.\\\\packages\\\\core\\\\dist\\\\cli\\.js --project demo-lit-csr$/": {
+        "approve": true,
+        "matchCommandLine": true,
+      },
     },
   },
 }
