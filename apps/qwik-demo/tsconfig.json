@@ -28,6 +28,9 @@
       "@qwik-custom-elements/adapter-stencil/ssr": [
         "../../packages/adapter-stencil/src/ssr/index.ts"
       ],
+      "@qwik-custom-elements/adapter-lit/client": [
+        "../../packages/adapter-lit/src/client.ts"
+      ],
       "@qwik-custom-elements/adapter-lit/ssr": [
         "../../packages/adapter-lit/src/ssr.ts"
       ]

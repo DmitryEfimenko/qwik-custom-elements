@@ -1,5 +1,18 @@
 # Findings Log
 
+## 2026-04-28 - Lit CSR generated runtime bridge should be client-subpath owned and explicitly source-mapped in demo apps
+
+- Sources:
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/45
+- Finding:
+  - For Lit CSR projects using root `@qwik-custom-elements/adapter-lit` fallback mode, generated output remains deterministic only when adapter-owned CSR runtime bridge surface is emitted (`runtime.ts`, `runtime-csr.generated.ts`) and wrappers consume bridge result (`Qwik* CsrTagFromBridge`) instead of ad hoc route constants.
+  - In workspace-local app development, `@qwik-custom-elements/adapter-lit/client` must be mapped to source in both TypeScript paths and Vite aliases; otherwise subpath resolution can fail before package dist is built.
+- Durable guidance:
+  - Keep Lit CSR bridge contract adapter-owned at explicit `@qwik-custom-elements/adapter-lit/client` subpath.
+  - For generated Lit CSR outputs, emit a runtime barrel and CSR runtime leaf, then consume that bridge from generated wrapper modules.
+  - In local workspace apps, align `tsconfig` paths and Vite aliases for `@qwik-custom-elements/adapter-lit/client` the same way as other adapter subpaths.
+
 ## 2026-04-28 - Lit SSR generated runtime surface requires adapter SSR subpath selection
 
 - Sources:

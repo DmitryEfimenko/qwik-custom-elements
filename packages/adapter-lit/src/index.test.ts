@@ -29,6 +29,8 @@ describe('adapter-lit metadata contract', () => {
 
     expect(plannedWrites).toEqual([
       expect.objectContaining({ relativePath: 'index.ts' }),
+      expect.objectContaining({ relativePath: 'runtime.ts' }),
+      expect.objectContaining({ relativePath: 'runtime-csr.generated.ts' }),
       expect.objectContaining({ relativePath: 'lit-button.ts' }),
     ]);
 
@@ -40,6 +42,14 @@ describe('adapter-lit metadata contract', () => {
       (plannedWrite: { relativePath: string }) =>
         plannedWrite.relativePath === 'lit-button.ts',
     );
+    const runtimeWrite = plannedWrites.find(
+      (plannedWrite: { relativePath: string }) =>
+        plannedWrite.relativePath === 'runtime.ts',
+    );
+    const runtimeCsrWrite = plannedWrites.find(
+      (plannedWrite: { relativePath: string }) =>
+        plannedWrite.relativePath === 'runtime-csr.generated.ts',
+    );
 
     expect(indexWrite?.content).toContain(
       'export const generatedComponentTags = ["lit-button"] as const;',
@@ -49,6 +59,21 @@ describe('adapter-lit metadata contract', () => {
     );
     expect(wrapperWrite?.content).toContain(
       'export const QwikLitButton = "lit-button" as const;',
+    );
+    expect(runtimeWrite?.content).toContain(
+      "export * from './runtime-csr.generated';",
+    );
+    expect(runtimeCsrWrite?.content).toContain(
+      "import { createLitCSRComponent, renderComponentCsrTag } from '@qwik-custom-elements/adapter-lit/client';",
+    );
+    expect(runtimeCsrWrite?.content).toContain(
+      'export const GeneratedLitCSRComponent = createLitCSRComponent(renderComponentCsrTag);',
+    );
+    expect(wrapperWrite?.content).toContain(
+      "import { GeneratedLitCSRComponent } from './runtime';",
+    );
+    expect(wrapperWrite?.content).toContain(
+      'export const QwikLitButtonCsrTagFromBridge = GeneratedLitCSRComponent({ tagName: "lit-button" });',
     );
     expect(wrapperWrite?.content).not.toContain('QwikLitButtonSsrHtml');
   });

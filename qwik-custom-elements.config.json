@@ -34,6 +34,17 @@
       "cleanOutput": true
     },
     {
+      "id": "demo-lit-csr",
+      "adapter": "lit",
+      "adapterPackage": "@qwik-custom-elements/adapter-lit",
+      "source": {
+        "type": "CEM",
+        "path": "./packages/test-lit-lib/custom-elements.json"
+      },
+      "outDir": "./apps/qwik-demo/src/generated/lit/csr",
+      "cleanOutput": true
+    },
+    {
       "id": "demo-lit-ssr",
       "adapter": "lit",
       "adapterPackage": "@qwik-custom-elements/adapter-lit/ssr",
