@@ -1,16 +1,11 @@
-import { component$, isBrowser, jsx, useTask$ } from '@builder.io/qwik';
+import { $, component$, useOnDocument } from '@builder.io/qwik';
 import type { DocumentHead } from '@builder.io/qwik-city';
 
-import { QwikDeButton } from '../../../../generated/lit/ssr';
 
 export default component$(() => {
-  useTask$(() => {
-    if (!isBrowser) {
-      return;
-    }
-
+  useOnDocument('readystatechange', $(() => {
     void import('@qwik-custom-elements/test-lit-lib');
-  });
+  }));
 
   return (
     <>
@@ -18,10 +13,7 @@ export default component$(() => {
       <p id="lit-render-status">First Lit render path active.</p>
 
       <div id="lit-first-wrapper">
-        {jsx(QwikDeButton, {
-          id: 'first-lit-button',
-          children: 'First Lit Button',
-        })}
+        <de-button id="first-lit-button">First Lit Button</de-button>
       </div>
     </>
   );
