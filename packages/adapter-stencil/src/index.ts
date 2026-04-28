@@ -216,7 +216,7 @@ export function createGeneratedOutput({
   projectId,
   componentDefinitions,
   runtimeImports,
-  ssrAvailable,
+  ssrAvailable: _ssrAvailable,
 }: CreateGeneratedOutputInput): Array<{
   relativePath: string;
   content: string;
@@ -268,7 +268,7 @@ export function createGeneratedOutput({
       content: renderStencilComponentWrapper(
         projectId,
         componentDefinition,
-        ssrAvailable === true,
+        hasHydrateRuntime,
       ),
     });
   }

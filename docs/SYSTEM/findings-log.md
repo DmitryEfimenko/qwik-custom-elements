@@ -2,6 +2,18 @@
 
 # Findings Log
 
+## 2026-04-28 - Stencil SSR probe unavailability at generation time does not mean hydrate runtime is absent
+
+- Sources:
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/43
+- Finding:
+  - `probeSSR()` returns `{ available: false }` during CLI generation even when the hydrate module is correctly configured, because the generator process cannot dynamically `import()` the hydrate package path at that time. Using the probe result to gate SSR wrapper generation mode causes all generated wrappers to emit `GeneratedStencilCSRComponent` regardless of config.
+- Durable guidance:
+  - Treat `ssrAvailable` (probe result) as a diagnostic/reporting signal only.
+  - Use `hasHydrateRuntime` (whether `runtimeImports.hydrateImport` is a non-empty string in config) as the authoritative gate for SSR wrapper generation mode.
+  - Never derive generation-time capability from runtime probe outcomes that cannot succeed in the generator process environment.
+
 ## 2026-04-28 - First-path Lit SSR e2e proof should assert both custom-element registration and rendered host presence
 
 - Sources:

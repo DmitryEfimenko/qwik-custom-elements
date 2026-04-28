@@ -3,7 +3,7 @@
 
 import { Slot, component$ } from '@builder.io/qwik';
 import type { QRL } from '@builder.io/qwik';
-import { GeneratedStencilCSRComponent } from './runtime';
+import { GeneratedStencilComponent } from './runtime';
 
 export interface QwikDeButtonProps {
   size?: "lg" | "md" | "sm";
@@ -42,7 +42,7 @@ export const QwikDeButton = component$<QwikDeButtonProps>((props) => {
   const mappedEvents = Object.keys(events).length > 0 ? events : undefined;
 
   return (
-    <GeneratedStencilCSRComponent
+    <GeneratedStencilComponent
       tagName="de-button"
       props={elementProps}
       events={mappedEvents}
@@ -50,6 +50,6 @@ export const QwikDeButton = component$<QwikDeButtonProps>((props) => {
       {...passthroughEventProps}
     >
     <Slot />
-    </GeneratedStencilCSRComponent>
+    </GeneratedStencilComponent>
   );
 });

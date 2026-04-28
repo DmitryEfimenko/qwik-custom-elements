@@ -1,5 +1,17 @@
 # Decisions
 
+## DEC-2026-04-28-STENCIL-WRAPPER-MODE-GATE
+- Status: Accepted
+- Sources:
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/43
+- Decision:
+  - SSR wrapper generation mode in `createGeneratedOutput` is gated on `hasHydrateRuntime` (whether `runtimeImports.hydrateImport` is a non-empty string), not on `ssrAvailable` (the runtime probe result).
+  - The probe result is retained for diagnostics and reporting only and must not influence code generation decisions.
+- Rationale:
+  - The hydrate module cannot be dynamically imported inside the generator process even when it is correctly configured. Using the probe result as a capability gate causes permanent CSR-only wrapper generation regardless of consumer config intent.
+  - Config presence is the correct authoritative signal because it reflects deliberate consumer intent, while probe availability is an execution-environment artifact.
+
 ## DEC-2026-04-20-ADAPTER-OWNED-GENERATED-OUTPUT
 - Status: Accepted
 - Sources:

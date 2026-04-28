@@ -379,4 +379,34 @@ describe('adapter-stencil metadata contract', () => {
     expect(ssrRuntimeWrite?.content).toContain('@acme/stencil-lib/hydrate');
     expect(ssrRuntimeWrite?.content).toContain('GeneratedStencilComponent');
   });
+
+  it('generates SSR wrappers when hydrate runtime import is present even if ssrAvailable is false', () => {
+    const plannedWrites = createGeneratedOutput({
+      projectId: 'demo',
+      source: { type: 'CEM' },
+      runtimeImports: {
+        loaderImport: '@acme/stencil-lib/loader',
+        hydrateImport: '@acme/stencil-lib/hydrate',
+      },
+      componentDefinitions: [
+        {
+          tagName: 'de-button',
+          props: [],
+          events: [],
+          slots: [],
+        },
+      ],
+      ssrAvailable: false,
+    });
+
+    const wrapperWrite = plannedWrites.find(
+      (plannedWrite) => plannedWrite.relativePath === 'de-button.tsx',
+    );
+
+    expect(wrapperWrite?.content).toContain(
+      "import { GeneratedStencilComponent } from './runtime';",
+    );
+    expect(wrapperWrite?.content).toContain('    <GeneratedStencilComponent');
+    expect(wrapperWrite?.content).toContain('    </GeneratedStencilComponent>');
+  });
 });
