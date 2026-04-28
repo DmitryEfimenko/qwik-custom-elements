@@ -222,6 +222,8 @@ test('lit ssr bridge smoke: first Lit render path renders and custom element is 
 
   await page.waitForFunction(() => customElements.get('de-button') != null);
 
+  await expect(page.locator('#first-lit-button')).toHaveCount(0);
+
   const firstHost = page.locator('#lit-first-wrapper de-button');
   await expect(firstHost).toBeVisible();
 });

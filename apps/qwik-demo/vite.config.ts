@@ -56,6 +56,9 @@ export default defineConfig(({ command, mode }): UserConfig => {
     },
     resolve: {
       alias: {
+        '@qwik-custom-elements/adapter-lit/ssr': fileURLToPath(
+          new URL('../../packages/adapter-lit/src/ssr.ts', import.meta.url),
+        ),
         '@qwik-custom-elements/adapter-stencil/client': fileURLToPath(
           new URL(
             '../../packages/adapter-stencil/src/client/index.ts',

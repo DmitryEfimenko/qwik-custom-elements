@@ -1,5 +1,6 @@
 import { $, component$, useOnDocument } from '@builder.io/qwik';
 import type { DocumentHead } from '@builder.io/qwik-city';
+import { QwikDeButtonSsrHtmlFromBridge } from '../../../../generated/lit/ssr/de-button';
 
 export default component$(() => {
   useOnDocument(
@@ -14,9 +15,10 @@ export default component$(() => {
       <h1>Lit SSR Bridge Validation</h1>
       <p id="lit-render-status">First Lit render path active.</p>
 
-      <div id="lit-first-wrapper">
-        <de-button id="first-lit-button">First Lit Button</de-button>
-      </div>
+      <div
+        id="lit-first-wrapper"
+        dangerouslySetInnerHTML={QwikDeButtonSsrHtmlFromBridge ?? undefined}
+      />
     </>
   );
 });

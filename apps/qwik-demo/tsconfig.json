@@ -27,6 +27,9 @@
       ],
       "@qwik-custom-elements/adapter-stencil/ssr": [
         "../../packages/adapter-stencil/src/ssr/index.ts"
+      ],
+      "@qwik-custom-elements/adapter-lit/ssr": [
+        "../../packages/adapter-lit/src/ssr.ts"
       ]
     },
     /* if you do not use CSS modules, remove this line and delete the typescript-plugin-css-modules module from package.json */
