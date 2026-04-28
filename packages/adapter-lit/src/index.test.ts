@@ -86,4 +86,16 @@ describe('adapter-lit metadata contract', () => {
       }),
     );
   });
+
+  it('throws deterministic contract error for non-string SSR tagName input', () => {
+    expect(() =>
+      renderComponentSsrHtml({ tagName: 42 as unknown as string }),
+    ).toThrowError(
+      expect.objectContaining({
+        code: 'QCE_LIT_RUNTIME_TAGNAME_INVALID',
+        message:
+          'Lit SSR render contract requires options.tagName to be a non-empty string when provided.',
+      }),
+    );
+  });
 });
