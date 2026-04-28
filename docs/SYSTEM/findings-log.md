@@ -2,6 +2,17 @@
 
 # Findings Log
 
+## 2026-04-28 - First-path Lit SSR e2e proof should assert both custom-element registration and rendered host presence
+
+- Sources:
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/42
+- Finding:
+  - For Lit SSR bridge smoke coverage, route copy alone can pass while runtime registration fails silently. Durable first-path proof should assert both `customElements.get('<tag>')` availability and visible rendered host under route-owned wrapper selectors.
+- Durable guidance:
+  - In Lit first-path e2e tests, assert page-level route signals (heading/status) plus runtime readiness (`customElements.get(...) != null`) plus visible host render under deterministic wrapper ids.
+  - Keep this smoke contract small and route-local; defer event-contract or richer interaction assertions to later Lit tracer bullets.
+
 ## 2026-04-22 - Generated Stencil wrapper setup should be page-level, while SSR-capable wrappers must keep SSR component surface
 
 - Sources:

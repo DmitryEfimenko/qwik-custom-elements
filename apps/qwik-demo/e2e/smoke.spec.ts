@@ -204,3 +204,24 @@ test('stencil csr wrappers interaction contract: toggles handler and increments 
     { expectedSizeAttribute: 'ignore' },
   );
 });
+
+test('lit ssr bridge smoke: first Lit render path renders and custom element is available', async ({
+  page,
+}) => {
+  await page.goto('/lit/ssr/bridge');
+
+  await expect(
+    page.getByRole('heading', {
+      level: 1,
+      name: 'Lit SSR Bridge Validation',
+    }),
+  ).toBeVisible();
+  await expect(page.locator('#lit-render-status')).toContainText(
+    'First Lit render path active.',
+  );
+
+  await page.waitForFunction(() => customElements.get('de-button') != null);
+
+  const firstHost = page.locator('#lit-first-wrapper de-button');
+  await expect(firstHost).toBeVisible();
+});
