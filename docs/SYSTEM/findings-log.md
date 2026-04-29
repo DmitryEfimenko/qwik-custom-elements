@@ -1,5 +1,17 @@
 # Findings Log
 
+## 2026-04-29 - libraryName should flow as additive adapter context, not as core-owned naming logic
+
+- Sources:
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/50
+- Finding:
+  - Introducing optional `projects[].libraryName` in core config enables deterministic adapter naming work while keeping core framework-agnostic.
+  - Passing `libraryName` directly to `createGeneratedOutput(...)` is backward-compatible because adapters can ignore unknown/optional context fields.
+- Durable guidance:
+  - Keep `libraryName` optional during rollout to avoid breaking existing configs.
+  - Keep naming-shape decisions in adapters; core should only transport neutral generation context.
+
 ## 2026-04-29 - Stencil SSR bridge factory name must stay aligned across adapter runtime and generated runtime templates
 
 - Sources:

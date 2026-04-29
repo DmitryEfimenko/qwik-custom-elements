@@ -488,6 +488,50 @@ describe('generateFromConfig', () => {
     });
   });
 
+  it('passes optional libraryName to createGeneratedOutput when configured', async () => {
+    await withTempDir(async (tempDir) => {
+      await writeFile(
+        path.join(tempDir, 'custom-elements.json'),
+        JSON.stringify({
+          modules: [{ declarations: [{ tagName: 'app-root' }] }],
+        }),
+        'utf8',
+      );
+      await writeFile(
+        path.join(tempDir, 'adapter-library-name.mjs'),
+        [
+          'export const metadata = {',
+          "  supportedSourceTypes: ['CEM', 'PACKAGE_NAME'],",
+          '  supportsSsrProbe: false,',
+          '  ssrRuntimeSubpath: null,',
+          '};',
+          '',
+          'export function createGeneratedOutput({ projectId, libraryName, componentDefinitions }) {',
+          '  return componentDefinitions.map((componentDefinition) => ({',
+          '    relativePath: `${componentDefinition.tagName}.txt`,',
+          '    content: `library:${projectId}:${libraryName ?? "missing"}:${componentDefinition.tagName}` ,',
+          '  }));',
+          '}',
+          '',
+        ].join('\n'),
+        'utf8',
+      );
+
+      const config = createSingleProjectConfig(tempDir, true);
+      config.projects[0].adapterPackage = './adapter-library-name.mjs';
+      config.projects[0].libraryName = 'test-stencil-lib';
+
+      const result = await generateFromConfig(config, { cwd: tempDir });
+
+      expect(result.projects[0].plannedWrites).toEqual([
+        expect.objectContaining({
+          path: path.join(tempDir, 'src', 'generated', 'app-root.txt'),
+          content: 'library:demo:test-stencil-lib:app-root',
+        }),
+      ]);
+    });
+  });
+
   it('returns only adapter-generated files without adding core fallback output', async () => {
     await withTempDir(async (tempDir) => {
       await writeFile(

@@ -15,6 +15,7 @@ export type GeneratorProjectSource =
 
 export interface GeneratorProject {
   id: string;
+  libraryName?: string;
   adapter: string;
   adapterPackage: string;
   source: GeneratorProjectSource;

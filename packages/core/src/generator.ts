@@ -851,6 +851,7 @@ async function createAdapterPlannedWrites(
   try {
     const plannedWrites = (await createGeneratedOutput({
       projectId: project.id,
+      libraryName: project.libraryName,
       source: project.source,
       adapterOptions: project.adapterOptions ?? {},
       runtimeImports,

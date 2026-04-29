@@ -1,5 +1,18 @@
 # Decisions
 
+## DEC-2026-04-29-OPTIONAL-LIBRARY-NAME-CONTRACT
+- Status: Accepted
+- Sources:
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/50
+- Decision:
+  - Core generator project config supports optional `projects[].libraryName`.
+  - When provided, core passes `libraryName` through to adapter `createGeneratedOutput(...)` inputs without imposing naming behavior in core.
+  - When omitted, generation behavior remains unchanged for backward compatibility.
+- Rationale:
+  - Deterministic generated-surface naming needs library identity available to adapters, but framework-specific naming rules remain adapter-owned.
+  - Keeping the field optional avoids breaking existing project configs during migration.
+
 ## DEC-2026-04-28-LIT-SSR-ADAPTER-SUBPATH-GATE
 - Status: Accepted
 - Sources:

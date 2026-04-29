@@ -87,6 +87,32 @@ describe('loadGeneratorConfig', () => {
       });
     });
   });
+
+  it('accepts optional project libraryName field', async () => {
+    await withTempDir(async (tempDir) => {
+      const configPath = path.join(tempDir, 'qwik-custom-elements.config.json');
+      await writeFile(
+        configPath,
+        JSON.stringify(
+          {
+            projects: [
+              {
+                ...validProject,
+                libraryName: 'test-stencil-lib',
+              },
+            ],
+          },
+          null,
+          2,
+        ),
+        'utf8',
+      );
+
+      const loaded = await loadGeneratorConfig({ cwd: tempDir });
+      expect(loaded.config.projects[0].libraryName).toBe('test-stencil-lib');
+    });
+  });
+
   it('keeps adapterOptions opaque during config loading', async () => {
     await withTempDir(async (tempDir) => {
       const configPath = path.join(tempDir, 'qwik-custom-elements.config.json');

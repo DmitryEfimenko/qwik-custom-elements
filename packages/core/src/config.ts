@@ -23,6 +23,7 @@ const ROOT_ALLOWED_KEYS = new Set([
 ]);
 const PROJECT_ALLOWED_KEYS = new Set([
   'id',
+  'libraryName',
   'adapter',
   'adapterPackage',
   'source',
@@ -101,6 +102,10 @@ function validateProject(
 
   return {
     id: readRequiredString(rawProject.id, `${pathPrefix}.id`),
+    libraryName: readOptionalString(
+      rawProject.libraryName,
+      `${pathPrefix}.libraryName`,
+    ),
     adapter: readRequiredString(rawProject.adapter, `${pathPrefix}.adapter`),
     adapterPackage: readRequiredString(
       rawProject.adapterPackage,
