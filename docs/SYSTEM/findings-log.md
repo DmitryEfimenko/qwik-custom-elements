@@ -1,5 +1,17 @@
 # Findings Log
 
+## 2026-04-29 - Lit CSR bridge tag exports should be consumed as validated markup or intrinsic tags, not nullable JSX component aliases
+
+- Sources:
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/45
+- Finding:
+  - Generated Lit CSR bridge helpers currently expose tag names as `string | null` (for deterministic invalid-input fallback). In Qwik TSX routes, assigning this value to a JSX component alias (for example `<BridgeTag />`) fails typecheck because nullable unions are not valid JSX element types.
+- Durable guidance:
+  - For route consumption of generated CSR tag bridges, normalize nullable outputs before render.
+  - Prefer either validated intrinsic-tag rendering or null-safe `dangerouslySetInnerHTML` binding in route-owned containers.
+  - Keep generated bridge contracts unchanged; resolve render-shape adaptation at app integration boundary.
+
 ## 2026-04-28 - Lit CSR generated runtime bridge should be client-subpath owned and explicitly source-mapped in demo apps
 
 - Sources:
