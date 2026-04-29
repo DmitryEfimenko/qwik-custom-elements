@@ -970,7 +970,7 @@ describe('generateFromConfig', () => {
         'return runtimeRenderToString(input, options);',
       );
       expect(runtimeWrite!.content).toContain(
-        'export const GeneratedStencilComponent = createStencilSSRComponent(',
+        'export const GeneratedStencilComponent = createStencilSSRBridgeComponent(',
       );
     });
   });

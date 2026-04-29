@@ -3,7 +3,7 @@
 
 import { $ } from '@builder.io/qwik';
 import {
-  createStencilSSRComponent,
+  createStencilSSRBridgeComponent,
   type StencilRenderToString,
 } from '@qwik-custom-elements/adapter-stencil/ssr';
 
@@ -17,6 +17,6 @@ export const renderToString: StencilRenderToString = async (input, options) => {
 };
 
 export const generatedStencilRenderToStringQrl = $(renderToString);
-export const GeneratedStencilComponent = createStencilSSRComponent(
+export const GeneratedStencilComponent = createStencilSSRBridgeComponent(
   generatedStencilRenderToStringQrl,
 );

@@ -1,5 +1,16 @@
 # Findings Log
 
+## 2026-04-29 - Stencil SSR bridge factory name must stay aligned across adapter runtime and generated runtime templates
+
+- Sources:
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/50
+- Finding:
+  - Renaming the adapter SSR factory export without updating generator SSR runtime templates leaves generated bridge modules on stale symbol imports and breaks deterministic generation contracts.
+- Durable guidance:
+  - Treat stencil SSR factory symbol renames as a contract change that must update both adapter runtime export and generator-emitted runtime module templates in the same slice.
+  - Regenerate tracked demo/runtime outputs immediately after template rename so checked-in generated files match the active adapter export.
+
 ## 2026-04-29 - Lit CSR bridge tag exports should be consumed as validated markup or intrinsic tags, not nullable JSX component aliases
 
 - Sources:

@@ -190,7 +190,7 @@ function collectSlotEntries(html: string, namedSlots: string[]): SlotEntry[] {
  * @param options - Optional callbacks for SSR lifecycle events
  * @returns A Qwik component that can be used like any other Qwik component
  */
-export function createStencilSSRComponent(
+export function createStencilSSRBridgeComponent(
   stencilRenderToString$: QRL<StencilRenderToString>,
   options?: {
     onSsrRenderResultQrl?: QRL<
