@@ -47,7 +47,7 @@ $normalizedLines = foreach ($line in $lines) {
 
 $content = [string]::Join("`n", $normalizedLines)
 
-$tmp = Join-Path $PWD (".tmp-issue-{0}-body.md" -f $Issue)
+$tmp = Join-Path $PWD (".tmp-issue-{0}-body-work.md" -f $Issue)
 [System.IO.File]::WriteAllText($tmp, $content, [System.Text.UTF8Encoding]::new($false))
 
 try {

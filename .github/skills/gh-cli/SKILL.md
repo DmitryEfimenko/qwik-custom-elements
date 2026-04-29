@@ -23,7 +23,7 @@ Minimal usage:
 
 ```powershell
 Set-Location <repo-root>
-pwsh ./.github/skills/gh-cli/safe-issue-body-update.ps1 `
+& ./.github/skills/gh-cli/safe-issue-body-update.ps1 `
   -Repo 'DmitryEfimenko/qwik-custom-elements' `
   -Issue 35 `
   -SourceBodyFile ./.tmp-issue-35-body.md
@@ -56,12 +56,12 @@ if (-not $found) { throw 'Expected checklist line was not found.' }
 
 $content = [string]::Join("`n", $updatedLines)
 [System.IO.File]::WriteAllText($tmp, $content, [System.Text.UTF8Encoding]::new($false))
-pwsh ./.github/skills/gh-cli/safe-issue-body-update.ps1 `
+& ./.github/skills/gh-cli/safe-issue-body-update.ps1 `
   -Repo $repo `
   -Issue $issue `
   -SourceBodyFile $tmp
 
-Remove-Item $tmp -Force
+Remove-Item $tmp -Force -ErrorAction SilentlyContinue
 ```
 
 ## Prerequisites
