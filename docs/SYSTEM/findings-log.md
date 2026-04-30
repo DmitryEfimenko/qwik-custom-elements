@@ -1,5 +1,18 @@
 # Findings Log
 
+## 2026-04-29 - Generated bridge variable naming must be adapter-owned and library-scoped
+
+- Sources:
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/50
+- Finding:
+  - Without `libraryName`-derived bridge variable names, all stencil and Lit SSR/CSR bridge symbols use a single generic name (`GeneratedStencilComponent`, etc.) per adapter. When multiple library outputs coexist in the same app this causes symbol shadowing and import resolution failures.
+  - Adding `toBridgeComponentName(libraryName, mode, fallback)` in each adapter resolves this cleanly because adapters control generated-file content (per DEC-2026-04-20).
+- Durable guidance:
+  - Keep naming helpers (`toPascalCase`, `toBridgeComponentName`) inside adapter packages, not core.
+  - The fallback-to-generic pattern is the correct compatibility strategy for configs that don't supply `libraryName`.
+  - Ensure both adapter-level contract tests and generated runtime templates are updated together when bridge symbol names change.
+
 ## 2026-04-29 - libraryName should flow as additive adapter context, not as core-owned naming logic
 
 - Sources:

@@ -1,5 +1,20 @@
 # Decisions
 
+## DEC-2026-04-29-ADAPTER-BRIDGE-VARIABLE-NAMING
+- Status: Accepted
+- Sources:
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/50
+- Decision:
+  - When `libraryName` is provided in adapter generation inputs, generated bridge variable names follow `{PascalCase(libraryName)}{mode}BridgeComponent` — e.g. `test-stencil-lib` → `TestStencilLibSSRBridgeComponent` / `TestStencilLibCSRBridgeComponent`.
+  - When `libraryName` is absent, adapters fall back to their existing generic names (`GeneratedStencilComponent`, `GeneratedStencilCSRComponent`, `GeneratedLitComponent`, `GeneratedLitCSRComponent`).
+  - PascalCase conversion splits on hyphens and underscores: each segment is title-cased and joined.
+  - This naming logic is adapter-owned (not core-owned) and is implemented identically but independently in each adapter.
+- Rationale:
+  - Library-scoped bridge names prevent symbol collisions when multiple generated library outputs coexist in the same demo/app.
+  - Keeping the fallback preserves backward compatibility for existing project configs that omit `libraryName`.
+  - Adapter-ownership of the naming rule is consistent with DEC-2026-04-20-ADAPTER-OWNED-GENERATED-OUTPUT.
+
 ## DEC-2026-04-29-OPTIONAL-LIBRARY-NAME-CONTRACT
 - Status: Accepted
 - Sources:
