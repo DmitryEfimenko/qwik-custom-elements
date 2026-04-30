@@ -1,5 +1,18 @@
 # Findings Log
 
+## 2026-04-29 - Stencil generated outputs should stay under a dedicated generated/stencil namespace
+
+- Sources:
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/50
+- Finding:
+  - Keeping Stencil outputs at root-level generated paths (`generated/ssr`, `generated/csr`) creates mixed adapter surfaces alongside Lit outputs and increases import ambiguity in demo routes.
+  - Migrating to `apps/qwik-demo/src/generated/stencil/(ssr|csr)` keeps Stencil surfaces explicit and prevents accidental cross-adapter path coupling.
+- Durable guidance:
+  - Treat `apps/qwik-demo/src/generated/stencil/ssr` and `apps/qwik-demo/src/generated/stencil/csr` as canonical Stencil generated locations.
+  - Remove and avoid reintroducing `apps/qwik-demo/src/generated/ssr` and `apps/qwik-demo/src/generated/csr`.
+  - Route-level Stencil imports should always reference the namespaced `generated/stencil/*` paths.
+
 ## 2026-04-29 - Generated bridge variable naming must be adapter-owned and library-scoped
 
 - Sources:

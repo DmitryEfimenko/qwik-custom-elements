@@ -1,5 +1,21 @@
 # Decisions
 
+## DEC-2026-04-29-STENCIL-GENERATED-NAMESPACE-PATHS
+- Status: Accepted
+- Sources:
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/50
+- Decision:
+  - Stencil generated outputs in `qwik-demo` are namespaced under `apps/qwik-demo/src/generated/stencil/`.
+  - SSR output path is `apps/qwik-demo/src/generated/stencil/ssr`.
+  - CSR output path is `apps/qwik-demo/src/generated/stencil/csr`.
+  - Stencil demo routes must import generated surfaces from these namespaced paths.
+  - Legacy root-level Stencil generated paths `apps/qwik-demo/src/generated/ssr` and `apps/qwik-demo/src/generated/csr` are removed and no longer authoritative.
+- Rationale:
+  - Keeps Stencil and Lit generated surfaces clearly partitioned under `apps/qwik-demo/src/generated/*`.
+  - Prevents path ambiguity now that both adapters emit multi-mode outputs.
+  - Makes route wiring deterministic and discoverable for future tracer-bullet work.
+
 ## DEC-2026-04-29-ADAPTER-BRIDGE-VARIABLE-NAMING
 - Status: Accepted
 - Sources:
