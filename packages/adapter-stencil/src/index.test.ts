@@ -409,4 +409,79 @@ describe('adapter-stencil metadata contract', () => {
     expect(wrapperWrite?.content).toContain('    <GeneratedStencilComponent');
     expect(wrapperWrite?.content).toContain('    </GeneratedStencilComponent>');
   });
+
+  it('uses library-named SSR bridge variable when libraryName is provided', () => {
+    const plannedWrites = createGeneratedOutput({
+      projectId: 'demo',
+      libraryName: 'test-stencil-lib',
+      source: { type: 'CEM' },
+      runtimeImports: {
+        loaderImport: '@acme/stencil-lib/loader',
+        hydrateImport: '@acme/stencil-lib/hydrate',
+      },
+      componentDefinitions: [
+        { tagName: 'de-button', props: [], events: [], slots: [] },
+      ],
+      ssrAvailable: true,
+    });
+
+    const ssrRuntimeWrite = plannedWrites.find(
+      (w) => w.relativePath === 'runtime-ssr.generated.ts',
+    );
+    const wrapperWrite = plannedWrites.find(
+      (w) => w.relativePath === 'de-button.tsx',
+    );
+
+    expect(ssrRuntimeWrite?.content).toContain(
+      'export const TestStencilLibSSRBridgeComponent = createStencilSSRBridgeComponent(',
+    );
+    expect(ssrRuntimeWrite?.content).not.toContain('GeneratedStencilComponent');
+    expect(wrapperWrite?.content).toContain(
+      "import { TestStencilLibSSRBridgeComponent } from './runtime';",
+    );
+    expect(wrapperWrite?.content).toContain(
+      '    <TestStencilLibSSRBridgeComponent',
+    );
+    expect(wrapperWrite?.content).toContain(
+      '    </TestStencilLibSSRBridgeComponent>',
+    );
+  });
+
+  it('uses library-named CSR bridge variable when libraryName is provided', () => {
+    const plannedWrites = createGeneratedOutput({
+      projectId: 'demo',
+      libraryName: 'test-stencil-lib',
+      source: { type: 'CEM' },
+      runtimeImports: {
+        loaderImport: '@acme/stencil-lib/loader',
+      },
+      componentDefinitions: [
+        { tagName: 'de-button', props: [], events: [], slots: [] },
+      ],
+      ssrAvailable: false,
+    });
+
+    const csrRuntimeWrite = plannedWrites.find(
+      (w) => w.relativePath === 'runtime-csr.generated.ts',
+    );
+    const wrapperWrite = plannedWrites.find(
+      (w) => w.relativePath === 'de-button.tsx',
+    );
+
+    expect(csrRuntimeWrite?.content).toContain(
+      'export const TestStencilLibCSRBridgeComponent = createStencilCSRComponent();',
+    );
+    expect(csrRuntimeWrite?.content).not.toContain(
+      'GeneratedStencilCSRComponent',
+    );
+    expect(wrapperWrite?.content).toContain(
+      "import { TestStencilLibCSRBridgeComponent } from './runtime';",
+    );
+    expect(wrapperWrite?.content).toContain(
+      '    <TestStencilLibCSRBridgeComponent',
+    );
+    expect(wrapperWrite?.content).toContain(
+      '    </TestStencilLibCSRBridgeComponent>',
+    );
+  });
 });

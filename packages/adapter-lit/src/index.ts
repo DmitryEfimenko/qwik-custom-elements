@@ -13,6 +13,7 @@ export async function probeSSR(): Promise<{ available: boolean }> {
 
 export function createGeneratedOutput(input: {
   projectId?: string;
+  libraryName?: string;
   componentDefinitions?: Array<{ tagName: string }>;
   ssrAvailable?: boolean;
 }): Array<{

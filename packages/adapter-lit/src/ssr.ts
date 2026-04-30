@@ -63,6 +63,7 @@ function createContractError(
 
 export function createGeneratedOutput(input: {
   projectId?: string;
+  libraryName?: string;
   componentDefinitions?: Array<{ tagName: string }>;
   ssrAvailable?: boolean;
 }): Array<{

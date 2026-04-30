@@ -160,4 +160,60 @@ describe('adapter-lit metadata contract', () => {
       }),
     );
   });
+
+  it('uses library-named SSR bridge variable when libraryName is provided', () => {
+    const plannedWrites = createSsrGeneratedOutput({
+      projectId: 'demo',
+      libraryName: 'test-lit-lib',
+      componentDefinitions: [{ tagName: 'lit-button' }],
+      ssrAvailable: true,
+    });
+
+    const runtimeSsrWrite = plannedWrites.find(
+      (w: { relativePath: string }) =>
+        w.relativePath === 'runtime-ssr.generated.ts',
+    );
+    const wrapperWrite = plannedWrites.find(
+      (w: { relativePath: string }) => w.relativePath === 'lit-button.ts',
+    );
+
+    expect(runtimeSsrWrite?.content).toContain(
+      'export const TestLitLibSSRBridgeComponent = createLitSSRComponent(renderComponentSsrHtml);',
+    );
+    expect(runtimeSsrWrite?.content).not.toContain('GeneratedLitComponent');
+    expect(wrapperWrite?.content).toContain(
+      "import { TestLitLibSSRBridgeComponent } from './runtime';",
+    );
+    expect(wrapperWrite?.content).toContain(
+      'export const QwikLitButtonSsrHtmlFromBridge = TestLitLibSSRBridgeComponent({ tagName: "lit-button" });',
+    );
+  });
+
+  it('uses library-named CSR bridge variable when libraryName is provided', () => {
+    const plannedWrites = createGeneratedOutput({
+      projectId: 'demo',
+      libraryName: 'test-lit-lib',
+      componentDefinitions: [{ tagName: 'lit-button' }],
+      ssrAvailable: false,
+    });
+
+    const runtimeCsrWrite = plannedWrites.find(
+      (w: { relativePath: string }) =>
+        w.relativePath === 'runtime-csr.generated.ts',
+    );
+    const wrapperWrite = plannedWrites.find(
+      (w: { relativePath: string }) => w.relativePath === 'lit-button.ts',
+    );
+
+    expect(runtimeCsrWrite?.content).toContain(
+      'export const TestLitLibCSRBridgeComponent = createLitCSRComponent(renderComponentCsrTag);',
+    );
+    expect(runtimeCsrWrite?.content).not.toContain('GeneratedLitCSRComponent');
+    expect(wrapperWrite?.content).toContain(
+      "import { TestLitLibCSRBridgeComponent } from './runtime';",
+    );
+    expect(wrapperWrite?.content).toContain(
+      'export const QwikLitButtonCsrTagFromBridge = TestLitLibCSRBridgeComponent({ tagName: "lit-button" });',
+    );
+  });
 });
