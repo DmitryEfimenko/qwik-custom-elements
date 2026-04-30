@@ -34,16 +34,19 @@ Assert-CommandAvailable -Name 'gh'
 Assert-FileExists -Path $SourceBodyFile
 
 $raw = [System.IO.File]::ReadAllText((Resolve-Path -LiteralPath $SourceBodyFile), [System.Text.Encoding]::UTF8)
-$lines = $raw -split "`r?`n"
+$lines = @($raw -split "`r?`n")
 
 if ($lines.Count -eq 0) {
   throw 'Body file is empty.'
 }
 
+$sourceHeadingCount = @($lines | Where-Object { $_ -match '^## ' }).Count
+$sourceChecklistCount = @($lines | Where-Object { $_ -match '^- \[( |x)\] ' }).Count
+
 # Normalize trailing whitespace while preserving intentional blank lines.
-$normalizedLines = foreach ($line in $lines) {
+$normalizedLines = @(foreach ($line in $lines) {
   $line.TrimEnd()
-}
+})
 
 $content = [string]::Join("`n", $normalizedLines)
 
@@ -54,21 +57,21 @@ try {
   gh issue edit $Issue --repo $Repo --body-file $tmp | Out-Null
 
   $verify = gh api ("repos/{0}/issues/{1}" -f $Repo, $Issue) --jq '.body'
-  $verifyLines = $verify -split "`r?`n"
+  $verifyLines = @($verify -split "`r?`n")
 
-  $headingCount = ($verifyLines | Where-Object { $_ -match '^## ' }).Count
-  $checklistCount = ($verifyLines | Where-Object { $_ -match '^- \[( |x)\] ' }).Count
+  $headingCount = @($verifyLines | Where-Object { $_ -match '^## ' }).Count
+  $checklistCount = @($verifyLines | Where-Object { $_ -match '^- \[( |x)\] ' }).Count
 
-  if ($headingCount -lt 1) {
-    throw 'Verification failed: no markdown headings found after update.'
+  if ($sourceHeadingCount -gt 0 -and $headingCount -lt 1) {
+    throw 'Verification failed: source contained markdown headings, but none were found after update.'
   }
 
-  if ($checklistCount -lt 1) {
-    throw 'Verification failed: no checklist lines found after update.'
+  if ($sourceChecklistCount -gt 0 -and $checklistCount -lt 1) {
+    throw 'Verification failed: source contained checklist lines, but none were found after update.'
   }
 
   if ($VerifyUncheckedPattern) {
-    $unchecked = ($verifyLines | Where-Object { $_ -match '^- \[ \] ' }).Count
+    $unchecked = @($verifyLines | Where-Object { $_ -match '^- \[ \] ' }).Count
     if ($unchecked -gt 0 -and $verify -notmatch $VerifyUncheckedPattern) {
       throw "Verification failed: unchecked items remain but expected pattern '$VerifyUncheckedPattern' was not found."
     }
