@@ -3,4 +3,4 @@
 
 import { createLitCSRComponent, renderComponentCsrTag } from '@qwik-custom-elements/adapter-lit/client';
 
-export const GeneratedLitCSRComponent = createLitCSRComponent(renderComponentCsrTag);
+export const TestLitLibCSRBridgeComponent = createLitCSRComponent(renderComponentCsrTag);

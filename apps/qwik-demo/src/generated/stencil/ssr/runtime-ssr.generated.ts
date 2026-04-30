@@ -17,6 +17,6 @@ export const renderToString: StencilRenderToString = async (input, options) => {
 };
 
 export const generatedStencilRenderToStringQrl = $(renderToString);
-export const GeneratedStencilComponent = createStencilSSRBridgeComponent(
+export const TestStencilLibSSRBridgeComponent = createStencilSSRBridgeComponent(
   generatedStencilRenderToStringQrl,
 );

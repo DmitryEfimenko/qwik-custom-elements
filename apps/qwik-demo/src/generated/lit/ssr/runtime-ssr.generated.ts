@@ -3,4 +3,4 @@
 
 import { createLitSSRComponent, renderComponentSsrHtml } from '@qwik-custom-elements/adapter-lit/ssr';
 
-export const GeneratedLitComponent = createLitSSRComponent(renderComponentSsrHtml);
+export const TestLitLibSSRBridgeComponent = createLitSSRComponent(renderComponentSsrHtml);

@@ -4,6 +4,7 @@
       "id": "demo",
       "adapter": "stencil",
       "adapterPackage": "@qwik-custom-elements/adapter-stencil",
+      "libraryName": "test-stencil-lib",
       "source": {
         "type": "CEM",
         "path": "./packages/test-stencil-lib/custom-elements.json"
@@ -21,6 +22,7 @@
       "id": "demo-csr",
       "adapter": "stencil",
       "adapterPackage": "@qwik-custom-elements/adapter-stencil",
+      "libraryName": "test-stencil-lib",
       "source": {
         "type": "CEM",
         "path": "./packages/test-stencil-lib/custom-elements.json"
@@ -37,6 +39,7 @@
       "id": "demo-lit-csr",
       "adapter": "lit",
       "adapterPackage": "@qwik-custom-elements/adapter-lit",
+      "libraryName": "test-lit-lib",
       "source": {
         "type": "CEM",
         "path": "./packages/test-lit-lib/custom-elements.json"
@@ -48,6 +51,7 @@
       "id": "demo-lit-ssr",
       "adapter": "lit",
       "adapterPackage": "@qwik-custom-elements/adapter-lit/ssr",
+      "libraryName": "test-lit-lib",
       "source": {
         "type": "CEM",
         "path": "./packages/test-lit-lib/custom-elements.json"
