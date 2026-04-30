@@ -2,7 +2,7 @@ import { $, component$, useSignal } from '@builder.io/qwik';
 import type { DocumentHead } from '@builder.io/qwik-city';
 
 import {
-  GeneratedStencilCSRComponent,
+  TestStencilLibCSRBridgeComponent,
   useGeneratedStencilClientSetup,
 } from '../../../../generated/stencil/csr/runtime';
 
@@ -73,35 +73,35 @@ export default component$(() => {
 
       <div id="buttons">
         <div id="first-stencil-wrapper">
-          <GeneratedStencilCSRComponent
+          <TestStencilLibCSRBridgeComponent
             tagName="de-button"
             props={{ size: buttonSize.value }}
             events={firstEvents}
           >
             First CSR Button
-          </GeneratedStencilCSRComponent>
+          </TestStencilLibCSRBridgeComponent>
         </div>
 
         <div id="second-stencil-wrapper">
-          <GeneratedStencilCSRComponent
+          <TestStencilLibCSRBridgeComponent
             tagName="de-button"
             props={{ size: buttonSize.value }}
             events={{ tripleClick: handleSecond$ }}
           >
             Second CSR Button
-          </GeneratedStencilCSRComponent>
+          </TestStencilLibCSRBridgeComponent>
         </div>
       </div>
 
       <div id="alert-stencil-wrapper">
-        <GeneratedStencilCSRComponent
+        <TestStencilLibCSRBridgeComponent
           tagName="de-alert"
           props={{ heading: 'Validation Alert' }}
           slots={['footer']}
         >
           <span>Alert body content</span>
           <span q:slot="footer">Alert footer content</span>
-        </GeneratedStencilCSRComponent>
+        </TestStencilLibCSRBridgeComponent>
       </div>
     </>
   );

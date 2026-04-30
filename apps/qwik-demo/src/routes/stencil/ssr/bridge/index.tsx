@@ -2,7 +2,7 @@ import { $, component$, useSignal } from '@builder.io/qwik';
 import type { DocumentHead } from '@builder.io/qwik-city';
 
 import {
-  GeneratedStencilComponent,
+  TestStencilLibSSRBridgeComponent,
   useGeneratedStencilClientSetup,
 } from '../../../../generated/stencil/ssr/runtime';
 
@@ -73,26 +73,26 @@ export default component$(() => {
       </button>
 
       <div id="buttons">
-        <GeneratedStencilComponent
+        <TestStencilLibSSRBridgeComponent
           id="first-stencil-wrapper"
           tagName="de-button"
           props={{ size: buttonSize.value }}
           events={firstEvents}
         >
           First SSR Button
-        </GeneratedStencilComponent>
+        </TestStencilLibSSRBridgeComponent>
 
-        <GeneratedStencilComponent
+        <TestStencilLibSSRBridgeComponent
           id="second-stencil-wrapper"
           tagName="de-button"
           props={{ size: buttonSize.value }}
           events={{ tripleClick: handleSecond$ }}
         >
           Second SSR Button
-        </GeneratedStencilComponent>
+        </TestStencilLibSSRBridgeComponent>
       </div>
 
-      <GeneratedStencilComponent
+      <TestStencilLibSSRBridgeComponent
         id="alert-stencil-wrapper"
         tagName="de-alert"
         props={{ heading: 'Validation Alert' }}
@@ -100,7 +100,7 @@ export default component$(() => {
       >
         <span>Alert body content</span>
         <span q:slot="footer">Alert footer content</span>
-      </GeneratedStencilComponent>
+      </TestStencilLibSSRBridgeComponent>
     </>
   );
 });
