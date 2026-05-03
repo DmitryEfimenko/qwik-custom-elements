@@ -1280,7 +1280,7 @@ describe('generateFromConfig', () => {
       const litWrapperWrite = result.projects[0].plannedWrites.find(
         (plannedWrite) =>
           plannedWrite.path.endsWith(
-            path.join('src', 'generated', 'lit-button.ts'),
+            path.join('src', 'generated', 'lit-button.tsx'),
           ),
       );
       expect(result.projects[0].status).toBe('success');
@@ -1295,7 +1295,13 @@ describe('generateFromConfig', () => {
         plannedWrite.path.endsWith(path.join('src', 'generated', 'index.ts')),
       );
       expect(litWrapperWrite?.content).toContain(
-        'export const QwikLitButtonSsrHtml = "<lit-button></lit-button>" as const;',
+        'export const QwikLitButton = component$<QwikLitButtonProps>((props) => {',
+      );
+      expect(litWrapperWrite?.content).toContain(
+        '    <GeneratedLitComponent',
+      );
+      expect(litWrapperWrite?.content).not.toContain(
+        'QwikLitButtonSsrHtml',
       );
       expect(indexWrite?.content).toContain(
         "export { QwikLitButton } from './lit-button';",

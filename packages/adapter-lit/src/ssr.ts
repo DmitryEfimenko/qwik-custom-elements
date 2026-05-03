@@ -1,3 +1,4 @@
+import { createLitCSRComponent } from './client/lit-csr.js';
 import { createLitPlannedWrites } from './generated-output.js';
 
 export const metadata = {
@@ -14,7 +15,7 @@ export async function probeSSR(): Promise<{ available: boolean }> {
 }
 
 export function renderComponentSsrHtml(
-  options: { tagName?: unknown } = {},
+  options: { tagName?: unknown; props?: Record<string, unknown> } = {},
 ): string | null {
   // Keep fallback and hard-failure deterministic for contract tests.
   if (options.tagName == null) {
@@ -33,23 +34,25 @@ export function renderComponentSsrHtml(
 
   const tagName = options.tagName.trim();
 
-  return `<${tagName}></${tagName}>`;
+  const serializedProps = serializePropsForHtml(options.props ?? {});
+  const openingTag = serializedProps.length
+    ? `<${tagName} ${serializedProps}>`
+    : `<${tagName}>`;
+
+  return `${openingTag}</${tagName}>`;
 }
 
 export type LitSsrComponentRenderer = (options?: {
   tagName?: unknown;
+  props?: Record<string, unknown>;
 }) => string | null;
 
-export type LitGeneratedSsrComponent = (options: {
-  tagName: string;
-}) => string | null;
+export type LitGeneratedSsrComponent = ReturnType<typeof createLitCSRComponent>;
 
 export function createLitSSRComponent(
-  render: LitSsrComponentRenderer,
+  _render: LitSsrComponentRenderer,
 ): LitGeneratedSsrComponent {
-  return ({ tagName }) => {
-    return render({ tagName });
-  };
+  return createLitCSRComponent();
 }
 
 function createContractError(
@@ -75,8 +78,34 @@ export function createGeneratedOutput(input: {
   relativePath: string;
   content: string;
 }> {
-  return createLitPlannedWrites({
-    ...input,
-    renderComponentSsrHtml,
-  });
+  return createLitPlannedWrites(input);
+}
+
+function serializePropsForHtml(props: Record<string, unknown>): string {
+  return Object.entries(props)
+    .filter(
+      ([key, value]) => key.trim().length > 0 && isSerializableValue(value),
+    )
+    .map(([key, value]) => {
+      if (value === true) {
+        return key;
+      }
+
+      return `${key}=${JSON.stringify(String(value))}`;
+    })
+    .join(' ');
+}
+
+function isSerializableValue(
+  value: unknown,
+): value is string | number | boolean {
+  if (value == null) {
+    return false;
+  }
+
+  return (
+    typeof value === 'string' ||
+    typeof value === 'number' ||
+    typeof value === 'boolean'
+  );
 }

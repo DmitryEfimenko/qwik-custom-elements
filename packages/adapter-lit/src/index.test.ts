@@ -110,6 +110,12 @@ describe('adapter-lit metadata contract', () => {
     expect(renderComponentSsrHtml({ tagName: 'lit-button' })).toBe(
       '<lit-button></lit-button>',
     );
+    expect(
+      renderComponentSsrHtml({
+        tagName: 'lit-button',
+        props: { size: 'lg', disabled: true },
+      }),
+    ).toBe('<lit-button size="lg" disabled></lit-button>');
 
     const plannedWrites = createSsrGeneratedOutput({
       projectId: 'demo',
@@ -118,11 +124,11 @@ describe('adapter-lit metadata contract', () => {
     });
     const wrapperWrite = plannedWrites.find(
       (plannedWrite: { relativePath: string }) =>
-        plannedWrite.relativePath === 'lit-button.ts',
+        plannedWrite.relativePath === 'lit-button.tsx',
     );
 
     expect(wrapperWrite?.content).toContain(
-      'export const QwikLitButtonSsrHtml = "<lit-button></lit-button>" as const;',
+      "import { Slot, component$ } from '@builder.io/qwik';",
     );
   });
 
@@ -143,7 +149,7 @@ describe('adapter-lit metadata contract', () => {
     );
     const wrapperWrite = plannedWrites.find(
       (plannedWrite: { relativePath: string }) =>
-        plannedWrite.relativePath === 'lit-button.ts',
+        plannedWrite.relativePath === 'lit-button.tsx',
     );
 
     expect(runtimeBarrelWrite?.content).toContain(
@@ -159,8 +165,12 @@ describe('adapter-lit metadata contract', () => {
       "import { GeneratedLitComponent } from './runtime';",
     );
     expect(wrapperWrite?.content).toContain(
-      'export const QwikLitButtonSsrHtmlFromBridge = GeneratedLitComponent({ tagName: "lit-button" });',
+      'export const QwikLitButton = component$<QwikLitButtonProps>((props) => {',
     );
+    expect(wrapperWrite?.content).toContain('      tagName="lit-button"');
+    expect(wrapperWrite?.content).toContain('      props={elementProps}');
+    expect(wrapperWrite?.content).toContain('      events={mappedEvents}');
+    expect(wrapperWrite?.content).not.toContain('QwikLitButtonSsrHtml');
   });
 
   it('returns fallback null when no SSR tagName input is provided', () => {
@@ -202,7 +212,7 @@ describe('adapter-lit metadata contract', () => {
         w.relativePath === 'runtime-ssr.generated.ts',
     );
     const wrapperWrite = plannedWrites.find(
-      (w: { relativePath: string }) => w.relativePath === 'lit-button.ts',
+      (w: { relativePath: string }) => w.relativePath === 'lit-button.tsx',
     );
 
     expect(runtimeSsrWrite?.content).toContain(
@@ -213,7 +223,13 @@ describe('adapter-lit metadata contract', () => {
       "import { TestLitLibSSRBridgeComponent } from './runtime';",
     );
     expect(wrapperWrite?.content).toContain(
-      'export const QwikLitButtonSsrHtmlFromBridge = TestLitLibSSRBridgeComponent({ tagName: "lit-button" });',
+      "import { TestLitLibSSRBridgeComponent } from './runtime';",
+    );
+    expect(wrapperWrite?.content).toContain(
+      '    <TestLitLibSSRBridgeComponent',
+    );
+    expect(wrapperWrite?.content).toContain(
+      '    </TestLitLibSSRBridgeComponent>',
     );
   });
 
