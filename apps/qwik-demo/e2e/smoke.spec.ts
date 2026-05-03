@@ -258,6 +258,11 @@ test('lit csr bridge interaction contract: generated bridge renders props, event
   await expect(firstButton).toBeVisible();
   await expect(firstButton).toHaveAttribute('data-size', 'lg');
 
+  const wrapperHost = page.locator('#lit-wrapper-props de-button');
+  const wrapperButton = page.locator('#lit-wrapper-props de-button button');
+  await expect(wrapperHost).toBeVisible();
+  await expect(wrapperButton).toHaveAttribute('data-size', 'md');
+
   await firstButton.click();
   await firstButton.click();
   await firstButton.click();

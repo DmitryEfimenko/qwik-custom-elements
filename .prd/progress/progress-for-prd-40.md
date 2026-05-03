@@ -506,3 +506,27 @@
       - Fix prop delivery timing bug in `lit-csr.tsx`. Strategy to explore: use `customElements.whenDefined(tagName).then(() => updateLitCSRHostProps(...))` inside `useVisibleTask$` so props are applied after the upgrade cycle completes, then re-track reactively.
       - Once props pass, add events and slots e2e proof to complete issue #45 acceptance criteria.
       - Issue #44 (Lit SSR bridge) needs full rework: replace string factory + `dangerouslySetInnerHTML` pattern with real Qwik component using `SSRStream`/`SSRRaw`, typed props, event wiring, and slots.
+
+- 2026-05-03: Completed issue #45 task slice: prove wrapper prop propagation on `/lit/csr/bridge` (acceptance criterion 2 partial proof).
+   - PRD reference: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
+   - Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/45
+   - Task completed:
+      - Extended `/lit/csr/bridge` route to render generated wrapper `QwikDeButton` with deterministic prop input (`size="md"`) under `#lit-wrapper-props`.
+      - Extended Lit CSR bridge smoke test with wrapper-level assertion checking rendered host button attribute (`data-size="md"`) to prove wrapper props reach Lit host surface.
+   - Key decisions:
+      - Keep scope to one behavior only: wrapper prop propagation proof.
+      - Reuse existing bridge route and smoke test to avoid creating surrogate/fallback path.
+   - Key findings:
+      - Local e2e execution in this environment is blocked by missing Linux browser runtime libraries (`libnspr4.so`) required by Playwright Chromium headless shell.
+      - `playwright install-deps` requires sudo password; unavailable in this run.
+   - Validation:
+      - `pnpm format` ran; unrelated repo files were reformatted by workspace-wide formatter.
+      - `pnpm typecheck` passed before subsequent loop failure.
+      - `pnpm test` failed in `@qwik-custom-elements/core#test` because `@qwik-custom-elements/adapter-lit` build cannot resolve `@builder.io/qwik` in current workspace install state (environment/dependency issue, not from route/test slice).
+      - `pnpm e2e` could not complete due missing host libraries for Playwright browser launch.
+   - Files changed (task scope):
+      - `apps/qwik-demo/src/routes/lit/csr/bridge/index.tsx`
+      - `apps/qwik-demo/e2e/smoke.spec.ts`
+   - Notes for next iteration:
+      - Run `sudo pnpm --filter qwik-demo exec playwright install-deps` (or apt package list from Playwright output), then rerun `pnpm e2e`.
+      - Confirm/fix adapter-lit package dependency resolution for `@builder.io/qwik`, then rerun full root loops.

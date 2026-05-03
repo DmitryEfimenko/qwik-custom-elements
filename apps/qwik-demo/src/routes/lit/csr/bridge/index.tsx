@@ -1,5 +1,6 @@
 import { $, component$, useOnDocument, useSignal } from '@builder.io/qwik';
 import type { DocumentHead } from '@builder.io/qwik-city';
+import { QwikDeButton } from '../../../../generated/lit/csr';
 import { TestLitLibCSRBridgeComponent } from '../../../../generated/lit/csr/runtime';
 
 export default component$(() => {
@@ -39,6 +40,12 @@ export default component$(() => {
           <span>Alert body content</span>
           <span q:slot="footer">Alert footer content</span>
         </TestLitLibCSRBridgeComponent>
+      </div>
+
+      <div id="lit-wrapper-props">
+        <QwikDeButton id="wrapper-lit-button" size="md">
+          Wrapper Prop Button
+        </QwikDeButton>
       </div>
     </>
   );
