@@ -106,7 +106,10 @@ function getPropValueDependencyKey(value: unknown): string {
 
 function getPropsDependencyKey(props: LitCSRProps['props']): string {
   return Object.entries(props ?? {})
-    .map(([propName, propValue]) => `${propName}:${getPropValueDependencyKey(propValue)}`)
+    .map(
+      ([propName, propValue]) =>
+        `${propName}:${getPropValueDependencyKey(propValue)}`,
+    )
     .sort()
     .join('|');
 }
@@ -124,99 +127,97 @@ export interface LitCSRProps {
 }
 
 export function createLitCSRComponent() {
-  return component$<LitCSRProps>(
-    (inputProps) => {
-      const hostRef = useSignal<HTMLElement>();
-      const { tagName, props, events, slots, ...restProps } = inputProps;
-      const namedSlots = slots ?? [];
-      const normalizedTagName = requireLitTagName(tagName);
+  return component$<LitCSRProps>((inputProps) => {
+    const hostRef = useSignal<HTMLElement>();
+    const { tagName, props, events, slots, ...restProps } = inputProps;
+    const namedSlots = slots ?? [];
+    const normalizedTagName = requireLitTagName(tagName);
 
-      useVisibleTask$(({ track, cleanup }) => {
-        const host = track(() => hostRef.value);
-        const latestTagName = track(() => inputProps.tagName);
-        track(() => getPropsDependencyKey(inputProps.props));
+    useVisibleTask$(({ track, cleanup }) => {
+      const host = track(() => hostRef.value);
+      const latestTagName = track(() => inputProps.tagName);
+      track(() => getPropsDependencyKey(inputProps.props));
 
-        if (!host) {
+      if (!host) {
+        return;
+      }
+
+      let disposed = false;
+
+      cleanup(() => {
+        disposed = true;
+      });
+
+      updateLitCSRHostProps(host, inputProps.props);
+
+      const resolvedTagName = requireLitTagName(latestTagName);
+      void customElements.whenDefined(resolvedTagName).then(() => {
+        if (disposed) {
           return;
         }
-
-        let disposed = false;
-
-        cleanup(() => {
-          disposed = true;
-        });
 
         updateLitCSRHostProps(host, inputProps.props);
-
-        const resolvedTagName = requireLitTagName(latestTagName);
-        void customElements.whenDefined(resolvedTagName).then(() => {
-          if (disposed) {
-            return;
-          }
-
-          updateLitCSRHostProps(host, inputProps.props);
-        });
       });
+    });
 
-      useVisibleTask$(({ track, cleanup }) => {
-        const host = track(() => hostRef.value);
-        const eventsDependencyKey = track(() =>
-          getEventsDependencyKey(inputProps.events),
-        );
-
-        if (!host) {
-          return;
-        }
-
-        const eventEntries = getEventEntries(inputProps.events);
-        if (eventEntries.length === 0 || eventsDependencyKey.length === 0) {
-          return;
-        }
-
-        let disposed = false;
-        const listeners: Array<{ eventName: string; listener: EventListener }> =
-          [];
-
-        cleanup(() => {
-          disposed = true;
-          for (const { eventName, listener } of listeners) {
-            host.removeEventListener(eventName, listener);
-          }
-        });
-
-        for (const [eventName, eventQrl] of eventEntries) {
-          const listener: EventListener = (event) => {
-            const qrl = eventQrl as EventQrlInternal;
-            const containerEl = host.closest('[q\\:container]');
-            if (containerEl) {
-              qrl.$setContainer$?.(containerEl);
-            }
-
-            const result = eventQrl(event, host);
-            void Promise.resolve(result).catch((error) => {
-              console.error(error);
-            });
-          };
-
-          if (disposed) {
-            return;
-          }
-
-          host.addEventListener(eventName, listener);
-          listeners.push({ eventName, listener });
-        }
-      });
-
-      const ElementTag = normalizedTagName as any;
-
-      return (
-        <ElementTag ref={hostRef} {...restProps}>
-          <Slot />
-          {namedSlots.map((name) => (
-            <Slot name={name} />
-          ))}
-        </ElementTag>
+    useVisibleTask$(({ track, cleanup }) => {
+      const host = track(() => hostRef.value);
+      const eventsDependencyKey = track(() =>
+        getEventsDependencyKey(inputProps.events),
       );
-    },
-  );
+
+      if (!host) {
+        return;
+      }
+
+      const eventEntries = getEventEntries(inputProps.events);
+      if (eventEntries.length === 0 || eventsDependencyKey.length === 0) {
+        return;
+      }
+
+      let disposed = false;
+      const listeners: Array<{ eventName: string; listener: EventListener }> =
+        [];
+
+      cleanup(() => {
+        disposed = true;
+        for (const { eventName, listener } of listeners) {
+          host.removeEventListener(eventName, listener);
+        }
+      });
+
+      for (const [eventName, eventQrl] of eventEntries) {
+        const listener: EventListener = (event) => {
+          const qrl = eventQrl as EventQrlInternal;
+          const containerEl = host.closest('[q\\:container]');
+          if (containerEl) {
+            qrl.$setContainer$?.(containerEl);
+          }
+
+          const result = eventQrl(event, host);
+          void Promise.resolve(result).catch((error) => {
+            console.error(error);
+          });
+        };
+
+        if (disposed) {
+          return;
+        }
+
+        host.addEventListener(eventName, listener);
+        listeners.push({ eventName, listener });
+      }
+    });
+
+    const ElementTag = normalizedTagName as any;
+
+    return (
+      <ElementTag ref={hostRef} {...restProps}>
+        <Slot />
+        {namedSlots.map((name) => (
+          <Slot name={name} />
+        ))}
+      </ElementTag>
+    );
+  });
 }
