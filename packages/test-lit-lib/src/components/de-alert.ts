@@ -27,7 +27,12 @@ export class DeAlert extends LitElement {
     }
   `;
 
-  heading = 'Alert';
+  declare heading: string;
+
+  constructor() {
+    super();
+    this.heading = 'Alert';
+  }
 
   render() {
     return html`

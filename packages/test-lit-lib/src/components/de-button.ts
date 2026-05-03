@@ -36,8 +36,13 @@ export class DeButton extends LitElement {
     }
   `;
 
-  size: 'sm' | 'md' | 'lg' = 'md';
+  declare size: 'sm' | 'md' | 'lg';
   #clicks = 0;
+
+  constructor() {
+    super();
+    this.size = 'md';
+  }
 
   protected willUpdate(): void {
     if (!sizeValues.has(this.size)) {

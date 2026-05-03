@@ -136,7 +136,7 @@ export function createLitCSRComponent() {
     useVisibleTask$(({ track, cleanup }) => {
       const host = track(() => hostRef.value);
       const latestTagName = track(() => inputProps.tagName);
-      track(() => getPropsDependencyKey(inputProps.props));
+      track(() => getPropsDependencyKey(props));
 
       if (!host) {
         return;
@@ -148,7 +148,7 @@ export function createLitCSRComponent() {
         disposed = true;
       });
 
-      updateLitCSRHostProps(host, inputProps.props);
+      updateLitCSRHostProps(host, props);
 
       const resolvedTagName = requireLitTagName(latestTagName);
       void customElements.whenDefined(resolvedTagName).then(() => {
@@ -156,21 +156,21 @@ export function createLitCSRComponent() {
           return;
         }
 
-        updateLitCSRHostProps(host, inputProps.props);
+        updateLitCSRHostProps(host, props);
       });
     });
 
     useVisibleTask$(({ track, cleanup }) => {
       const host = track(() => hostRef.value);
       const eventsDependencyKey = track(() =>
-        getEventsDependencyKey(inputProps.events),
+        getEventsDependencyKey(events),
       );
 
       if (!host) {
         return;
       }
 
-      const eventEntries = getEventEntries(inputProps.events);
+      const eventEntries = getEventEntries(events);
       if (eventEntries.length === 0 || eventsDependencyKey.length === 0) {
         return;
       }
