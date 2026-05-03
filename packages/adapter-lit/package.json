@@ -18,14 +18,14 @@
     }
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "check-types": "tsc -p tsconfig.json --noEmit",
-    "dev": "tsc -p tsconfig.json --watch",
+    "build": "tsc -p tsconfig.build.json",
+    "check-types": "tsc -p tsconfig.build.json --noEmit && tsc -p tsconfig.test.json --noEmit",
+    "dev": "tsc -p tsconfig.build.json --watch",
     "format": "prettier --write . --config ../../.prettierrc.json --ignore-path ../../.prettierignore",
     "format:check": "prettier --check . --config ../../.prettierrc.json --ignore-path ../../.prettierignore",
     "lint": "eslint \"**/*.{js,mjs,cjs,ts,mts,cts,tsx}\" --no-error-on-unmatched-pattern",
     "e2e": "node -e \"console.log('adapter-lit e2e noop')\"",
-    "test": "pnpm --filter @qwik-custom-elements/core exec vitest run --root .. adapter-lit/src/index.test.ts"
+    "test": "pnpm --filter @qwik-custom-elements/core exec vitest run --globals --root .. adapter-lit/src/index.test.ts"
   },
   "files": [
     "dist"
@@ -35,6 +35,7 @@
   },
   "devDependencies": {
     "@builder.io/qwik": "^1.19.2",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
   }
 }

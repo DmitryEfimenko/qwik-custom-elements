@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+/// <reference types="vitest/globals" />
 
 import { createGeneratedOutput, metadata, probeSSR } from './index.js';
 import {
@@ -119,7 +119,9 @@ describe('adapter-lit metadata contract', () => {
 
     const plannedWrites = createSsrGeneratedOutput({
       projectId: 'demo',
-      componentDefinitions: [{ tagName: 'lit-button' }],
+      componentDefinitions: [
+        { tagName: 'lit-button', props: [], events: [], slots: [] },
+      ],
       ssrAvailable: true,
     });
     const wrapperWrite = plannedWrites.find(
@@ -135,7 +137,9 @@ describe('adapter-lit metadata contract', () => {
   it('generates Lit SSR runtime bridge contract and consumes it in wrappers', () => {
     const plannedWrites = createSsrGeneratedOutput({
       projectId: 'demo',
-      componentDefinitions: [{ tagName: 'lit-button' }],
+      componentDefinitions: [
+        { tagName: 'lit-button', props: [], events: [], slots: [] },
+      ],
       ssrAvailable: true,
     });
 
@@ -203,7 +207,9 @@ describe('adapter-lit metadata contract', () => {
     const plannedWrites = createSsrGeneratedOutput({
       projectId: 'demo',
       libraryName: 'test-lit-lib',
-      componentDefinitions: [{ tagName: 'lit-button' }],
+      componentDefinitions: [
+        { tagName: 'lit-button', props: [], events: [], slots: [] },
+      ],
       ssrAvailable: true,
     });
 
