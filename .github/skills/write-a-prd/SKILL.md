@@ -20,6 +20,8 @@ If it is unclear, ask follow-up questions until one mode is primary. If both are
 
 For architecture mode and mixed mode, explicitly cover contract ownership, compatibility constraints, rollout sequencing, failure handling, and operational expectations.
 
+If the work is parity-focused or replaces an existing implementation path, explicitly identify the reference implementation and enumerate which observable behavior dimensions must match it. Do not leave parity implied.
+
 5. Sketch out the major modules you will need to build or modify to complete the implementation. Actively look for opportunities to extract deep modules that can be tested in isolation.
 
 A deep module (as opposed to a shallow module) is one which encapsulates a lot of functionality in a simple, testable interface which rarely changes.
@@ -86,6 +88,7 @@ For architecture mode and mixed mode, also include:
 - Reliability goals and failure-mode behavior
 - Observability expectations (metrics, logs, traces)
 - Migration and deprecation plan
+- Reference implementations and parity dimensions when behavior must match an existing path
 
 Do NOT include specific file paths or code snippets. They may end up being outdated very quickly.
 
@@ -98,6 +101,8 @@ A list of testing decisions that were made. Include:
 - Prior art for the tests (i.e. similar types of tests in the codebase)
 
 For architecture mode and mixed mode, also include contract tests, cross-team integration tests, and resilience tests for degraded dependencies.
+
+If the PRD replicates or replaces an existing implementation path, require testing decisions to spell out how each observable behavior dimension will be proven against the named reference.
 
 ## Out of Scope
 

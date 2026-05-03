@@ -65,6 +65,14 @@ Example:
 
 `gh issue create --title "[PRD-12] - Add login shell" --label "prd-12" --body-file /tmp/issue.md`
 
+### Acceptance criteria rules
+
+- Acceptance criteria must describe externally verifiable behavior, not artifact existence.
+- Do not use acceptance wording like `contract exists`, `helper added`, `surface emitted`, or `route wired` as a completion gate by itself.
+- If the slice replicates, replaces, or extends an existing implementation path, criteria must prove the new surface handles the same observable behavior dimensions as the reference — not just that the new artifact exists.
+- When a reference implementation exists, name it explicitly in `What to build` and call out the specific behavior dimensions that must match.
+- If a behavior dimension is intentionally out of scope for a slice, say so explicitly in `What to build` and leave it for a separately named child issue.
+
 <issue-template>
 ## Parent PRD
 
@@ -73,6 +81,8 @@ https://github.com/<owner>/<repo>/issues/<prd-issue-number>
 ## What to build
 
 A concise description of this vertical slice. Describe the end-to-end behavior, not layer-by-layer implementation. Reference specific sections of the parent PRD rather than duplicating content.
+
+If this issue replicates or replaces an existing implementation, name that reference explicitly and state which observable behavior dimensions must match it.
 
 ## Acceptance criteria
 

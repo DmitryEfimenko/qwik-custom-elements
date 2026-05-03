@@ -86,6 +86,7 @@ Explore the repo and fill your context window with relevant information that wil
   - List the 3-7 highest-impact constraints that must hold for this slice.
   - Include explicit "must" and "must not" statements derived from PRD decisions.
   - Include contract-shape constraints (types/interfaces/config schema) when applicable.
+  - If the slice replicates, replaces, or extends an existing implementation path, name the reference explicitly and convert parity expectations into a concrete checklist of observable behavior dimensions. Treat any unlisted dimension as unresolved scope, not implied completion.
 - Use Explore subagents to quickly locate:
   - Current implementations affected by the task.
   - Prior art patterns for similar code.
@@ -126,6 +127,20 @@ Reference:
 - SIFERS + setup pattern: ../skills/tdd/SIFERS.md
 
 If the issue is purely documentation, formatting, scaffolding, or other work where TDD would be artificial, you may skip TDD, but still run the feedback loops.
+
+## Parity and Integration Completion Rule
+
+If the selected issue replicates, replaces, or extends an existing implementation path, enforce this stricter completion rule:
+
+- Do not treat `contract exists`, `file exists`, `surface emitted`, `route wired`, or `fallback removed` as sufficient acceptance on their own.
+- Before coding, identify the closest existing reference implementation in the repo. Treat it as the behavioral baseline for this slice.
+- Before marking any acceptance criterion complete, verify the new surface handles all observable behavior dimensions described in the issue or implied by the reference implementation.
+- If the issue acceptance criteria omit a behavior dimension that the reference implementation covers, treat the issue as under-specified:
+  - do not silently assume the omitted dimension is out of scope
+  - call out the gap in your progress log/comment
+  - keep work limited to the selected task, but do not report the slice as complete unless the issue explicitly narrows scope
+- Integration-level proof must exercise the new surface directly, not a fallback, stub, or surrogate that bypasses it.
+- If the reference implementation exposes richer behavior than the current issue wording, prefer the stricter interpretation unless the child issue explicitly defers a dimension to a separate issue.
 
 # FEEDBACK LOOPS
 
@@ -173,8 +188,9 @@ Use this order:
 
 1. Review the child issue body `## Acceptance criteria` section.
 2. If the work completed in this run fully satisfies any unchecked acceptance-criteria item, edit the issue body and check those items. Do not check partial progress.
-3. Post a comment with what was done, what remains, and any new blockers. Always post this comment, whether or not the issue will be closed.
-4. If all acceptance criteria are now checked, close the original GitHub issue after posting the comment. Otherwise, leave it open.
+3. For parity or replacement issues, verify each checked item is backed by direct behavioral proof for all dimensions in scope. If proof is missing, leave the item unchecked and explain the gap in the issue comment.
+4. Post a comment with what was done, what remains, and any new blockers. Always post this comment, whether or not the issue will be closed.
+5. If all acceptance criteria are now checked, close the original GitHub issue after posting the comment. Otherwise, leave it open.
 
 Reference for GitHub CLI usage and PowerShell multiline comment safety:
 
