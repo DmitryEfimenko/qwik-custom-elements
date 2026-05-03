@@ -1297,12 +1297,8 @@ describe('generateFromConfig', () => {
       expect(litWrapperWrite?.content).toContain(
         'export const QwikLitButton = component$<QwikLitButtonProps>((props) => {',
       );
-      expect(litWrapperWrite?.content).toContain(
-        '    <GeneratedLitComponent',
-      );
-      expect(litWrapperWrite?.content).not.toContain(
-        'QwikLitButtonSsrHtml',
-      );
+      expect(litWrapperWrite?.content).toContain('    <GeneratedLitComponent');
+      expect(litWrapperWrite?.content).not.toContain('QwikLitButtonSsrHtml');
       expect(indexWrite?.content).toContain(
         "export { QwikLitButton } from './lit-button';",
       );
