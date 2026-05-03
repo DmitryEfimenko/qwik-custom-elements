@@ -227,3 +227,48 @@ test('lit ssr bridge smoke: first Lit render path renders and custom element is 
   const firstHost = page.locator('#lit-first-wrapper de-button');
   await expect(firstHost).toBeVisible();
 });
+
+test('lit csr bridge interaction contract: generated bridge renders props, events, and slots', async ({
+  page,
+}) => {
+  await page.goto('/lit/csr/bridge');
+
+  await expect(
+    page.getByRole('heading', {
+      level: 1,
+      name: 'Lit CSR Bridge Validation',
+    }),
+  ).toBeVisible();
+  await expect(page.locator('#lit-render-status')).toContainText(
+    'Generated Lit CSR bridge route active.',
+  );
+  await expect(page.locator('#lit-triple-click-count')).toContainText(
+    'Triple click count: 0',
+  );
+
+  await page.waitForFunction(
+    () =>
+      customElements.get('de-button') != null &&
+      customElements.get('de-alert') != null,
+  );
+
+  const firstHost = page.locator('#lit-first-wrapper de-button');
+  const firstButton = page.locator('#lit-first-wrapper de-button button');
+  await expect(firstHost).toBeVisible();
+  await expect(firstButton).toBeVisible();
+  await expect(firstButton).toHaveAttribute('data-size', 'lg');
+
+  await firstButton.click();
+  await firstButton.click();
+  await firstButton.click();
+  await expect(page.locator('#lit-triple-click-count')).toContainText(
+    'Triple click count: 1',
+  );
+
+  await expect(page.locator('#lit-alert-wrapper')).toContainText(
+    'Alert body content',
+  );
+  await expect(page.locator('#lit-alert-wrapper')).toContainText(
+    'Alert footer content',
+  );
+});

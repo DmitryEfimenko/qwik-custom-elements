@@ -3,12 +3,15 @@
     "target": "ES2022",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
+    "jsxImportSource": "@builder.io/qwik",
     "strict": true,
     "declaration": true,
     "outDir": "dist",
     "rootDir": "src",
     "skipLibCheck": true
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
   "exclude": ["src/**/*.test.ts"]
 }

@@ -23,7 +23,19 @@ describe('adapter-lit metadata contract', () => {
   it('generates the stable Lit barrel and wrapper surface from the root entrypoint', () => {
     const plannedWrites = createGeneratedOutput({
       projectId: 'demo',
-      componentDefinitions: [{ tagName: 'lit-button' }],
+      componentDefinitions: [
+        {
+          tagName: 'lit-button',
+          props: [{ name: 'size', type: '"lg" | "md"', required: false }],
+          events: [{ name: 'ready', type: 'CustomEvent<string>' }],
+          slots: [{ name: 'footer' }],
+        },
+      ] as Array<{
+        tagName: string;
+        props: Array<{ name: string; type: string; required: boolean }>;
+        events: Array<{ name: string; type: string }>;
+        slots: Array<{ name: string }>;
+      }>,
       ssrAvailable: false,
     });
 
@@ -31,7 +43,7 @@ describe('adapter-lit metadata contract', () => {
       expect.objectContaining({ relativePath: 'index.ts' }),
       expect.objectContaining({ relativePath: 'runtime.ts' }),
       expect.objectContaining({ relativePath: 'runtime-csr.generated.ts' }),
-      expect.objectContaining({ relativePath: 'lit-button.ts' }),
+      expect.objectContaining({ relativePath: 'lit-button.tsx' }),
     ]);
 
     const indexWrite = plannedWrites.find(
@@ -40,7 +52,7 @@ describe('adapter-lit metadata contract', () => {
     );
     const wrapperWrite = plannedWrites.find(
       (plannedWrite: { relativePath: string }) =>
-        plannedWrite.relativePath === 'lit-button.ts',
+        plannedWrite.relativePath === 'lit-button.tsx',
     );
     const runtimeWrite = plannedWrites.find(
       (plannedWrite: { relativePath: string }) =>
@@ -58,23 +70,39 @@ describe('adapter-lit metadata contract', () => {
       "export { QwikLitButton } from './lit-button';",
     );
     expect(wrapperWrite?.content).toContain(
-      'export const QwikLitButton = "lit-button" as const;',
+      "import { Slot, component$ } from '@builder.io/qwik';",
+    );
+    expect(wrapperWrite?.content).toContain(
+      "import type { QRL } from '@builder.io/qwik';",
+    );
+    expect(wrapperWrite?.content).toContain(
+      'export interface QwikLitButtonProps {',
+    );
+    expect(wrapperWrite?.content).toContain('  size?: "lg" | "md";');
+    expect(wrapperWrite?.content).toContain(
+      '  onReady$?: QRL<(event: CustomEvent<string>) => void>;',
     );
     expect(runtimeWrite?.content).toContain(
       "export * from './runtime-csr.generated';",
     );
     expect(runtimeCsrWrite?.content).toContain(
-      "import { createLitCSRComponent, renderComponentCsrTag } from '@qwik-custom-elements/adapter-lit/client';",
+      "import { createLitCSRComponent } from '@qwik-custom-elements/adapter-lit/client';",
     );
     expect(runtimeCsrWrite?.content).toContain(
-      'export const GeneratedLitCSRComponent = createLitCSRComponent(renderComponentCsrTag);',
+      'export const GeneratedLitCSRComponent = createLitCSRComponent();',
     );
     expect(wrapperWrite?.content).toContain(
       "import { GeneratedLitCSRComponent } from './runtime';",
     );
     expect(wrapperWrite?.content).toContain(
-      'export const QwikLitButtonCsrTagFromBridge = GeneratedLitCSRComponent({ tagName: "lit-button" });',
+      'export const QwikLitButton = component$<QwikLitButtonProps>((props) => {',
     );
+    expect(wrapperWrite?.content).toContain('      tagName="lit-button"');
+    expect(wrapperWrite?.content).toContain('      props={elementProps}');
+    expect(wrapperWrite?.content).toContain('      events={mappedEvents}');
+    expect(wrapperWrite?.content).toContain('      slots={["footer"]}');
+    expect(wrapperWrite?.content).toContain('    <Slot />');
+    expect(wrapperWrite?.content).toContain('    <Slot name="footer" />');
     expect(wrapperWrite?.content).not.toContain('QwikLitButtonSsrHtml');
   });
 
@@ -193,7 +221,19 @@ describe('adapter-lit metadata contract', () => {
     const plannedWrites = createGeneratedOutput({
       projectId: 'demo',
       libraryName: 'test-lit-lib',
-      componentDefinitions: [{ tagName: 'lit-button' }],
+      componentDefinitions: [
+        {
+          tagName: 'lit-button',
+          props: [],
+          events: [],
+          slots: [],
+        },
+      ] as Array<{
+        tagName: string;
+        props: Array<{ name: string; type: string; required: boolean }>;
+        events: Array<{ name: string; type: string }>;
+        slots: Array<{ name: string }>;
+      }>,
       ssrAvailable: false,
     });
 
@@ -202,18 +242,21 @@ describe('adapter-lit metadata contract', () => {
         w.relativePath === 'runtime-csr.generated.ts',
     );
     const wrapperWrite = plannedWrites.find(
-      (w: { relativePath: string }) => w.relativePath === 'lit-button.ts',
+      (w: { relativePath: string }) => w.relativePath === 'lit-button.tsx',
     );
 
     expect(runtimeCsrWrite?.content).toContain(
-      'export const TestLitLibCSRBridgeComponent = createLitCSRComponent(renderComponentCsrTag);',
+      'export const TestLitLibCSRBridgeComponent = createLitCSRComponent();',
     );
     expect(runtimeCsrWrite?.content).not.toContain('GeneratedLitCSRComponent');
     expect(wrapperWrite?.content).toContain(
       "import { TestLitLibCSRBridgeComponent } from './runtime';",
     );
     expect(wrapperWrite?.content).toContain(
-      'export const QwikLitButtonCsrTagFromBridge = TestLitLibCSRBridgeComponent({ tagName: "lit-button" });',
+      '    <TestLitLibCSRBridgeComponent',
+    );
+    expect(wrapperWrite?.content).toContain(
+      '    </TestLitLibCSRBridgeComponent>',
     );
   });
 });

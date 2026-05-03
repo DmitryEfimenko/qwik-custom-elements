@@ -14,7 +14,12 @@ export async function probeSSR(): Promise<{ available: boolean }> {
 export function createGeneratedOutput(input: {
   projectId?: string;
   libraryName?: string;
-  componentDefinitions?: Array<{ tagName: string }>;
+  componentDefinitions?: Array<{
+    tagName: string;
+    props: Array<{ name: string; type: string; required: boolean }>;
+    events: Array<{ name: string; type: string }>;
+    slots: Array<{ name: string }>;
+  }>;
   ssrAvailable?: boolean;
 }): Array<{
   relativePath: string;
