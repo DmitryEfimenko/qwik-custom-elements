@@ -1,5 +1,17 @@
 # Decisions
 
+## DEC-2026-05-03-LIT-SSR-RUNTIME-BRIDGE-NO-ARG-CONTRACT
+- Status: Accepted
+- Sources:
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/44
+- Decision:
+  - Generated Lit SSR runtime modules must import only `createLitSSRComponent` from `@qwik-custom-elements/adapter-lit/ssr` and instantiate bridge with no renderer argument (`createLitSSRComponent()`).
+  - Generated runtime shape `createLitSSRComponent(renderComponentSsrHtml)` is removed from adapter template and generated demo outputs.
+- Rationale:
+  - Removes misleading external renderer-injection contract from generated surface and keeps SSR renderer ownership adapter-internal.
+  - Reduces contract ambiguity ahead of true Lit SSR bridge implementation work.
+
 ## DEC-2026-04-29-STENCIL-GENERATED-NAMESPACE-PATHS
 - Status: Accepted
 - Sources:

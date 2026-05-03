@@ -42,16 +42,9 @@ export function renderComponentSsrHtml(
   return `${openingTag}</${tagName}>`;
 }
 
-export type LitSsrComponentRenderer = (options?: {
-  tagName?: unknown;
-  props?: Record<string, unknown>;
-}) => string | null;
-
 export type LitGeneratedSsrComponent = ReturnType<typeof createLitCSRComponent>;
 
-export function createLitSSRComponent(
-  _render: LitSsrComponentRenderer,
-): LitGeneratedSsrComponent {
+export function createLitSSRComponent(): LitGeneratedSsrComponent {
   return createLitCSRComponent();
 }
 

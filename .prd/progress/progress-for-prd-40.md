@@ -530,3 +530,32 @@
   - Notes for next iteration:
     - Run `sudo pnpm --filter qwik-demo exec playwright install-deps` (or apt package list from Playwright output), then rerun `pnpm e2e`.
     - Confirm/fix adapter-lit package dependency resolution for `@builder.io/qwik`, then rerun full root loops.
+
+- 2026-05-03: Completed issue #44 task slice: remove legacy generated Lit SSR runtime arg shape (acceptance criterion 2).
+  - PRD reference: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
+  - Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/44
+  - Task completed:
+    - Removed legacy generated runtime call shape `createLitSSRComponent(renderComponentSsrHtml)`.
+    - Updated Lit SSR adapter contract `createLitSSRComponent` to no-arg shape.
+    - Updated Lit generator SSR runtime template to import only `createLitSSRComponent` from `@qwik-custom-elements/adapter-lit/ssr` and call `createLitSSRComponent()`.
+    - Updated Lit adapter tests and regenerated demo Lit SSR runtime output to assert/use new shape.
+  - Key decisions:
+    - Keep this run strictly scoped to acceptance criterion 2 only; no SSR engine behavior expansion in this slice.
+    - Keep `renderComponentSsrHtml` available in adapter for existing contract checks, but remove it from generated runtime contract path.
+  - Key findings:
+    - Legacy renderer-arg runtime shape masked ownership boundaries and implied external renderer injection that the adapter does not need.
+    - Root build failure remains unrelated to this slice: `qwik-demo` unresolved import `@qwik-custom-elements/test-stencil-lib/loader` from generated Stencil CSR runtime file.
+  - Validation:
+    - `pnpm format` passed.
+    - `pnpm typecheck` passed.
+    - `pnpm test` passed.
+    - `pnpm build` failed due unrelated pre-existing `qwik-demo` import resolution error (`@qwik-custom-elements/test-stencil-lib/loader`).
+    - `pnpm lint` passed.
+    - `pnpm e2e` passed (9/9).
+  - Files changed:
+    - `packages/adapter-lit/src/ssr.ts`
+    - `packages/adapter-lit/src/generated-output.ts`
+    - `packages/adapter-lit/src/index.test.ts`
+    - `apps/qwik-demo/src/generated/lit/ssr/runtime-ssr.generated.ts`
+  - Notes for next iteration:
+    - Continue issue #44 with SSR runtime plumbing and true SSR rendering path (`@lit-labs/ssr` + Qwik SSR primitives).

@@ -1,5 +1,17 @@
 # Findings Log
 
+## 2026-05-03 - Lit SSR generated runtime should not expose renderer-injection argument
+
+- Sources:
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/44
+- Finding:
+  - Generated Lit SSR runtime shape `createLitSSRComponent(renderComponentSsrHtml)` creates false contract expectation that SSR renderer is consumer-supplied, while adapter owns SSR rendering path.
+  - Keeping renderer helper in generated contract surface obscures adapter ownership boundaries and complicates parity work planning.
+- Durable guidance:
+  - Generated Lit SSR runtime should import only `createLitSSRComponent` from `@qwik-custom-elements/adapter-lit/ssr` and call it with no arguments.
+  - Keep renderer implementation details internal to adapter SSR entry until true SSR path lands.
+
 ## 2026-04-29 - Stencil generated outputs should stay under a dedicated generated/stencil namespace
 
 - Sources:

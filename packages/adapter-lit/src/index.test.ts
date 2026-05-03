@@ -156,10 +156,10 @@ describe('adapter-lit metadata contract', () => {
       "export * from './runtime-ssr.generated';",
     );
     expect(runtimeSsrWrite?.content).toContain(
-      "import { createLitSSRComponent, renderComponentSsrHtml } from '@qwik-custom-elements/adapter-lit/ssr';",
+      "import { createLitSSRComponent } from '@qwik-custom-elements/adapter-lit/ssr';",
     );
     expect(runtimeSsrWrite?.content).toContain(
-      'export const GeneratedLitComponent = createLitSSRComponent(renderComponentSsrHtml);',
+      'export const GeneratedLitComponent = createLitSSRComponent();',
     );
     expect(wrapperWrite?.content).toContain(
       "import { GeneratedLitComponent } from './runtime';",
@@ -216,7 +216,7 @@ describe('adapter-lit metadata contract', () => {
     );
 
     expect(runtimeSsrWrite?.content).toContain(
-      'export const TestLitLibSSRBridgeComponent = createLitSSRComponent(renderComponentSsrHtml);',
+      'export const TestLitLibSSRBridgeComponent = createLitSSRComponent();',
     );
     expect(runtimeSsrWrite?.content).not.toContain('GeneratedLitComponent');
     expect(wrapperWrite?.content).toContain(
