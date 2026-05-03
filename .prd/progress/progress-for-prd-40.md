@@ -33,500 +33,500 @@
 
 - 2026-04-25: Created child issues #42-#49 and initialized this progress file.
 - 2026-04-25: Completed issue #42 task slice: fixture package bootstrap only (acceptance criterion 1).
-   - PRD reference: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
-   - Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/42
-   - Task completed:
-      - Populated `@qwik-custom-elements/test-lit-lib` with runnable Lit components mirroring Stencil fixture surface (`de-button`, `de-alert`) including props/events/slots.
-      - Added deterministic CEM generation script and committed `custom-elements.json` for stable reruns.
-      - Enabled real package scripts (`build`, `check-types`, `dev`) and package-level TypeScript config.
-   - Key decisions:
-      - Kept slice strictly inside fixture package; deferred demo route and e2e Lit-path work to next task slice in #42.
-      - Used deterministic static manifest writer to keep CEM output stable and core-consumable.
-   - Key findings:
-      - Root validation loops `typecheck`, `test`, `build`, `lint` passed.
-      - Root `e2e` command hung in aggregated turbo run; direct `pnpm --filter qwik-demo run e2e -- --reporter=line` completed and failed on existing stencil wrappers assertion in `apps/qwik-demo/e2e/smoke.spec.ts` (not part of this slice).
-   - Files changed:
-      - `packages/test-lit-lib/package.json`
-      - `packages/test-lit-lib/tsconfig.json`
-      - `packages/test-lit-lib/src/index.ts`
-      - `packages/test-lit-lib/src/components/de-button.ts`
-      - `packages/test-lit-lib/src/components/de-alert.ts`
-      - `packages/test-lit-lib/scripts/write-cem.mjs`
-      - `packages/test-lit-lib/custom-elements.json`
-      - `pnpm-lock.yaml`
-   - Notes for next iteration:
-      - Continue #42 with demo-route wiring and first Lit render e2e proof once existing stencil wrappers e2e instability is resolved or isolated.
+  - PRD reference: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
+  - Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/42
+  - Task completed:
+    - Populated `@qwik-custom-elements/test-lit-lib` with runnable Lit components mirroring Stencil fixture surface (`de-button`, `de-alert`) including props/events/slots.
+    - Added deterministic CEM generation script and committed `custom-elements.json` for stable reruns.
+    - Enabled real package scripts (`build`, `check-types`, `dev`) and package-level TypeScript config.
+  - Key decisions:
+    - Kept slice strictly inside fixture package; deferred demo route and e2e Lit-path work to next task slice in #42.
+    - Used deterministic static manifest writer to keep CEM output stable and core-consumable.
+  - Key findings:
+    - Root validation loops `typecheck`, `test`, `build`, `lint` passed.
+    - Root `e2e` command hung in aggregated turbo run; direct `pnpm --filter qwik-demo run e2e -- --reporter=line` completed and failed on existing stencil wrappers assertion in `apps/qwik-demo/e2e/smoke.spec.ts` (not part of this slice).
+  - Files changed:
+    - `packages/test-lit-lib/package.json`
+    - `packages/test-lit-lib/tsconfig.json`
+    - `packages/test-lit-lib/src/index.ts`
+    - `packages/test-lit-lib/src/components/de-button.ts`
+    - `packages/test-lit-lib/src/components/de-alert.ts`
+    - `packages/test-lit-lib/scripts/write-cem.mjs`
+    - `packages/test-lit-lib/custom-elements.json`
+    - `pnpm-lock.yaml`
+  - Notes for next iteration:
+    - Continue #42 with demo-route wiring and first Lit render e2e proof once existing stencil wrappers e2e instability is resolved or isolated.
 - 2026-04-25: Updated issue #42 fixture slice implementation to use official CEM tooling instead of custom manifest script.
-   - PRD reference: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
-   - Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/42
-   - Task completed:
-      - Replaced custom `scripts/write-cem.mjs` generation path with `@custom-elements-manifest/analyzer` CLI (`cem analyze --litelement --globs "src/**/*.ts" --outdir .`).
-      - Added analyzer dependency in fixture package and regenerated `custom-elements.json` with official analyzer output.
-      - Removed custom script file to avoid non-standard manifest drift.
-   - Key decisions:
-      - Prefer official ecosystem CEM generation capability over hand-written JSON output.
-      - Keep first acceptance criterion (#42) status as complete; this run is implementation hardening within same completed criterion.
-   - Key findings:
-      - `pnpm --filter @qwik-custom-elements/test-lit-lib run build` passes and emits analyzer-generated manifest.
-   - Files changed:
-      - `packages/test-lit-lib/package.json`
-      - `packages/test-lit-lib/custom-elements.json`
-      - `packages/test-lit-lib/scripts/write-cem.mjs` (deleted)
-      - `pnpm-lock.yaml`
+  - PRD reference: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
+  - Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/42
+  - Task completed:
+    - Replaced custom `scripts/write-cem.mjs` generation path with `@custom-elements-manifest/analyzer` CLI (`cem analyze --litelement --globs "src/**/*.ts" --outdir .`).
+    - Added analyzer dependency in fixture package and regenerated `custom-elements.json` with official analyzer output.
+    - Removed custom script file to avoid non-standard manifest drift.
+  - Key decisions:
+    - Prefer official ecosystem CEM generation capability over hand-written JSON output.
+    - Keep first acceptance criterion (#42) status as complete; this run is implementation hardening within same completed criterion.
+  - Key findings:
+    - `pnpm --filter @qwik-custom-elements/test-lit-lib run build` passes and emits analyzer-generated manifest.
+  - Files changed:
+    - `packages/test-lit-lib/package.json`
+    - `packages/test-lit-lib/custom-elements.json`
+    - `packages/test-lit-lib/scripts/write-cem.mjs` (deleted)
+    - `pnpm-lock.yaml`
 - 2026-04-25: Completed issue #42 task slice: first Lit demo render path (acceptance criterion 2).
-   - PRD reference: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
-   - Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/42
-   - Task completed:
-      - Added Lit SSR demo generation project config (`demo-lit-ssr`) targeting `apps/qwik-demo/src/generated/lit/ssr`.
-      - Generated Lit demo wrappers (`de-alert`, `de-button`) and index barrel via core CLI from the new project config.
-      - Added new demo route at `/lit/ssr/bridge` that renders one generated Lit element (`QwikDeButton`) as first visible Lit path.
-      - Wired client-side Lit custom element registration on browser only via task hook import.
-      - Added explicit workspace dependency/path mapping so `qwik-demo` can typecheck against `@qwik-custom-elements/test-lit-lib`.
-   - Key decisions:
-      - Keep this run scoped to acceptance criterion 2 only; defer Lit e2e proof (acceptance criterion 3) to next task slice.
-      - Keep generation adapter-owned and config-driven; no core framework-specific output shaping introduced.
-      - Use browser-guarded task import for Lit registration to avoid SSR `customElements` runtime hazards.
-   - Key findings:
-      - Root loops `typecheck`, `test`, `build`, `lint` pass for this slice.
-      - Root `e2e` still fails on existing Stencil wrappers assertion in `apps/qwik-demo/e2e/smoke.spec.ts` (`#first-stencil-wrapper de-button[size=\"lg\"]` not found), unrelated to this Lit route slice.
-   - Files changed:
-      - `qwik-custom-elements.config.json`
-      - `apps/qwik-demo/src/routes/lit/ssr/bridge/index.tsx`
-      - `apps/qwik-demo/src/generated/lit/ssr/index.ts`
-      - `apps/qwik-demo/src/generated/lit/ssr/de-alert.ts`
-      - `apps/qwik-demo/src/generated/lit/ssr/de-button.ts`
-      - `apps/qwik-demo/package.json`
-      - `apps/qwik-demo/tsconfig.json`
-      - `packages/test-lit-lib/package.json`
-      - `pnpm-lock.yaml`
-   - Notes for next iteration:
-      - Add Lit e2e smoke for `/lit/ssr/bridge` and complete acceptance criterion 3.
+  - PRD reference: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
+  - Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/42
+  - Task completed:
+    - Added Lit SSR demo generation project config (`demo-lit-ssr`) targeting `apps/qwik-demo/src/generated/lit/ssr`.
+    - Generated Lit demo wrappers (`de-alert`, `de-button`) and index barrel via core CLI from the new project config.
+    - Added new demo route at `/lit/ssr/bridge` that renders one generated Lit element (`QwikDeButton`) as first visible Lit path.
+    - Wired client-side Lit custom element registration on browser only via task hook import.
+    - Added explicit workspace dependency/path mapping so `qwik-demo` can typecheck against `@qwik-custom-elements/test-lit-lib`.
+  - Key decisions:
+    - Keep this run scoped to acceptance criterion 2 only; defer Lit e2e proof (acceptance criterion 3) to next task slice.
+    - Keep generation adapter-owned and config-driven; no core framework-specific output shaping introduced.
+    - Use browser-guarded task import for Lit registration to avoid SSR `customElements` runtime hazards.
+  - Key findings:
+    - Root loops `typecheck`, `test`, `build`, `lint` pass for this slice.
+    - Root `e2e` still fails on existing Stencil wrappers assertion in `apps/qwik-demo/e2e/smoke.spec.ts` (`#first-stencil-wrapper de-button[size=\"lg\"]` not found), unrelated to this Lit route slice.
+  - Files changed:
+    - `qwik-custom-elements.config.json`
+    - `apps/qwik-demo/src/routes/lit/ssr/bridge/index.tsx`
+    - `apps/qwik-demo/src/generated/lit/ssr/index.ts`
+    - `apps/qwik-demo/src/generated/lit/ssr/de-alert.ts`
+    - `apps/qwik-demo/src/generated/lit/ssr/de-button.ts`
+    - `apps/qwik-demo/package.json`
+    - `apps/qwik-demo/tsconfig.json`
+    - `packages/test-lit-lib/package.json`
+    - `pnpm-lock.yaml`
+  - Notes for next iteration:
+    - Add Lit e2e smoke for `/lit/ssr/bridge` and complete acceptance criterion 3.
 - 2026-04-28: Completed issue #42 task slice: Lit SSR bridge e2e smoke (acceptance criterion 3).
-   - PRD reference: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
-   - Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/42
-   - Task completed:
-      - Added Lit SSR bridge smoke coverage in `apps/qwik-demo/e2e/smoke.spec.ts` for first Lit render path.
-      - Asserted route heading/status copy, custom element registration (`customElements.get('de-button')`), and visible rendered host under `#lit-first-wrapper`.
-   - Key decisions:
-      - Kept this run scoped to one tracer-bullet task only: complete issue #42 acceptance criterion 3 without expanding Lit route behavior.
-      - Used route-level smoke assertions only, matching current first-path proof goal.
-   - Key findings:
-      - Targeted Lit e2e check passes: `pnpm --filter qwik-demo run e2e -- --reporter=line --grep "lit ssr bridge"`.
-      - Root loops `typecheck`, `test`, `build`, `lint` pass.
-      - Full demo e2e run still fails on known pre-existing Stencil wrappers regression in `apps/qwik-demo/e2e/smoke.spec.ts` (`stencil wrappers interaction contract`), not introduced by this Lit slice.
-   - Files changed:
-      - `apps/qwik-demo/e2e/smoke.spec.ts`
+  - PRD reference: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
+  - Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/42
+  - Task completed:
+    - Added Lit SSR bridge smoke coverage in `apps/qwik-demo/e2e/smoke.spec.ts` for first Lit render path.
+    - Asserted route heading/status copy, custom element registration (`customElements.get('de-button')`), and visible rendered host under `#lit-first-wrapper`.
+  - Key decisions:
+    - Kept this run scoped to one tracer-bullet task only: complete issue #42 acceptance criterion 3 without expanding Lit route behavior.
+    - Used route-level smoke assertions only, matching current first-path proof goal.
+  - Key findings:
+    - Targeted Lit e2e check passes: `pnpm --filter qwik-demo run e2e -- --reporter=line --grep "lit ssr bridge"`.
+    - Root loops `typecheck`, `test`, `build`, `lint` pass.
+    - Full demo e2e run still fails on known pre-existing Stencil wrappers regression in `apps/qwik-demo/e2e/smoke.spec.ts` (`stencil wrappers interaction contract`), not introduced by this Lit slice.
+  - Files changed:
+    - `apps/qwik-demo/e2e/smoke.spec.ts`
 - 2026-04-28: Completed issue #43 task slice: Lit SSR runtime contract fallback-vs-hard-fail diagnostics (acceptance criterion 2, partial).
-   - PRD reference: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
-   - Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/43
-   - Task completed:
-      - Added deterministic Lit SSR contract behavior for `renderComponentSsrHtml`: missing `tagName` returns fallback `null`; invalid provided `tagName` now throws deterministic error.
-      - Added adapter-lit tests proving distinction between fallback and hard failure paths.
-   - Key decisions:
-      - Keep fallback path limited to absent `options.tagName` only.
-      - Treat blank/non-string provided `tagName` as hard contract failure with stable error code `QCE_LIT_RUNTIME_TAGNAME_INVALID`.
-      - Keep changes adapter-owned (`packages/adapter-lit/*`); no core branching introduced.
-   - Key findings (issue #43 partial):
-      - Root loops `format`, `typecheck`, `test`, `build`, `lint` pass for this slice.
-      - Pre-existing Stencil wrappers e2e regression unblocked in same session (see fix entry below).
-   - Files changed:
-      - `packages/adapter-lit/src/index.ts`
-      - `packages/adapter-lit/src/index.test.ts`
-   - Notes for next iteration:
-      - Continue issue #43 remaining acceptance criteria.
+  - PRD reference: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
+  - Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/43
+  - Task completed:
+    - Added deterministic Lit SSR contract behavior for `renderComponentSsrHtml`: missing `tagName` returns fallback `null`; invalid provided `tagName` now throws deterministic error.
+    - Added adapter-lit tests proving distinction between fallback and hard failure paths.
+  - Key decisions:
+    - Keep fallback path limited to absent `options.tagName` only.
+    - Treat blank/non-string provided `tagName` as hard contract failure with stable error code `QCE_LIT_RUNTIME_TAGNAME_INVALID`.
+    - Keep changes adapter-owned (`packages/adapter-lit/*`); no core branching introduced.
+  - Key findings (issue #43 partial):
+    - Root loops `format`, `typecheck`, `test`, `build`, `lint` pass for this slice.
+    - Pre-existing Stencil wrappers e2e regression unblocked in same session (see fix entry below).
+  - Files changed:
+    - `packages/adapter-lit/src/index.ts`
+    - `packages/adapter-lit/src/index.test.ts`
+  - Notes for next iteration:
+    - Continue issue #43 remaining acceptance criteria.
 - 2026-04-28: Fixed pre-existing stencil wrappers e2e regression (triage task, unblocks PRD-40 full e2e suite).
-   - PRD reference: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
-   - Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/43
-   - Task completed:
-      - Identified and fixed root cause: `createGeneratedOutput` used `ssrAvailable` (runtime probe result, always `false` during CLI generation) as gate for SSR wrapper mode instead of `hasHydrateRuntime` (presence of `hydrateImport` in config).
-      - Changed `renderStencilComponentWrapper` call to use `hasHydrateRuntime` — whether `runtimeImports.hydrateImport` is a non-empty string.
-      - Patched all 4 generated SSR wrappers under `apps/qwik-demo/src/generated/ssr/` from `GeneratedStencilCSRComponent` → `GeneratedStencilComponent`.
-      - Added regression test: `generates SSR wrappers when hydrate runtime import is present even if ssrAvailable is false`.
-      - Prefixed destructured `ssrAvailable` with `_` in `createGeneratedOutput` to satisfy `no-unused-vars` lint rule.
-   - Key decisions:
-      - Probe availability (`ssrAvailable`) is for reporting/diagnostics only; wrapper mode must follow config intent (`hasHydrateRuntime`).
-      - Probe cannot import the hydrate module at CLI generation time even if it is correctly configured — treat config presence as the authoritative capability signal.
-   - Key findings:
-      - `ssrAvailable: false` in `generated-run-summary.json` was misleading — probe fails because hydrate module cannot be dynamically imported during generator execution, not because SSR is actually absent.
-      - All 5 stencil e2e tests now pass (1 was failing: `stencil wrappers interaction contract`).
-      - 31/31 adapter-stencil unit tests pass (30 before + 1 regression test).
-   - Validation:
-      - `pnpm test` ✓ 6/6 tasks successful
-      - `pnpm typecheck` ✓ 6/6 tasks successful
-      - `pnpm lint` ✓ 6/6 tasks successful
-      - `pnpm format` ✓ 6/6 tasks successful
-      - `pnpm e2e` ✓ 6/6 tests pass
-   - Files changed:
-      - `packages/adapter-stencil/src/index.ts`
-      - `packages/adapter-stencil/src/index.test.ts`
-      - `apps/qwik-demo/src/generated/ssr/de-button.tsx`
-      - `apps/qwik-demo/src/generated/ssr/de-alert.tsx`
-      - `apps/qwik-demo/src/generated/ssr/de-button-shadow.tsx`
-      - `apps/qwik-demo/src/generated/ssr/de-alert-shadow.tsx`
-      - Root `e2e` still fails on known pre-existing stencil wrappers test in `apps/qwik-demo/e2e/smoke.spec.ts` (`#first-stencil-wrapper de-button[size="lg"]` not found), unrelated to this Lit slice.
-   - Files changed:
-      - `packages/adapter-lit/src/ssr.ts`
-      - `packages/adapter-lit/src/index.test.ts`
-   - Notes for next iteration:
-      - Continue issue #43 with remaining runtime contract/demos checks in another single-task slice.
+  - PRD reference: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
+  - Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/43
+  - Task completed:
+    - Identified and fixed root cause: `createGeneratedOutput` used `ssrAvailable` (runtime probe result, always `false` during CLI generation) as gate for SSR wrapper mode instead of `hasHydrateRuntime` (presence of `hydrateImport` in config).
+    - Changed `renderStencilComponentWrapper` call to use `hasHydrateRuntime` — whether `runtimeImports.hydrateImport` is a non-empty string.
+    - Patched all 4 generated SSR wrappers under `apps/qwik-demo/src/generated/ssr/` from `GeneratedStencilCSRComponent` → `GeneratedStencilComponent`.
+    - Added regression test: `generates SSR wrappers when hydrate runtime import is present even if ssrAvailable is false`.
+    - Prefixed destructured `ssrAvailable` with `_` in `createGeneratedOutput` to satisfy `no-unused-vars` lint rule.
+  - Key decisions:
+    - Probe availability (`ssrAvailable`) is for reporting/diagnostics only; wrapper mode must follow config intent (`hasHydrateRuntime`).
+    - Probe cannot import the hydrate module at CLI generation time even if it is correctly configured — treat config presence as the authoritative capability signal.
+  - Key findings:
+    - `ssrAvailable: false` in `generated-run-summary.json` was misleading — probe fails because hydrate module cannot be dynamically imported during generator execution, not because SSR is actually absent.
+    - All 5 stencil e2e tests now pass (1 was failing: `stencil wrappers interaction contract`).
+    - 31/31 adapter-stencil unit tests pass (30 before + 1 regression test).
+  - Validation:
+    - `pnpm test` ✓ 6/6 tasks successful
+    - `pnpm typecheck` ✓ 6/6 tasks successful
+    - `pnpm lint` ✓ 6/6 tasks successful
+    - `pnpm format` ✓ 6/6 tasks successful
+    - `pnpm e2e` ✓ 6/6 tests pass
+  - Files changed:
+    - `packages/adapter-stencil/src/index.ts`
+    - `packages/adapter-stencil/src/index.test.ts`
+    - `apps/qwik-demo/src/generated/ssr/de-button.tsx`
+    - `apps/qwik-demo/src/generated/ssr/de-alert.tsx`
+    - `apps/qwik-demo/src/generated/ssr/de-button-shadow.tsx`
+    - `apps/qwik-demo/src/generated/ssr/de-alert-shadow.tsx`
+    - Root `e2e` still fails on known pre-existing stencil wrappers test in `apps/qwik-demo/e2e/smoke.spec.ts` (`#first-stencil-wrapper de-button[size="lg"]` not found), unrelated to this Lit slice.
+  - Files changed:
+    - `packages/adapter-lit/src/ssr.ts`
+    - `packages/adapter-lit/src/index.test.ts`
+  - Notes for next iteration:
+    - Continue issue #43 with remaining runtime contract/demos checks in another single-task slice.
 - 2026-04-28: Completed issue #43 task slice: non-string tagName contract test (acceptance criterion 1 completion).
-   - PRD reference: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
-   - Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/43
-   - Task completed:
-      - Added test `'throws deterministic contract error for non-string SSR tagName input'` to `packages/adapter-lit/src/index.test.ts`.
-      - Proves `typeof options.tagName !== 'string'` branch (non-null, non-string e.g. number) throws `QCE_LIT_RUNTIME_TAGNAME_INVALID` with deterministic message.
-      - All 3 acceptance criteria now fully covered: runtime contract validation (7 tests), fallback vs hard-fail distinct, e2e smoke for demo wiring (from #42).
-   - Key decisions:
-      - Non-string non-null input must hit same hard-fail error code as blank string; test proves it.
-      - All validation rules deterministic: null/undefined → fallback null; string blank → hard error; non-string → hard error; valid string → rendered HTML.
-   - Key findings:
-      - 7/7 adapter-lit tests pass.
-      - turbo build + lint pass.
-      - Issue #43 all acceptance criteria satisfied; ready to close.
-   - Files changed:
-      - `packages/adapter-lit/src/index.test.ts`
-   - Notes for next iteration:
-      - Issue #43 can be closed. Next unblocked issue: #44 (Generate SSR Lit bridge component and wire lit ssr bridge route with e2e).
+  - PRD reference: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
+  - Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/43
+  - Task completed:
+    - Added test `'throws deterministic contract error for non-string SSR tagName input'` to `packages/adapter-lit/src/index.test.ts`.
+    - Proves `typeof options.tagName !== 'string'` branch (non-null, non-string e.g. number) throws `QCE_LIT_RUNTIME_TAGNAME_INVALID` with deterministic message.
+    - All 3 acceptance criteria now fully covered: runtime contract validation (7 tests), fallback vs hard-fail distinct, e2e smoke for demo wiring (from #42).
+  - Key decisions:
+    - Non-string non-null input must hit same hard-fail error code as blank string; test proves it.
+    - All validation rules deterministic: null/undefined → fallback null; string blank → hard error; non-string → hard error; valid string → rendered HTML.
+  - Key findings:
+    - 7/7 adapter-lit tests pass.
+    - turbo build + lint pass.
+    - Issue #43 all acceptance criteria satisfied; ready to close.
+  - Files changed:
+    - `packages/adapter-lit/src/index.test.ts`
+  - Notes for next iteration:
+    - Issue #43 can be closed. Next unblocked issue: #44 (Generate SSR Lit bridge component and wire lit ssr bridge route with e2e).
 - 2026-04-28: Completed issue #44 task slice: generated Lit SSR bridge contract and generated-output consumption (acceptance criterion 1).
-   - PRD reference: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
-   - Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/44
-   - Task completed:
-      - Added adapter-owned Lit SSR bridge factory contract (`createLitSSRComponent`) in `@qwik-custom-elements/adapter-lit/ssr`.
-      - Extended Lit planned writes to emit SSR runtime surface (`runtime.ts`, `runtime-ssr.generated.ts`) when SSR is available.
-      - Updated generated Lit SSR component files to consume generated runtime bridge and emit bridge-derived SSR HTML exports.
-      - Switched Lit SSR project config to adapter SSR subpath (`@qwik-custom-elements/adapter-lit/ssr`) so SSR-capable generation path is used.
-      - Added adapter-lit contract test proving generated runtime bridge files and wrapper consumption are emitted.
-   - Key decisions:
-      - For Lit SSR projects, generator must target adapter SSR subpath to preserve adapter-owned SSR contract (`adapter-lit/ssr`) instead of root entrypoint fallback mode.
-      - Keep this run strictly scoped to acceptance criterion 1; route wiring migration and dedicated issue #44 e2e assertion changes remain for next slice.
-   - Key findings:
-      - `demo-lit-ssr` configured with root `@qwik-custom-elements/adapter-lit` always downgrades to client-only fallback because root `probeSSR()` intentionally reports unavailable.
-      - Pointing project config at `@qwik-custom-elements/adapter-lit/ssr` enables deterministic SSR bridge runtime generation.
-   - Validation:
-      - `npm run typecheck` passed.
-      - `npm run test` passed.
-      - `npm run build` passed.
-      - `npm run lint` passed.
-      - `npm run e2e` passed (7/7).
-   - Files changed:
-      - `packages/adapter-lit/src/ssr.ts`
-      - `packages/adapter-lit/src/generated-output.ts`
-      - `packages/adapter-lit/src/index.test.ts`
-      - `qwik-custom-elements.config.json`
-      - `apps/qwik-demo/src/generated/lit/ssr/runtime.ts`
-      - `apps/qwik-demo/src/generated/lit/ssr/runtime-ssr.generated.ts`
-      - `apps/qwik-demo/src/generated/lit/ssr/de-alert.ts`
-      - `apps/qwik-demo/src/generated/lit/ssr/de-button.ts`
-   - Notes for next iteration:
-      - Complete issue #44 acceptance criterion 2 by wiring `/lit/ssr/bridge` route to generated SSR bridge surface (remove handwritten fallback markup path).
+  - PRD reference: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
+  - Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/44
+  - Task completed:
+    - Added adapter-owned Lit SSR bridge factory contract (`createLitSSRComponent`) in `@qwik-custom-elements/adapter-lit/ssr`.
+    - Extended Lit planned writes to emit SSR runtime surface (`runtime.ts`, `runtime-ssr.generated.ts`) when SSR is available.
+    - Updated generated Lit SSR component files to consume generated runtime bridge and emit bridge-derived SSR HTML exports.
+    - Switched Lit SSR project config to adapter SSR subpath (`@qwik-custom-elements/adapter-lit/ssr`) so SSR-capable generation path is used.
+    - Added adapter-lit contract test proving generated runtime bridge files and wrapper consumption are emitted.
+  - Key decisions:
+    - For Lit SSR projects, generator must target adapter SSR subpath to preserve adapter-owned SSR contract (`adapter-lit/ssr`) instead of root entrypoint fallback mode.
+    - Keep this run strictly scoped to acceptance criterion 1; route wiring migration and dedicated issue #44 e2e assertion changes remain for next slice.
+  - Key findings:
+    - `demo-lit-ssr` configured with root `@qwik-custom-elements/adapter-lit` always downgrades to client-only fallback because root `probeSSR()` intentionally reports unavailable.
+    - Pointing project config at `@qwik-custom-elements/adapter-lit/ssr` enables deterministic SSR bridge runtime generation.
+  - Validation:
+    - `npm run typecheck` passed.
+    - `npm run test` passed.
+    - `npm run build` passed.
+    - `npm run lint` passed.
+    - `npm run e2e` passed (7/7).
+  - Files changed:
+    - `packages/adapter-lit/src/ssr.ts`
+    - `packages/adapter-lit/src/generated-output.ts`
+    - `packages/adapter-lit/src/index.test.ts`
+    - `qwik-custom-elements.config.json`
+    - `apps/qwik-demo/src/generated/lit/ssr/runtime.ts`
+    - `apps/qwik-demo/src/generated/lit/ssr/runtime-ssr.generated.ts`
+    - `apps/qwik-demo/src/generated/lit/ssr/de-alert.ts`
+    - `apps/qwik-demo/src/generated/lit/ssr/de-button.ts`
+  - Notes for next iteration:
+    - Complete issue #44 acceptance criterion 2 by wiring `/lit/ssr/bridge` route to generated SSR bridge surface (remove handwritten fallback markup path).
 - 2026-04-28: Completed issue #44 task slice: route wiring to generated Lit SSR bridge surface + e2e proof (acceptance criteria 2 and 3).
-   - PRD reference: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
-   - Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/44
-   - Task completed:
-      - Rewired `/lit/ssr/bridge` route to consume generated SSR bridge HTML (`QwikDeButtonSsrHtmlFromBridge`) instead of handwritten `<de-button>` fallback markup.
-      - Added null-safe HTML binding in route (`?? undefined`) to satisfy Qwik prop typing for `dangerouslySetInnerHTML`.
-      - Strengthened Lit SSR bridge smoke assertion by proving handwritten fallback id (`#first-lit-button`) is absent while generated host render remains visible.
-      - Added missing local workspace subpath resolution for `@qwik-custom-elements/adapter-lit/ssr` in demo `tsconfig` paths + Vite alias so generated bridge runtime import typechecks/builds from source.
-   - Key decisions:
-      - Keep generated Lit files immutable; route must consume generated surface rather than editing generated output.
-      - Treat `@qwik-custom-elements/adapter-lit/ssr` subpath as explicit local source mapping in demo app for deterministic workspace typecheck/build parity.
-   - Key findings:
-      - Full root validation loops now pass with this slice: `typecheck`, `test`, `build`, `lint`, `e2e`.
-      - Route-level absence check for handwritten id is low-cost guard preventing regression back to fallback markup.
-   - Validation:
-      - `pnpm typecheck` passed.
-      - `pnpm test` passed.
-      - `pnpm build` passed.
-      - `pnpm lint` passed.
-      - `pnpm e2e` passed (7/7).
-   - Files changed:
-      - `apps/qwik-demo/src/routes/lit/ssr/bridge/index.tsx`
-      - `apps/qwik-demo/e2e/smoke.spec.ts`
-      - `apps/qwik-demo/tsconfig.json`
-      - `apps/qwik-demo/vite.config.ts`
+  - PRD reference: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
+  - Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/44
+  - Task completed:
+    - Rewired `/lit/ssr/bridge` route to consume generated SSR bridge HTML (`QwikDeButtonSsrHtmlFromBridge`) instead of handwritten `<de-button>` fallback markup.
+    - Added null-safe HTML binding in route (`?? undefined`) to satisfy Qwik prop typing for `dangerouslySetInnerHTML`.
+    - Strengthened Lit SSR bridge smoke assertion by proving handwritten fallback id (`#first-lit-button`) is absent while generated host render remains visible.
+    - Added missing local workspace subpath resolution for `@qwik-custom-elements/adapter-lit/ssr` in demo `tsconfig` paths + Vite alias so generated bridge runtime import typechecks/builds from source.
+  - Key decisions:
+    - Keep generated Lit files immutable; route must consume generated surface rather than editing generated output.
+    - Treat `@qwik-custom-elements/adapter-lit/ssr` subpath as explicit local source mapping in demo app for deterministic workspace typecheck/build parity.
+  - Key findings:
+    - Full root validation loops now pass with this slice: `typecheck`, `test`, `build`, `lint`, `e2e`.
+    - Route-level absence check for handwritten id is low-cost guard preventing regression back to fallback markup.
+  - Validation:
+    - `pnpm typecheck` passed.
+    - `pnpm test` passed.
+    - `pnpm build` passed.
+    - `pnpm lint` passed.
+    - `pnpm e2e` passed (7/7).
+  - Files changed:
+    - `apps/qwik-demo/src/routes/lit/ssr/bridge/index.tsx`
+    - `apps/qwik-demo/e2e/smoke.spec.ts`
+    - `apps/qwik-demo/tsconfig.json`
+    - `apps/qwik-demo/vite.config.ts`
 - 2026-04-28: Completed issue #45 task slice: generated Lit CSR bridge contract and generated-output consumption (acceptance criterion 1).
-   - PRD reference: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
-   - Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/45
-   - Task completed:
-      - Added adapter-owned Lit CSR bridge contract in `@qwik-custom-elements/adapter-lit/client` (`createLitCSRComponent`, `renderComponentCsrTag`) with deterministic validation/error behavior.
-      - Extended Lit planned writes for CSR mode to emit runtime surface (`runtime.ts`, `runtime-csr.generated.ts`) and wrapper bridge consumption (`Qwik* CsrTagFromBridge`).
-      - Added Lit CSR project in `qwik-custom-elements.config.json` (`demo-lit-csr`) targeting `apps/qwik-demo/src/generated/lit/csr` and regenerated output.
-      - Added demo workspace source-resolution mapping for `@qwik-custom-elements/adapter-lit/client` in `apps/qwik-demo/tsconfig.json` and `apps/qwik-demo/vite.config.ts`.
-      - Added adapter-lit tests proving CSR runtime bridge file generation and wrapper bridge consumption.
-   - Key decisions:
-      - Keep CSR bridge contract adapter-owned under explicit subpath `@qwik-custom-elements/adapter-lit/client`; no framework-specific core shaping.
-      - Keep this run scoped to acceptance criterion 1 only; `/lit/csr/bridge` route wiring and e2e coverage deferred to next slices.
-   - Key findings:
-      - Root Lit adapter entrypoint (`@qwik-custom-elements/adapter-lit`) remains deterministic fallback mode (`probeSSR` unavailable) and now intentionally emits CSR bridge runtime surface.
-      - Local app path/alias mapping for adapter-lit client subpath is required to keep workspace typecheck/build deterministic when dist artifacts are not prebuilt.
-   - Validation:
-      - `pnpm format` passed.
-      - `pnpm typecheck` passed.
-      - `pnpm test` passed.
-      - `pnpm build` passed.
-      - `pnpm lint` passed.
-      - `pnpm e2e` passed (7/7).
-   - Files changed:
-      - `packages/adapter-lit/src/client.ts`
-      - `packages/adapter-lit/src/generated-output.ts`
-      - `packages/adapter-lit/src/index.test.ts`
-      - `packages/adapter-lit/package.json`
-      - `qwik-custom-elements.config.json`
-      - `apps/qwik-demo/src/generated/lit/csr/index.ts`
-      - `apps/qwik-demo/src/generated/lit/csr/runtime.ts`
-      - `apps/qwik-demo/src/generated/lit/csr/runtime-csr.generated.ts`
-      - `apps/qwik-demo/src/generated/lit/csr/de-button.ts`
-      - `apps/qwik-demo/src/generated/lit/csr/de-alert.ts`
-      - `apps/qwik-demo/tsconfig.json`
-      - `apps/qwik-demo/vite.config.ts`
-   - Notes for next iteration:
-      - Wire `/lit/csr/bridge` route to generated Lit CSR bridge surface (acceptance criterion 2).
-      - Add dedicated e2e smoke for `/lit/csr/bridge` (acceptance criterion 3).
+  - PRD reference: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
+  - Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/45
+  - Task completed:
+    - Added adapter-owned Lit CSR bridge contract in `@qwik-custom-elements/adapter-lit/client` (`createLitCSRComponent`, `renderComponentCsrTag`) with deterministic validation/error behavior.
+    - Extended Lit planned writes for CSR mode to emit runtime surface (`runtime.ts`, `runtime-csr.generated.ts`) and wrapper bridge consumption (`Qwik* CsrTagFromBridge`).
+    - Added Lit CSR project in `qwik-custom-elements.config.json` (`demo-lit-csr`) targeting `apps/qwik-demo/src/generated/lit/csr` and regenerated output.
+    - Added demo workspace source-resolution mapping for `@qwik-custom-elements/adapter-lit/client` in `apps/qwik-demo/tsconfig.json` and `apps/qwik-demo/vite.config.ts`.
+    - Added adapter-lit tests proving CSR runtime bridge file generation and wrapper bridge consumption.
+  - Key decisions:
+    - Keep CSR bridge contract adapter-owned under explicit subpath `@qwik-custom-elements/adapter-lit/client`; no framework-specific core shaping.
+    - Keep this run scoped to acceptance criterion 1 only; `/lit/csr/bridge` route wiring and e2e coverage deferred to next slices.
+  - Key findings:
+    - Root Lit adapter entrypoint (`@qwik-custom-elements/adapter-lit`) remains deterministic fallback mode (`probeSSR` unavailable) and now intentionally emits CSR bridge runtime surface.
+    - Local app path/alias mapping for adapter-lit client subpath is required to keep workspace typecheck/build deterministic when dist artifacts are not prebuilt.
+  - Validation:
+    - `pnpm format` passed.
+    - `pnpm typecheck` passed.
+    - `pnpm test` passed.
+    - `pnpm build` passed.
+    - `pnpm lint` passed.
+    - `pnpm e2e` passed (7/7).
+  - Files changed:
+    - `packages/adapter-lit/src/client.ts`
+    - `packages/adapter-lit/src/generated-output.ts`
+    - `packages/adapter-lit/src/index.test.ts`
+    - `packages/adapter-lit/package.json`
+    - `qwik-custom-elements.config.json`
+    - `apps/qwik-demo/src/generated/lit/csr/index.ts`
+    - `apps/qwik-demo/src/generated/lit/csr/runtime.ts`
+    - `apps/qwik-demo/src/generated/lit/csr/runtime-csr.generated.ts`
+    - `apps/qwik-demo/src/generated/lit/csr/de-button.ts`
+    - `apps/qwik-demo/src/generated/lit/csr/de-alert.ts`
+    - `apps/qwik-demo/tsconfig.json`
+    - `apps/qwik-demo/vite.config.ts`
+  - Notes for next iteration:
+    - Wire `/lit/csr/bridge` route to generated Lit CSR bridge surface (acceptance criterion 2).
+    - Add dedicated e2e smoke for `/lit/csr/bridge` (acceptance criterion 3).
 - 2026-04-29: Completed issue #45 task slice: `/lit/csr/bridge` route wired to generated Lit CSR bridge surface (acceptance criterion 2).
-   - PRD reference: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
-   - Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/45
-   - Task completed:
-      - Added Lit CSR bridge route at `apps/qwik-demo/src/routes/lit/csr/bridge/index.tsx`.
-      - Route imports generated bridge export `QwikDeButtonCsrTagFromBridge` and renders generated tag via route-owned markup container.
-      - Kept Lit custom element registration in browser task hook to ensure route host renders after registration.
-   - Key decisions:
-      - Keep this run scoped to acceptance criterion 2 only; no e2e assertion changes in this slice.
-      - Avoid handwritten fallback constants; route consumes generated bridge surface directly.
-   - Key findings:
-      - Generated CSR bridge export is typed `string | null`; direct dynamic JSX tag usage is invalid in TSX and must be normalized to null-safe HTML markup binding for this route pattern.
-   - Validation:
-      - `npm run format` passed.
-      - `npm run typecheck` passed.
-      - `npm run test` passed.
-      - `npm run build` passed.
-      - `npm run lint` passed.
-      - `npm run e2e` passed (7/7).
-   - Files changed:
-      - `apps/qwik-demo/src/routes/lit/csr/bridge/index.tsx`
-   - Notes for next iteration:
-      - Add dedicated e2e smoke for `/lit/csr/bridge` (acceptance criterion 3).
+  - PRD reference: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
+  - Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/45
+  - Task completed:
+    - Added Lit CSR bridge route at `apps/qwik-demo/src/routes/lit/csr/bridge/index.tsx`.
+    - Route imports generated bridge export `QwikDeButtonCsrTagFromBridge` and renders generated tag via route-owned markup container.
+    - Kept Lit custom element registration in browser task hook to ensure route host renders after registration.
+  - Key decisions:
+    - Keep this run scoped to acceptance criterion 2 only; no e2e assertion changes in this slice.
+    - Avoid handwritten fallback constants; route consumes generated bridge surface directly.
+  - Key findings:
+    - Generated CSR bridge export is typed `string | null`; direct dynamic JSX tag usage is invalid in TSX and must be normalized to null-safe HTML markup binding for this route pattern.
+  - Validation:
+    - `npm run format` passed.
+    - `npm run typecheck` passed.
+    - `npm run test` passed.
+    - `npm run build` passed.
+    - `npm run lint` passed.
+    - `npm run e2e` passed (7/7).
+  - Files changed:
+    - `apps/qwik-demo/src/routes/lit/csr/bridge/index.tsx`
+  - Notes for next iteration:
+    - Add dedicated e2e smoke for `/lit/csr/bridge` (acceptance criterion 3).
 
 - [ ] #50 [PRD-40] - Unify bridge naming and stencil generated paths
 
 - 2026-04-29: Completed issue #50 task slice: Stencil SSR bridge factory rename across generator/runtime (acceptance criterion 2).
-   - PRD reference: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
-   - Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/50
-   - Task completed:
-      - Renamed adapter SSR factory export from `createStencilSSRComponent` to `createStencilSSRBridgeComponent` in stencil SSR runtime implementation.
-      - Updated stencil generator SSR runtime template to import and call `createStencilSSRBridgeComponent`.
-      - Regenerated demo stencil SSR runtime output so generated bridge module now consumes the renamed symbol.
-      - Updated core generator test assertion to verify renamed SSR factory usage in generated runtime output.
-   - Key decisions:
-      - Keep this run scoped to one tracer-bullet task only: acceptance criterion 2 for issue #50.
-      - Do not start libraryName naming and stencil path migration in this run.
-   - Key findings:
-      - Contract rename is adapter-owned and deterministic only when source template plus regenerated output are updated together.
-      - Existing README references still mention old name and should be migrated in a follow-up docs-focused slice.
-   - Validation:
-      - `pnpm format` passed.
-      - `pnpm typecheck` passed.
-      - `pnpm test` passed.
-      - `pnpm build` passed.
-      - `pnpm lint` passed.
-      - `pnpm e2e` passed.
-   - Files changed:
-      - `packages/adapter-stencil/src/ssr/stencil-ssr.tsx`
-      - `packages/adapter-stencil/src/index.ts`
-      - `packages/core/src/__tests__/generator.test.ts`
-      - `apps/qwik-demo/src/generated/ssr/runtime-ssr.generated.ts`
-   - Notes for next iteration:
-      - Add and plumb `libraryName` config contract.
-      - Implement Stencil and Lit bridge variable naming with library and mode markers.
-      - Move stencil generated outputs to `apps/qwik-demo/src/generated/stencil/(ssr|csr)` and update stencil route imports.
+  - PRD reference: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
+  - Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/50
+  - Task completed:
+    - Renamed adapter SSR factory export from `createStencilSSRComponent` to `createStencilSSRBridgeComponent` in stencil SSR runtime implementation.
+    - Updated stencil generator SSR runtime template to import and call `createStencilSSRBridgeComponent`.
+    - Regenerated demo stencil SSR runtime output so generated bridge module now consumes the renamed symbol.
+    - Updated core generator test assertion to verify renamed SSR factory usage in generated runtime output.
+  - Key decisions:
+    - Keep this run scoped to one tracer-bullet task only: acceptance criterion 2 for issue #50.
+    - Do not start libraryName naming and stencil path migration in this run.
+  - Key findings:
+    - Contract rename is adapter-owned and deterministic only when source template plus regenerated output are updated together.
+    - Existing README references still mention old name and should be migrated in a follow-up docs-focused slice.
+  - Validation:
+    - `pnpm format` passed.
+    - `pnpm typecheck` passed.
+    - `pnpm test` passed.
+    - `pnpm build` passed.
+    - `pnpm lint` passed.
+    - `pnpm e2e` passed.
+  - Files changed:
+    - `packages/adapter-stencil/src/ssr/stencil-ssr.tsx`
+    - `packages/adapter-stencil/src/index.ts`
+    - `packages/core/src/__tests__/generator.test.ts`
+    - `apps/qwik-demo/src/generated/ssr/runtime-ssr.generated.ts`
+  - Notes for next iteration:
+    - Add and plumb `libraryName` config contract.
+    - Implement Stencil and Lit bridge variable naming with library and mode markers.
+    - Move stencil generated outputs to `apps/qwik-demo/src/generated/stencil/(ssr|csr)` and update stencil route imports.
 
 - 2026-04-29: Completed issue #50 task slice: `libraryName` config contract and generator plumbing (acceptance criterion 1).
-   - PRD reference: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
-   - Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/50
-   - Task completed:
-      - Added optional `libraryName` to core `GeneratorProject` contract.
-      - Updated config validation/loading to accept and normalize `projects[].libraryName`.
-      - Plumbed `libraryName` from core generator into adapter `createGeneratedOutput(...)` call inputs.
-      - Added TDD coverage for config acceptance and adapter-contract plumbing.
-   - Key decisions:
-      - Keep `libraryName` optional to preserve backward compatibility for existing project configs.
-      - Treat `libraryName` as adapter input data only; no core naming behavior added in this slice.
-   - Key findings:
-      - Existing adapter-generation contract already supports additive context fields, so this extension required no adapter API break.
-   - Validation:
-      - `pnpm format` passed.
-      - `pnpm typecheck` passed.
-      - `pnpm test` passed.
-      - `pnpm build` passed.
-      - `pnpm lint` passed.
-      - `pnpm e2e` passed (7/7).
-   - Files changed:
-      - `packages/core/src/types.ts`
-      - `packages/core/src/config.ts`
-      - `packages/core/src/generator.ts`
-      - `packages/core/src/__tests__/config.test.ts`
-      - `packages/core/src/__tests__/generator.test.ts`
-   - Notes for next iteration:
-      - Implement deterministic bridge variable naming with `libraryName + mode + Bridge` markers for Stencil and Lit.
-      - Move stencil generated outputs to `apps/qwik-demo/src/generated/stencil/(ssr|csr)` and update stencil route imports.
+  - PRD reference: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
+  - Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/50
+  - Task completed:
+    - Added optional `libraryName` to core `GeneratorProject` contract.
+    - Updated config validation/loading to accept and normalize `projects[].libraryName`.
+    - Plumbed `libraryName` from core generator into adapter `createGeneratedOutput(...)` call inputs.
+    - Added TDD coverage for config acceptance and adapter-contract plumbing.
+  - Key decisions:
+    - Keep `libraryName` optional to preserve backward compatibility for existing project configs.
+    - Treat `libraryName` as adapter input data only; no core naming behavior added in this slice.
+  - Key findings:
+    - Existing adapter-generation contract already supports additive context fields, so this extension required no adapter API break.
+  - Validation:
+    - `pnpm format` passed.
+    - `pnpm typecheck` passed.
+    - `pnpm test` passed.
+    - `pnpm build` passed.
+    - `pnpm lint` passed.
+    - `pnpm e2e` passed (7/7).
+  - Files changed:
+    - `packages/core/src/types.ts`
+    - `packages/core/src/config.ts`
+    - `packages/core/src/generator.ts`
+    - `packages/core/src/__tests__/config.test.ts`
+    - `packages/core/src/__tests__/generator.test.ts`
+  - Notes for next iteration:
+    - Implement deterministic bridge variable naming with `libraryName + mode + Bridge` markers for Stencil and Lit.
+    - Move stencil generated outputs to `apps/qwik-demo/src/generated/stencil/(ssr|csr)` and update stencil route imports.
 
 - 2026-04-29: Completed issue #50 task slice: deterministic bridge variable naming with library + mode + Bridge for Stencil and Lit (acceptance criterion 3).
-   - PRD reference: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
-   - Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/50
-   - Task completed:
-      - Added `toPascalCase` + `toBridgeComponentName(libraryName, mode, fallback)` helpers in both `packages/adapter-stencil/src/index.ts` and `packages/adapter-lit/src/generated-output.ts`.
-      - When `libraryName` is provided: generated SSR bridge variable = `<LibraryPascalCase>SSRBridgeComponent`; CSR = `<LibraryPascalCase>CSRBridgeComponent`. E.g. `test-stencil-lib` → `TestStencilLibSSRBridgeComponent` / `TestStencilLibCSRBridgeComponent`.
-      - When `libraryName` is absent: fallback to previous generic names (`GeneratedStencilComponent`, `GeneratedStencilCSRComponent`, `GeneratedLitComponent`, `GeneratedLitCSRComponent`).
-      - Added `libraryName?` to `CreateGeneratedOutputInput` in both adapters; plumbed through all downstream render functions.
-      - Added 2 TDD tests for Stencil (SSR and CSR naming); 2 TDD tests for Lit (SSR and CSR naming).
-   - Key decisions:
-      - Bridge variable name = PascalCase(libraryName) + mode ("SSR"/"CSR") + "BridgeComponent" — exact pattern matching PRD expectation.
-      - Fallback to generic names preserves backward compatibility when `libraryName` is absent.
-      - Wrapper component files import the library-named bridge symbol from `'./runtime'` when `libraryName` is set.
-   - Key findings:
-      - `toPascalCase` splits on hyphens and underscores (`test-stencil-lib` → `TestStencilLib`).
-      - Consistent implementation pattern across both adapters without coupling (each has own private `toPascalCase`/`toBridgeComponentName`).
-   - Validation:
-      - `pnpm format` passed.
-      - `pnpm typecheck` passed.
-      - `pnpm test` passed.
-      - `pnpm build` passed.
-      - `pnpm lint` passed.
-      - `pnpm e2e` passed (7/7).
-   - Files changed:
-      - `packages/adapter-stencil/src/index.ts`
-      - `packages/adapter-stencil/src/index.test.ts`
-      - `packages/adapter-lit/src/generated-output.ts`
-      - `packages/adapter-lit/src/index.ts`
-      - `packages/adapter-lit/src/ssr.ts`
-      - `packages/adapter-lit/src/index.test.ts`
-   - Commit: `feat(adapters): PRD-40 #50 - generated bridge variable naming uses library + mode + Bridge for Stencil and Lit`
-   - Notes for next iteration:
-      - Move stencil generated outputs to `apps/qwik-demo/src/generated/stencil/(ssr|csr)` and update stencil route imports.
-      - Remove old `apps/qwik-demo/src/generated/ssr` and `apps/qwik-demo/src/generated/csr` directories.
+  - PRD reference: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
+  - Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/50
+  - Task completed:
+    - Added `toPascalCase` + `toBridgeComponentName(libraryName, mode, fallback)` helpers in both `packages/adapter-stencil/src/index.ts` and `packages/adapter-lit/src/generated-output.ts`.
+    - When `libraryName` is provided: generated SSR bridge variable = `<LibraryPascalCase>SSRBridgeComponent`; CSR = `<LibraryPascalCase>CSRBridgeComponent`. E.g. `test-stencil-lib` → `TestStencilLibSSRBridgeComponent` / `TestStencilLibCSRBridgeComponent`.
+    - When `libraryName` is absent: fallback to previous generic names (`GeneratedStencilComponent`, `GeneratedStencilCSRComponent`, `GeneratedLitComponent`, `GeneratedLitCSRComponent`).
+    - Added `libraryName?` to `CreateGeneratedOutputInput` in both adapters; plumbed through all downstream render functions.
+    - Added 2 TDD tests for Stencil (SSR and CSR naming); 2 TDD tests for Lit (SSR and CSR naming).
+  - Key decisions:
+    - Bridge variable name = PascalCase(libraryName) + mode ("SSR"/"CSR") + "BridgeComponent" — exact pattern matching PRD expectation.
+    - Fallback to generic names preserves backward compatibility when `libraryName` is absent.
+    - Wrapper component files import the library-named bridge symbol from `'./runtime'` when `libraryName` is set.
+  - Key findings:
+    - `toPascalCase` splits on hyphens and underscores (`test-stencil-lib` → `TestStencilLib`).
+    - Consistent implementation pattern across both adapters without coupling (each has own private `toPascalCase`/`toBridgeComponentName`).
+  - Validation:
+    - `pnpm format` passed.
+    - `pnpm typecheck` passed.
+    - `pnpm test` passed.
+    - `pnpm build` passed.
+    - `pnpm lint` passed.
+    - `pnpm e2e` passed (7/7).
+  - Files changed:
+    - `packages/adapter-stencil/src/index.ts`
+    - `packages/adapter-stencil/src/index.test.ts`
+    - `packages/adapter-lit/src/generated-output.ts`
+    - `packages/adapter-lit/src/index.ts`
+    - `packages/adapter-lit/src/ssr.ts`
+    - `packages/adapter-lit/src/index.test.ts`
+  - Commit: `feat(adapters): PRD-40 #50 - generated bridge variable naming uses library + mode + Bridge for Stencil and Lit`
+  - Notes for next iteration:
+    - Move stencil generated outputs to `apps/qwik-demo/src/generated/stencil/(ssr|csr)` and update stencil route imports.
+    - Remove old `apps/qwik-demo/src/generated/ssr` and `apps/qwik-demo/src/generated/csr` directories.
 
 - 2026-04-29: Completed issue #50 task slice: migrate Stencil generated output namespace paths and route imports (acceptance criteria 4, 5, 6, 7 completion).
-   - PRD reference: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
-   - Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/50
-   - Task completed:
-      - Updated Stencil project output dirs in `qwik-custom-elements.config.json` from `apps/qwik-demo/src/generated/(ssr|csr)` to `apps/qwik-demo/src/generated/stencil/(ssr|csr)`.
-      - Rewired Stencil demo routes to new generated namespace imports:
-        - `stencil/ssr/bridge` and `stencil/ssr/wrappers` now import from `generated/stencil/ssr`.
-        - `stencil/csr/bridge` and `stencil/csr/wrappers` now import from `generated/stencil/csr`.
-      - Regenerated outputs with core CLI and removed old tracked directories `apps/qwik-demo/src/generated/ssr` and `apps/qwik-demo/src/generated/csr`.
-   - Key decisions:
-      - Keep this run scoped to Stencil path migration only; no additional bridge-contract shape changes.
-      - Treat `generated/stencil/*` as canonical app-facing namespace for Stencil generated surfaces.
-   - Key findings:
-      - Root e2e can intermittently fail with transient `ERR_CONNECTION_REFUSED` during turbo orchestration; immediate rerun passed 7/7 without code changes.
-      - Full root quality loops are green after migration.
-   - Validation:
-      - `pnpm typecheck` passed.
-      - `pnpm test` passed.
-      - `pnpm build` passed.
-      - `pnpm lint` passed.
-      - `pnpm e2e` passed (7/7).
-      - `pnpm format` passed.
-   - Files changed:
-      - `qwik-custom-elements.config.json`
-      - `apps/qwik-demo/src/routes/stencil/ssr/bridge/index.tsx`
-      - `apps/qwik-demo/src/routes/stencil/ssr/wrappers/index.tsx`
-      - `apps/qwik-demo/src/routes/stencil/csr/bridge/index.tsx`
-      - `apps/qwik-demo/src/routes/stencil/csr/wrappers/index.tsx`
-      - `apps/qwik-demo/src/generated/stencil/ssr/*` (regenerated)
-      - `apps/qwik-demo/src/generated/stencil/csr/*` (regenerated)
-      - `apps/qwik-demo/src/generated/ssr/*` (deleted)
-      - `apps/qwik-demo/src/generated/csr/*` (deleted)
+  - PRD reference: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
+  - Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/50
+  - Task completed:
+    - Updated Stencil project output dirs in `qwik-custom-elements.config.json` from `apps/qwik-demo/src/generated/(ssr|csr)` to `apps/qwik-demo/src/generated/stencil/(ssr|csr)`.
+    - Rewired Stencil demo routes to new generated namespace imports:
+      - `stencil/ssr/bridge` and `stencil/ssr/wrappers` now import from `generated/stencil/ssr`.
+      - `stencil/csr/bridge` and `stencil/csr/wrappers` now import from `generated/stencil/csr`.
+    - Regenerated outputs with core CLI and removed old tracked directories `apps/qwik-demo/src/generated/ssr` and `apps/qwik-demo/src/generated/csr`.
+  - Key decisions:
+    - Keep this run scoped to Stencil path migration only; no additional bridge-contract shape changes.
+    - Treat `generated/stencil/*` as canonical app-facing namespace for Stencil generated surfaces.
+  - Key findings:
+    - Root e2e can intermittently fail with transient `ERR_CONNECTION_REFUSED` during turbo orchestration; immediate rerun passed 7/7 without code changes.
+    - Full root quality loops are green after migration.
+  - Validation:
+    - `pnpm typecheck` passed.
+    - `pnpm test` passed.
+    - `pnpm build` passed.
+    - `pnpm lint` passed.
+    - `pnpm e2e` passed (7/7).
+    - `pnpm format` passed.
+  - Files changed:
+    - `qwik-custom-elements.config.json`
+    - `apps/qwik-demo/src/routes/stencil/ssr/bridge/index.tsx`
+    - `apps/qwik-demo/src/routes/stencil/ssr/wrappers/index.tsx`
+    - `apps/qwik-demo/src/routes/stencil/csr/bridge/index.tsx`
+    - `apps/qwik-demo/src/routes/stencil/csr/wrappers/index.tsx`
+    - `apps/qwik-demo/src/generated/stencil/ssr/*` (regenerated)
+    - `apps/qwik-demo/src/generated/stencil/csr/*` (regenerated)
+    - `apps/qwik-demo/src/generated/ssr/*` (deleted)
+    - `apps/qwik-demo/src/generated/csr/*` (deleted)
 
 - 2026-04-29: Post-close follow-up for issue #50: set demo project `libraryName` values and regenerate outputs to surface library-scoped bridge symbols in checked-in generated files.
-   - PRD reference: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
-   - Child issue reference: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/50
-   - Task completed:
-      - Added `libraryName` for demo generation projects in `qwik-custom-elements.config.json` without scope prefixes:
-        - stencil projects: `test-stencil-lib`
-        - lit projects: `test-lit-lib`
-      - Re-ran generator CLI from repo root.
-      - Verified generated outputs now include library-scoped bridge symbols (`TestStencilLibSSRBridgeComponent`, `TestStencilLibCSRBridgeComponent`, `TestLitLibSSRBridgeComponent`, `TestLitLibCSRBridgeComponent`).
-   - Key decisions:
-      - Use unscoped library identifiers in config values to match requested naming style and current adapter `toPascalCase` conversion logic.
-      - Keep this run scoped to config + regenerated output only; no adapter/core logic changes.
-   - Validation:
-      - `node packages/core/dist/cli.js --config ./qwik-custom-elements.config.json` passed.
-      - Spot-check via file content search confirmed new bridge symbol names in generated outputs.
-   - Files changed:
-      - `qwik-custom-elements.config.json`
-      - `apps/qwik-demo/src/generated/stencil/ssr/*`
-      - `apps/qwik-demo/src/generated/stencil/csr/*`
-      - `apps/qwik-demo/src/generated/lit/ssr/*`
-      - `apps/qwik-demo/src/generated/lit/csr/*`
+  - PRD reference: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
+  - Child issue reference: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/50
+  - Task completed:
+    - Added `libraryName` for demo generation projects in `qwik-custom-elements.config.json` without scope prefixes:
+      - stencil projects: `test-stencil-lib`
+      - lit projects: `test-lit-lib`
+    - Re-ran generator CLI from repo root.
+    - Verified generated outputs now include library-scoped bridge symbols (`TestStencilLibSSRBridgeComponent`, `TestStencilLibCSRBridgeComponent`, `TestLitLibSSRBridgeComponent`, `TestLitLibCSRBridgeComponent`).
+  - Key decisions:
+    - Use unscoped library identifiers in config values to match requested naming style and current adapter `toPascalCase` conversion logic.
+    - Keep this run scoped to config + regenerated output only; no adapter/core logic changes.
+  - Validation:
+    - `node packages/core/dist/cli.js --config ./qwik-custom-elements.config.json` passed.
+    - Spot-check via file content search confirmed new bridge symbol names in generated outputs.
+  - Files changed:
+    - `qwik-custom-elements.config.json`
+    - `apps/qwik-demo/src/generated/stencil/ssr/*`
+    - `apps/qwik-demo/src/generated/stencil/csr/*`
+    - `apps/qwik-demo/src/generated/lit/ssr/*`
+    - `apps/qwik-demo/src/generated/lit/csr/*`
 
 - 2026-05-03: Gap analysis and workflow hardening session (issues #44, #45).
-   - PRD reference: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
-   - Child issues: #44, #45
-   - Work completed:
-      - Identified root cause of implementation gap in issues #44 and #45: acceptance criteria used artifact-existence language ("contract exists", "route wired") which allowed an agent to ship string factories instead of real Qwik bridge components.
-      - Corrected issue #45 acceptance criteria to require behavioral proof across all observable dimensions: render, props, events, slots, e2e coverage. Issue body updated; gap comment posted.
-      - Reopened issue #44 (was incorrectly closed) and corrected its acceptance criteria with same behavioral parity requirements referencing Stencil SSR bridge as reference implementation. Gap comment posted.
-      - Hardened workflow files to be generic (not repo-specific): `prd-to-issues/SKILL.md`, `prd-task-runner.prompt.md`, `write-a-prd/SKILL.md`. Bridge Slice Rule renamed to "Parity and Integration Completion Rule". All repo-specific examples and technology names removed.
-   - Partial implementation (issue #45 Lit CSR bridge):
-      - Implemented real Qwik CSR bridge `createLitCSRComponent` in `packages/adapter-lit/src/client/lit-csr.tsx`, modeled after Stencil CSR reference (`stencil-csr.tsx`). Includes `useVisibleTask$` for prop delivery and DOM event listener wiring.
-      - Added `updateLitCSRHostProps` helper in `packages/adapter-lit/src/client/lit-csr-props.ts` for DOM prop assignment (mirrors `stencil-csr-props.ts`).
-      - Updated `packages/adapter-lit/src/client.ts` to re-export real bridge (removed old string-factory).
-      - Updated generator (`generated-output.ts`) to emit `.tsx` Qwik component wrappers with typed props/events/slots interfaces instead of `.ts` string-factory files.
-      - Added JSX support to `packages/adapter-lit/tsconfig.json` (`jsx: react-jsx`, `jsxImportSource: @builder.io/qwik`).
-      - Regenerated Lit CSR generated files: new `.tsx` Qwik wrappers (`de-button.tsx`, `de-alert.tsx`), deleted stale `.ts` string-factory files.
-      - Updated `/lit/csr/bridge` demo route and smoke test to exercise real bridge surface.
-      - Adapter unit tests: 10/10 pass.
-   - Known blocker (issue #45 still open):
-      - Props do not reliably reach the underlying Lit custom element after upgrade. `updateLitCSRHostProps` may run before `customElements.whenDefined()` resolves and Lit overwrites props with defaults on upgrade. Multiple timing strategies attempted without success. Issue #45 e2e smoke for prop delivery is failing.
-      - Events and slots not yet e2e-proven.
-   - Key decisions:
-      - Real Qwik `component$` shape is required for CSR bridge — not a string factory or `dangerouslySetInnerHTML` pattern.
-      - Generator must emit `.tsx` (not `.ts`) for CSR bridge wrappers to support JSX/component composition.
-      - Workflow rules must be generic enough to apply to any codebase, not mention technology names from this repo.
-   - Files changed:
-      - `packages/adapter-lit/src/client.ts`
-      - `packages/adapter-lit/src/client/lit-csr.tsx` (new)
-      - `packages/adapter-lit/src/client/lit-csr-props.ts` (new)
-      - `packages/adapter-lit/src/generated-output.ts`
-      - `packages/adapter-lit/src/index.ts`
-      - `packages/adapter-lit/src/ssr.ts`
-      - `packages/adapter-lit/src/index.test.ts`
-      - `packages/adapter-lit/tsconfig.json`
-      - `apps/qwik-demo/src/generated/lit/csr/de-button.tsx` (new)
-      - `apps/qwik-demo/src/generated/lit/csr/de-alert.tsx` (new)
-      - `apps/qwik-demo/src/generated/lit/csr/runtime-csr.generated.ts`
-      - `apps/qwik-demo/src/generated/lit/csr/de-button.ts` (deleted)
-      - `apps/qwik-demo/src/generated/lit/csr/de-alert.ts` (deleted)
-      - `apps/qwik-demo/src/routes/lit/csr/bridge/index.tsx`
-      - `apps/qwik-demo/e2e/smoke.spec.ts`
-      - `.github/skills/prd-to-issues/SKILL.md`
-      - `.github/prompts/prd-task-runner.prompt.md`
-      - `.github/skills/write-a-prd/SKILL.md`
-   - Notes for next iteration:
-      - Fix prop delivery timing bug in `lit-csr.tsx`. Strategy to explore: use `customElements.whenDefined(tagName).then(() => updateLitCSRHostProps(...))` inside `useVisibleTask$` so props are applied after the upgrade cycle completes, then re-track reactively.
-      - Once props pass, add events and slots e2e proof to complete issue #45 acceptance criteria.
-      - Issue #44 (Lit SSR bridge) needs full rework: replace string factory + `dangerouslySetInnerHTML` pattern with real Qwik component using `SSRStream`/`SSRRaw`, typed props, event wiring, and slots.
+  - PRD reference: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
+  - Child issues: #44, #45
+  - Work completed:
+    - Identified root cause of implementation gap in issues #44 and #45: acceptance criteria used artifact-existence language ("contract exists", "route wired") which allowed an agent to ship string factories instead of real Qwik bridge components.
+    - Corrected issue #45 acceptance criteria to require behavioral proof across all observable dimensions: render, props, events, slots, e2e coverage. Issue body updated; gap comment posted.
+    - Reopened issue #44 (was incorrectly closed) and corrected its acceptance criteria with same behavioral parity requirements referencing Stencil SSR bridge as reference implementation. Gap comment posted.
+    - Hardened workflow files to be generic (not repo-specific): `prd-to-issues/SKILL.md`, `prd-task-runner.prompt.md`, `write-a-prd/SKILL.md`. Bridge Slice Rule renamed to "Parity and Integration Completion Rule". All repo-specific examples and technology names removed.
+  - Partial implementation (issue #45 Lit CSR bridge):
+    - Implemented real Qwik CSR bridge `createLitCSRComponent` in `packages/adapter-lit/src/client/lit-csr.tsx`, modeled after Stencil CSR reference (`stencil-csr.tsx`). Includes `useVisibleTask$` for prop delivery and DOM event listener wiring.
+    - Added `updateLitCSRHostProps` helper in `packages/adapter-lit/src/client/lit-csr-props.ts` for DOM prop assignment (mirrors `stencil-csr-props.ts`).
+    - Updated `packages/adapter-lit/src/client.ts` to re-export real bridge (removed old string-factory).
+    - Updated generator (`generated-output.ts`) to emit `.tsx` Qwik component wrappers with typed props/events/slots interfaces instead of `.ts` string-factory files.
+    - Added JSX support to `packages/adapter-lit/tsconfig.json` (`jsx: react-jsx`, `jsxImportSource: @builder.io/qwik`).
+    - Regenerated Lit CSR generated files: new `.tsx` Qwik wrappers (`de-button.tsx`, `de-alert.tsx`), deleted stale `.ts` string-factory files.
+    - Updated `/lit/csr/bridge` demo route and smoke test to exercise real bridge surface.
+    - Adapter unit tests: 10/10 pass.
+  - Known blocker (issue #45 still open):
+    - Props do not reliably reach the underlying Lit custom element after upgrade. `updateLitCSRHostProps` may run before `customElements.whenDefined()` resolves and Lit overwrites props with defaults on upgrade. Multiple timing strategies attempted without success. Issue #45 e2e smoke for prop delivery is failing.
+    - Events and slots not yet e2e-proven.
+  - Key decisions:
+    - Real Qwik `component$` shape is required for CSR bridge — not a string factory or `dangerouslySetInnerHTML` pattern.
+    - Generator must emit `.tsx` (not `.ts`) for CSR bridge wrappers to support JSX/component composition.
+    - Workflow rules must be generic enough to apply to any codebase, not mention technology names from this repo.
+  - Files changed:
+    - `packages/adapter-lit/src/client.ts`
+    - `packages/adapter-lit/src/client/lit-csr.tsx` (new)
+    - `packages/adapter-lit/src/client/lit-csr-props.ts` (new)
+    - `packages/adapter-lit/src/generated-output.ts`
+    - `packages/adapter-lit/src/index.ts`
+    - `packages/adapter-lit/src/ssr.ts`
+    - `packages/adapter-lit/src/index.test.ts`
+    - `packages/adapter-lit/tsconfig.json`
+    - `apps/qwik-demo/src/generated/lit/csr/de-button.tsx` (new)
+    - `apps/qwik-demo/src/generated/lit/csr/de-alert.tsx` (new)
+    - `apps/qwik-demo/src/generated/lit/csr/runtime-csr.generated.ts`
+    - `apps/qwik-demo/src/generated/lit/csr/de-button.ts` (deleted)
+    - `apps/qwik-demo/src/generated/lit/csr/de-alert.ts` (deleted)
+    - `apps/qwik-demo/src/routes/lit/csr/bridge/index.tsx`
+    - `apps/qwik-demo/e2e/smoke.spec.ts`
+    - `.github/skills/prd-to-issues/SKILL.md`
+    - `.github/prompts/prd-task-runner.prompt.md`
+    - `.github/skills/write-a-prd/SKILL.md`
+  - Notes for next iteration:
+    - Fix prop delivery timing bug in `lit-csr.tsx`. Strategy to explore: use `customElements.whenDefined(tagName).then(() => updateLitCSRHostProps(...))` inside `useVisibleTask$` so props are applied after the upgrade cycle completes, then re-track reactively.
+    - Once props pass, add events and slots e2e proof to complete issue #45 acceptance criteria.
+    - Issue #44 (Lit SSR bridge) needs full rework: replace string factory + `dangerouslySetInnerHTML` pattern with real Qwik component using `SSRStream`/`SSRRaw`, typed props, event wiring, and slots.
 
 - 2026-05-03: Completed issue #45 task slice: prove wrapper prop propagation on `/lit/csr/bridge` (acceptance criterion 2 partial proof).
-   - PRD reference: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
-   - Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/45
-   - Task completed:
-      - Extended `/lit/csr/bridge` route to render generated wrapper `QwikDeButton` with deterministic prop input (`size="md"`) under `#lit-wrapper-props`.
-      - Extended Lit CSR bridge smoke test with wrapper-level assertion checking rendered host button attribute (`data-size="md"`) to prove wrapper props reach Lit host surface.
-   - Key decisions:
-      - Keep scope to one behavior only: wrapper prop propagation proof.
-      - Reuse existing bridge route and smoke test to avoid creating surrogate/fallback path.
-   - Key findings:
-      - Local e2e execution in this environment is blocked by missing Linux browser runtime libraries (`libnspr4.so`) required by Playwright Chromium headless shell.
-      - `playwright install-deps` requires sudo password; unavailable in this run.
-   - Validation:
-      - `pnpm format` ran; unrelated repo files were reformatted by workspace-wide formatter.
-      - `pnpm typecheck` passed before subsequent loop failure.
-      - `pnpm test` failed in `@qwik-custom-elements/core#test` because `@qwik-custom-elements/adapter-lit` build cannot resolve `@builder.io/qwik` in current workspace install state (environment/dependency issue, not from route/test slice).
-      - `pnpm e2e` could not complete due missing host libraries for Playwright browser launch.
-   - Files changed (task scope):
-      - `apps/qwik-demo/src/routes/lit/csr/bridge/index.tsx`
-      - `apps/qwik-demo/e2e/smoke.spec.ts`
-   - Notes for next iteration:
-      - Run `sudo pnpm --filter qwik-demo exec playwright install-deps` (or apt package list from Playwright output), then rerun `pnpm e2e`.
-      - Confirm/fix adapter-lit package dependency resolution for `@builder.io/qwik`, then rerun full root loops.
+  - PRD reference: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
+  - Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/45
+  - Task completed:
+    - Extended `/lit/csr/bridge` route to render generated wrapper `QwikDeButton` with deterministic prop input (`size="md"`) under `#lit-wrapper-props`.
+    - Extended Lit CSR bridge smoke test with wrapper-level assertion checking rendered host button attribute (`data-size="md"`) to prove wrapper props reach Lit host surface.
+  - Key decisions:
+    - Keep scope to one behavior only: wrapper prop propagation proof.
+    - Reuse existing bridge route and smoke test to avoid creating surrogate/fallback path.
+  - Key findings:
+    - Local e2e execution in this environment is blocked by missing Linux browser runtime libraries (`libnspr4.so`) required by Playwright Chromium headless shell.
+    - `playwright install-deps` requires sudo password; unavailable in this run.
+  - Validation:
+    - `pnpm format` ran; unrelated repo files were reformatted by workspace-wide formatter.
+    - `pnpm typecheck` passed before subsequent loop failure.
+    - `pnpm test` failed in `@qwik-custom-elements/core#test` because `@qwik-custom-elements/adapter-lit` build cannot resolve `@builder.io/qwik` in current workspace install state (environment/dependency issue, not from route/test slice).
+    - `pnpm e2e` could not complete due missing host libraries for Playwright browser launch.
+  - Files changed (task scope):
+    - `apps/qwik-demo/src/routes/lit/csr/bridge/index.tsx`
+    - `apps/qwik-demo/e2e/smoke.spec.ts`
+  - Notes for next iteration:
+    - Run `sudo pnpm --filter qwik-demo exec playwright install-deps` (or apt package list from Playwright output), then rerun `pnpm e2e`.
+    - Confirm/fix adapter-lit package dependency resolution for `@builder.io/qwik`, then rerun full root loops.
