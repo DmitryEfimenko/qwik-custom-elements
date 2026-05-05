@@ -1,5 +1,17 @@
 # Findings Log
 
+## 2026-05-03 - Lit SSR must avoid `unsafeHTML()` and must load hydrate support before client element upgrade
+
+- Sources:
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/44
+- Finding:
+  - Passing `<my-element ...></my-element>` through Lit `unsafeHTML()` during SSR bypasses `@lit-labs/ssr` element renderer lookup, which defeats true Lit SSR ownership and can collapse back to raw HTML behavior.
+  - When Lit Declarative Shadow DOM is emitted server-side, client upgrade needs `@lit-labs/ssr-client/lit-element-hydrate-support.js` loaded before Lit custom elements are defined; otherwise client upgrade duplicates shadow DOM content instead of hydrating the SSR output.
+- Durable guidance:
+  - Build Lit SSR input as a static template-string array passed to `html(...)`, not through `unsafeHTML()`.
+  - Load Lit hydrate support from the adapter SSR entrypoint so generated SSR runtimes get correct client hydration behavior without route-local patches.
+
 ## 2026-05-03 - Lit SSR generated runtime should not expose renderer-injection argument
 
 - Sources:

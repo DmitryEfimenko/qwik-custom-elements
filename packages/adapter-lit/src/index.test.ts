@@ -281,4 +281,55 @@ describe('adapter-lit metadata contract', () => {
       '    </TestLitLibCSRBridgeComponent>',
     );
   });
+
+  it('includes library import in SSR runtime when runtimeImports.libraryImport is provided', () => {
+    const plannedWrites = createSsrGeneratedOutput({
+      projectId: 'demo',
+      libraryName: 'test-lit-lib',
+      componentDefinitions: [
+        { tagName: 'lit-button', props: [], events: [], slots: [] },
+      ],
+      runtimeImports: {
+        libraryImport: '@qwik-custom-elements/test-lit-lib',
+      },
+      ssrAvailable: true,
+    });
+
+    const runtimeSsrWrite = plannedWrites.find(
+      (w: { relativePath: string }) =>
+        w.relativePath === 'runtime-ssr.generated.ts',
+    );
+
+    expect(runtimeSsrWrite?.content).toContain(
+      "import { createLitSSRComponent } from '@qwik-custom-elements/adapter-lit/ssr';",
+    );
+    expect(runtimeSsrWrite?.content).toContain(
+      "import '@qwik-custom-elements/test-lit-lib';",
+    );
+    expect(runtimeSsrWrite?.content).toContain(
+      'export const TestLitLibSSRBridgeComponent = createLitSSRComponent();',
+    );
+  });
+
+  it('omits library import in SSR runtime when runtimeImports.libraryImport is not provided', () => {
+    const plannedWrites = createSsrGeneratedOutput({
+      projectId: 'demo',
+      componentDefinitions: [
+        { tagName: 'lit-button', props: [], events: [], slots: [] },
+      ],
+      ssrAvailable: true,
+    });
+
+    const runtimeSsrWrite = plannedWrites.find(
+      (w: { relativePath: string }) =>
+        w.relativePath === 'runtime-ssr.generated.ts',
+    );
+
+    expect(runtimeSsrWrite?.content).toContain(
+      "import { createLitSSRComponent } from '@qwik-custom-elements/adapter-lit/ssr';",
+    );
+    expect(runtimeSsrWrite?.content).not.toContain(
+      'Register Lit element classes',
+    );
+  });
 });

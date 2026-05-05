@@ -1,4 +1,27 @@
-# PRD-40 Progress Log
+# PRD-40 Progress
+
+## 2026-05-03 - Issue #44 - Real Lit SSR bridge via @lit-labs/ssr
+
+- Status: Completed in this slice.
+- Scope:
+  - Added real Lit SSR Qwik bridge at `packages/adapter-lit/src/ssr/lit-ssr.tsx`.
+  - Switched `@qwik-custom-elements/adapter-lit/ssr` to export the real bridge instead of CSR fallback.
+  - Extended generated Lit SSR runtime output so it can import the Lit component library for server-side element registration.
+  - Regenerated demo Lit SSR runtime to register `@qwik-custom-elements/test-lit-lib` before server render.
+  - Added adapter dependency on `@lit-labs/ssr-client` and loaded `lit-element-hydrate-support` from the adapter SSR entrypoint so Declarative Shadow DOM hydrates without duplicate client render.
+  - Updated adapter-lit tests for SSR runtime library-import generation.
+  - Switched adapter-lit TS module settings to `ES2022` + `Bundler` so Qwik JSX types resolve correctly for the SSR bridge TSX file.
+- Key implementation notes:
+  - Server render uses `@lit-labs/ssr` directly from a static template string array, not `unsafeHTML()`, because `unsafeHTML()` bypasses Lit element renderer lookup and breaks true SSR behavior.
+  - Client path keeps host props/events synced and uses Lit hydrate support to preserve SSR shadow DOM instead of duplicating it on upgrade.
+- Validation:
+  - `pnpm test` ✅
+  - `pnpm lint` ✅
+  - `pnpm build` ✅
+  - `pnpm e2e` ✅
+  - Focused Playwright proof for `lit ssr bridge interaction contract` ✅
+- Residual note:
+  - Vite reports a non-blocking warning because `@qwik-custom-elements/test-lit-lib` is both statically imported by the generated Lit SSR runtime and dynamically imported by route code. Behavior is correct; chunking is just less optimal.# PRD-40 Progress Log
 
 - Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
 - Created: 2026-04-25

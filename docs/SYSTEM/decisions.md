@@ -1,6 +1,20 @@
 # Decisions
 
+## DEC-2026-05-03-LIT-SSR-HYDRATE-SUPPORT-OWNED-BY-ADAPTER-SSR-ENTRY
+
+- Status: Accepted
+- Sources:
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/44
+- Decision:
+  - `@qwik-custom-elements/adapter-lit/ssr` must load `@lit-labs/ssr-client/lit-element-hydrate-support.js` at module entry.
+  - Generated Lit SSR runtime modules continue to import `@qwik-custom-elements/adapter-lit/ssr` before importing the Lit component library, so client-side Lit upgrade sees hydrate support before custom elements register.
+- Rationale:
+  - Declarative Shadow DOM emitted by `@lit-labs/ssr` must be hydrated, not re-rendered from scratch on client upgrade.
+  - Owning hydrate-support import in the adapter SSR entrypoint keeps the requirement adapter-local and automatic for generated SSR runtimes.
+
 ## DEC-2026-05-03-LIT-SSR-RUNTIME-BRIDGE-NO-ARG-CONTRACT
+
 - Status: Accepted
 - Sources:
   - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
@@ -13,6 +27,7 @@
   - Reduces contract ambiguity ahead of true Lit SSR bridge implementation work.
 
 ## DEC-2026-04-29-STENCIL-GENERATED-NAMESPACE-PATHS
+
 - Status: Accepted
 - Sources:
   - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
@@ -29,6 +44,7 @@
   - Makes route wiring deterministic and discoverable for future tracer-bullet work.
 
 ## DEC-2026-04-29-ADAPTER-BRIDGE-VARIABLE-NAMING
+
 - Status: Accepted
 - Sources:
   - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
@@ -44,6 +60,7 @@
   - Adapter-ownership of the naming rule is consistent with DEC-2026-04-20-ADAPTER-OWNED-GENERATED-OUTPUT.
 
 ## DEC-2026-04-29-OPTIONAL-LIBRARY-NAME-CONTRACT
+
 - Status: Accepted
 - Sources:
   - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
@@ -57,6 +74,7 @@
   - Keeping the field optional avoids breaking existing project configs during migration.
 
 ## DEC-2026-04-28-LIT-SSR-ADAPTER-SUBPATH-GATE
+
 - Status: Accepted
 - Sources:
   - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
@@ -69,6 +87,7 @@
   - SSR bridge contract ownership for Lit lives under adapter-lit SSR subpath and should be explicit in project configuration to keep mode signaling deterministic.
 
 ## DEC-2026-04-28-STENCIL-WRAPPER-MODE-GATE
+
 - Status: Accepted
 - Sources:
   - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
@@ -81,6 +100,7 @@
   - Config presence is the correct authoritative signal because it reflects deliberate consumer intent, while probe availability is an execution-environment artifact.
 
 ## DEC-2026-04-20-ADAPTER-OWNED-GENERATED-OUTPUT
+
 - Status: Accepted
 - Sources:
   - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
@@ -95,6 +115,7 @@
   - Gives the architecture an enforceable ownership boundary that can be validated with tests.
 
 ## DEC-2026-04-09-ROOT-E2E-COMMAND-SURFACE
+
 - Status: Accepted
 - Sources:
   - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/25

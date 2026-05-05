@@ -162,9 +162,7 @@ export function createLitCSRComponent() {
 
     useVisibleTask$(({ track, cleanup }) => {
       const host = track(() => hostRef.value);
-      const eventsDependencyKey = track(() =>
-        getEventsDependencyKey(events),
-      );
+      const eventsDependencyKey = track(() => getEventsDependencyKey(events));
 
       if (!host) {
         return;

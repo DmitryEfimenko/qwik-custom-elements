@@ -1,5 +1,6 @@
-import { createLitCSRComponent } from './client/lit-csr.js';
+import '@lit-labs/ssr-client/lit-element-hydrate-support.js';
 import { createLitPlannedWrites } from './generated-output.js';
+import { createLitSSRComponent } from './ssr/lit-ssr.js';
 
 export const metadata = {
   adapterId: 'lit',
@@ -7,6 +8,8 @@ export const metadata = {
   supportsSsrProbe: true,
   ssrRuntimeSubpath: './ssr',
 };
+
+export type { LitSSRProps } from './ssr/lit-ssr.js';
 
 export async function probeSSR(): Promise<{ available: boolean }> {
   // Placeholder probe for tracer-bullet wiring.
@@ -42,11 +45,9 @@ export function renderComponentSsrHtml(
   return `${openingTag}</${tagName}>`;
 }
 
-export type LitGeneratedSsrComponent = ReturnType<typeof createLitCSRComponent>;
+export type LitGeneratedSsrComponent = ReturnType<typeof createLitSSRComponent>;
 
-export function createLitSSRComponent(): LitGeneratedSsrComponent {
-  return createLitCSRComponent();
-}
+export { createLitSSRComponent };
 
 function createContractError(
   code: string,
@@ -66,6 +67,9 @@ export function createGeneratedOutput(input: {
     events: Array<{ name: string; type: string }>;
     slots: Array<{ name: string }>;
   }>;
+  runtimeImports?: {
+    libraryImport?: string;
+  };
   ssrAvailable?: boolean;
 }): Array<{
   relativePath: string;
