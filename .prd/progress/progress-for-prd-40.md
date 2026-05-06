@@ -1,5 +1,21 @@
 # PRD-40 Progress
 
+## 2026-05-05 - Issue #44 - Raw HTTP response e2e test for Lit SSR bridge
+
+- Status: Completed in this slice.
+- Scope:
+  - Added `lit ssr bridge returns server-rendered lit html` test in `apps/qwik-demo/e2e/lit-smoke.spec.ts`.
+  - Test uses `page.request.get('/lit/ssr/bridge')` and asserts: `q:render="ssr"` present, `de-button` host tags with `size="md"` and DSD `<template shadowrootmode="open">` + shadow content `data-size="md"`, default slot content ("First Lit SSR Button", "Second Lit SSR Button"), `de-alert` with `heading="Validation Alert"` prop, shadow content "Validation Alert", light DOM slot content "Alert body content" / "Alert footer content", no `__qce_stencil_client_setup_done__` in response.
+- Key decisions:
+  - Lit DSD differs from Stencil: no `class="hydrated"`, uses `<template shadowrootmode="open">` as SSR proof. Assertions match Lit output shape.
+  - "No client-setup flags" assertion checks stencil flag absence (Lit has no equivalent global marker).
+- Validation:
+  - `pnpm e2e` ✅ (11/11 pass)
+- Files changed:
+  - `apps/qwik-demo/e2e/lit-smoke.spec.ts`
+- Notes for next iteration:
+  - All acceptance criteria for #44 now satisfied. Issue can be closed.
+
 ## 2026-05-03 - Issue #44 - Real Lit SSR bridge via @lit-labs/ssr
 
 - Status: Completed in this slice.
