@@ -115,6 +115,31 @@ test('stencil bridge interaction contract: toggles handler and increments active
   );
 });
 
+test('stencil ssr bridge returns server-rendered stencil html', async ({
+  page,
+}) => {
+  const response = await page.request.get('/stencil/ssr/bridge');
+  expect(response.ok()).toBe(true);
+  expect(response.headers()['content-type']).toContain('text/html');
+
+  const html = await response.text();
+
+  expect(html).toContain('q:render="ssr"');
+  expect(html).toMatch(/<h1[^>]*>Stencil Events Validation<\/h1>/);
+
+  expect(html).toMatch(
+    /<div[^>]*id="first-stencil-wrapper"[^>]*>[\s\S]*?<de-button[^>]*class="hydrated"[^>]*size="md"[^>]*>[\s\S]*?<button[^>]*class="de-button de-button--md"[^>]*>[\s\S]*?First SSR Button[\s\S]*?<\/button>[\s\S]*?<\/de-button>/,
+  );
+  expect(html).toMatch(
+    /<div[^>]*id="second-stencil-wrapper"[^>]*>[\s\S]*?<de-button[^>]*class="hydrated"[^>]*size="md"[^>]*>[\s\S]*?<button[^>]*class="de-button de-button--md"[^>]*>[\s\S]*?Second SSR Button[\s\S]*?<\/button>[\s\S]*?<\/de-button>/,
+  );
+  expect(html).toMatch(
+    /<div[^>]*id="alert-stencil-wrapper"[^>]*>[\s\S]*?<de-alert[^>]*class="hydrated"[^>]*heading="Validation Alert"[^>]*>[\s\S]*?<div[^>]*class="de-alert"[^>]*>[\s\S]*?<strong[^>]*>[\s\S]*?Validation Alert[\s\S]*?<\/strong>[\s\S]*?<div[^>]*class="de-alert__content"[^>]*>[\s\S]*?Alert body content[\s\S]*?<\/div>[\s\S]*?<div[^>]*class="de-alert__footer"[^>]*>[\s\S]*?Alert footer content[\s\S]*?<\/div>[\s\S]*?<\/div>[\s\S]*?<\/de-alert>/,
+  );
+
+  expect(html).not.toContain('__qce_stencil_client_setup_done__');
+});
+
 test('stencil wrappers interaction contract: toggles handler and increments active counters', async ({
   page,
 }) => {
