@@ -9,12 +9,112 @@ export const metadata = {
   ssrRuntimeSubpath: './ssr',
 };
 
+interface ValidateProjectInput {
+  source: {
+    type: 'CEM' | 'PACKAGE_NAME';
+    packageName?: string;
+  };
+  adapterOptions?: Record<string, unknown>;
+}
+
+interface ResolveRuntimeImportsInput extends ValidateProjectInput {
+  runtimeResolution?: {
+    resolveImportSpecifier?: (
+      specifier: string,
+      packageRoot?: string,
+    ) => string;
+    resolveSourcePackageRoot?: (packageName: string) => string;
+  };
+}
+
+interface ProbeSsrInput {
+  runtimeImports?: {
+    libraryImport?: unknown;
+  };
+}
+
 export type { LitSSRProps } from './ssr/lit-ssr.js';
 
-export async function probeSSR(): Promise<{ available: boolean }> {
-  // Placeholder probe for tracer-bullet wiring.
-  // TODO(#13): replace with real Lit SSR capability checks.
-  return { available: true };
+export function validateProject({
+  source,
+  adapterOptions,
+}: ValidateProjectInput) {
+  const runtime = isRecord(adapterOptions?.runtime)
+    ? adapterOptions.runtime
+    : undefined;
+  const libraryImport = validateOptionalRuntimeOverride(
+    runtime,
+    'libraryImport',
+    'QCE_LIT_RUNTIME_LIBRARY_IMPORT_OVERRIDE_INVALID',
+    `Lit ${source.type} projects must provide a non-empty adapterOptions.runtime.libraryImport override when the override is set.`,
+  );
+
+  if (source.type === 'CEM' && libraryImport == null) {
+    throw createContractError(
+      'QCE_LIT_RUNTIME_LIBRARY_IMPORT_REQUIRED',
+      'Lit CEM projects must provide adapterOptions.runtime.libraryImport.',
+    );
+  }
+}
+
+export async function resolveRuntimeImports({
+  source,
+  adapterOptions,
+  runtimeResolution,
+}: ResolveRuntimeImportsInput): Promise<{ libraryImport: string }> {
+  const runtime = isRecord(adapterOptions?.runtime)
+    ? adapterOptions.runtime
+    : undefined;
+  const libraryImportOverride = validateOptionalRuntimeOverride(
+    runtime,
+    'libraryImport',
+    'QCE_LIT_RUNTIME_LIBRARY_IMPORT_OVERRIDE_INVALID',
+    `Lit ${source.type} projects must provide a non-empty adapterOptions.runtime.libraryImport override when the override is set.`,
+  );
+
+  if (source.type === 'CEM') {
+    if (libraryImportOverride == null) {
+      throw createContractError(
+        'QCE_LIT_RUNTIME_LIBRARY_IMPORT_REQUIRED',
+        'Lit CEM projects must provide adapterOptions.runtime.libraryImport.',
+      );
+    }
+    return { libraryImport: libraryImportOverride };
+  }
+
+  const packageName = source.packageName;
+  if (typeof packageName !== 'string' || packageName.trim().length === 0) {
+    throw createContractError(
+      'QCE_LIT_RUNTIME_LIBRARY_IMPORT_REQUIRED',
+      'Lit PACKAGE_NAME projects must provide source.packageName or adapterOptions.runtime.libraryImport.',
+    );
+  }
+
+  const rawLibraryImport = libraryImportOverride ?? packageName;
+  const libraryImport =
+    runtimeResolution?.resolveImportSpecifier != null
+      ? runtimeResolution.resolveImportSpecifier(
+          rawLibraryImport,
+          runtimeResolution.resolveSourcePackageRoot?.(packageName),
+        )
+      : rawLibraryImport;
+
+  return { libraryImport };
+}
+
+export async function probeSSR({
+  runtimeImports,
+}: ProbeSsrInput = {}): Promise<{ available: boolean }> {
+  if (!isNonEmptyString(runtimeImports?.libraryImport)) {
+    return { available: false };
+  }
+
+  try {
+    await import(/* @vite-ignore */ runtimeImports.libraryImport);
+    return { available: true };
+  } catch {
+    return { available: false };
+  }
 }
 
 export function renderComponentSsrHtml(
@@ -48,6 +148,32 @@ export function renderComponentSsrHtml(
 export type LitGeneratedSsrComponent = ReturnType<typeof createLitSSRComponent>;
 
 export { createLitSSRComponent };
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function isNonEmptyString(value: unknown): value is string {
+  return typeof value === 'string' && value.trim().length > 0;
+}
+
+function validateOptionalRuntimeOverride(
+  runtime: Record<string, unknown> | undefined,
+  field: string,
+  errorCode: string,
+  errorMessage: string,
+): string | undefined {
+  if (!isRecord(runtime) || !(field in runtime)) {
+    return undefined;
+  }
+
+  const value = runtime[field];
+  if (!isNonEmptyString(value)) {
+    throw createContractError(errorCode, errorMessage);
+  }
+
+  return value;
+}
 
 function createContractError(
   code: string,

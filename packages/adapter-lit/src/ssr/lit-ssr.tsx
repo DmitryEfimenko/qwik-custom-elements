@@ -196,29 +196,29 @@ export function createLitSSRComponent() {
           >
             <SSRStream>
               {async function* () {
-                  // Dynamic imports ensure these server-only packages are not
-                  // bundled into client code.
-                  const { render } = await import('@lit-labs/ssr');
-                  const { html } = await import('lit');
+                // Dynamic imports ensure these server-only packages are not
+                // bundled into client code.
+                const { render } = await import('@lit-labs/ssr');
+                const { html } = await import('lit');
 
-                  const propsHtml = serializePropsToAttributes(props ?? {});
-                  const staticTemplate = propsHtml
-                    ? `<${tagName} ${propsHtml}></${tagName}>`
-                    : `<${tagName}></${tagName}>`;
+                const propsHtml = serializePropsToAttributes(props ?? {});
+                const staticTemplate = propsHtml
+                  ? `<${tagName} ${propsHtml}></${tagName}>`
+                  : `<${tagName}></${tagName}>`;
 
-                  // Build a TemplateResult from a static string so @lit-labs/ssr
-                  // can invoke registered element renderers and produce DSD.
-                  // unsafeHTML() bypasses element renderer lookup; calling html()
-                  // directly with a static-strings array does not.
-                  const strings = Object.assign([staticTemplate], {
-                    raw: [staticTemplate],
-                  }) as unknown as TemplateStringsArray;
+                // Build a TemplateResult from a static string so @lit-labs/ssr
+                // can invoke registered element renderers and produce DSD.
+                // unsafeHTML() bypasses element renderer lookup; calling html()
+                // directly with a static-strings array does not.
+                const strings = Object.assign([staticTemplate], {
+                  raw: [staticTemplate],
+                }) as unknown as TemplateStringsArray;
 
-                  // Collect the full SSR output from @lit-labs/ssr.
-                  let fullHtml = '';
-                  for (const chunk of render(html(strings))) {
-                    fullHtml += String(chunk);
-                  }
+                // Collect the full SSR output from @lit-labs/ssr.
+                let fullHtml = '';
+                for (const chunk of render(html(strings))) {
+                  fullHtml += String(chunk);
+                }
 
                 // Inject Qwik slot content as light-DOM children of the element
                 // (before the closing tag) so the shadow DOM <slot> outlets

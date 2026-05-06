@@ -1,5 +1,18 @@
 # Findings Log
 
+## 2026-05-05 - Lit SSR capability probe must follow runtime import wiring, not placeholder success
+
+- Sources:
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/44
+- Finding:
+  - Returning `probeSSR().available = true` unconditionally in Lit SSR entrypoint hides runtime wiring failures and weakens deterministic mode signaling.
+  - Lit SSR adapter needs explicit runtime import lifecycle parity (`validateProject`, `resolveRuntimeImports`, `probeSSR`) so server-side element registration import can be validated/resolved/probed consistently.
+- Durable guidance:
+  - Require `adapterOptions.runtime.libraryImport` for Lit CEM SSR projects.
+  - Resolve `runtimeImports.libraryImport` in adapter hook flow and pass that into probe.
+  - Probe availability by attempting to load resolved runtime import; report `false` on missing/invalid imports.
+
 ## 2026-05-03 - Lit SSR must avoid `unsafeHTML()` and must load hydrate support before client element upgrade
 
 - Sources:

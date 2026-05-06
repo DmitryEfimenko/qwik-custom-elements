@@ -1,5 +1,21 @@
 # Decisions
 
+## DEC-2026-05-05-LIT-SSR-RUNTIME-IMPORT-PROBE-WIRING
+
+- Status: Accepted
+- Sources:
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/44
+- Decision:
+  - `@qwik-custom-elements/adapter-lit/ssr` must provide deterministic runtime-import lifecycle hooks:
+    - `validateProject(...)` enforces runtime override contract for `adapterOptions.runtime.libraryImport`.
+    - `resolveRuntimeImports(...)` returns `runtimeImports.libraryImport` for both `CEM` and `PACKAGE_NAME` source modes.
+    - `probeSSR(...)` must derive `available` from resolved runtime import loadability instead of unconditional success.
+  - For Lit CEM SSR projects, `adapterOptions.runtime.libraryImport` is required.
+- Rationale:
+  - Server-side Lit rendering depends on deterministic library registration import.
+  - Probe signals must reflect actual runtime wiring so mode signaling remains machine-verifiable.
+
 ## DEC-2026-05-03-LIT-SSR-HYDRATE-SUPPORT-OWNED-BY-ADAPTER-SSR-ENTRY
 
 - Status: Accepted

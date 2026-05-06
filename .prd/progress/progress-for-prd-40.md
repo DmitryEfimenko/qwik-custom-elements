@@ -582,3 +582,29 @@
     - `apps/qwik-demo/src/generated/lit/ssr/runtime-ssr.generated.ts`
   - Notes for next iteration:
     - Continue issue #44 with SSR runtime plumbing and true SSR rendering path (`@lit-labs/ssr` + Qwik SSR primitives).
+
+- 2026-05-05: Completed issue #44 task slice: deterministic Lit SSR runtime import/probe wiring (acceptance criterion 3).
+  - PRD reference: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
+  - Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/44
+  - Task completed:
+    - Added Stencil-style Lit SSR adapter hooks in `@qwik-custom-elements/adapter-lit/ssr`:
+      - `validateProject(...)` now enforces deterministic runtime override validation for `adapterOptions.runtime.libraryImport`.
+      - `resolveRuntimeImports(...)` now resolves runtime import contract (`libraryImport`) for `CEM` and `PACKAGE_NAME` sources.
+      - `probeSSR(...)` now reports availability from resolved `runtimeImports.libraryImport` loadability instead of unconditional `true`.
+    - Added adapter-lit contract tests covering invalid override, required override for CEM, runtime resolution, and probe availability signaling.
+  - Key decisions:
+    - `libraryImport` is required for Lit CEM SSR projects to keep server-side element registration deterministic.
+    - SSR probe result must derive from runtime wiring input, not placeholder success.
+    - Keep slice strict to runtime wiring/probe criterion only; no route behavior or bridge rendering contract changes in this run.
+  - Key findings:
+    - Root `pnpm e2e` turbo stream did not emit final completion in this shell session; direct Playwright run confirmed e2e suite status (`9 passed`).
+  - Validation:
+    - `pnpm typecheck` passed.
+    - `pnpm test` passed.
+    - `pnpm build` passed.
+    - `pnpm lint` passed.
+    - `pnpm --filter qwik-demo exec playwright test --reporter=line` passed (`9 passed`).
+  - Files changed:
+    - `packages/adapter-lit/src/ssr.ts`
+    - `packages/adapter-lit/src/index.test.ts`
+    - `packages/adapter-lit/src/ssr/lit-ssr.tsx`

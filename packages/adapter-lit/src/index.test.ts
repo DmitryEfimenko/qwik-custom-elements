@@ -3,8 +3,86 @@
 import { createGeneratedOutput, metadata, probeSSR } from './index.js';
 import {
   createGeneratedOutput as createSsrGeneratedOutput,
+  probeSSR as probeSsrSubpath,
+  resolveRuntimeImports,
   renderComponentSsrHtml,
+  validateProject,
 } from './ssr.js';
+
+describe('adapter-lit SSR runtime import and probe wiring', () => {
+  it('rejects non-string runtime libraryImport override', () => {
+    expect(() =>
+      validateProject({
+        source: { type: 'CEM' },
+        adapterOptions: {
+          runtime: {
+            libraryImport: 42,
+          },
+        },
+      } as Parameters<typeof validateProject>[0]),
+    ).toThrowError(
+      expect.objectContaining({
+        code: 'QCE_LIT_RUNTIME_LIBRARY_IMPORT_OVERRIDE_INVALID',
+      }),
+    );
+  });
+
+  it('requires runtime libraryImport override for CEM sources', () => {
+    expect(() =>
+      validateProject({
+        source: { type: 'CEM' },
+        adapterOptions: {},
+      } as Parameters<typeof validateProject>[0]),
+    ).toThrowError(
+      expect.objectContaining({
+        code: 'QCE_LIT_RUNTIME_LIBRARY_IMPORT_REQUIRED',
+      }),
+    );
+  });
+
+  it('resolves runtime libraryImport from override for CEM sources', async () => {
+    await expect(
+      resolveRuntimeImports({
+        source: { type: 'CEM' },
+        adapterOptions: {
+          runtime: {
+            libraryImport: '@qwik-custom-elements/test-lit-lib',
+          },
+        },
+      } as Parameters<typeof resolveRuntimeImports>[0]),
+    ).resolves.toEqual({
+      libraryImport: '@qwik-custom-elements/test-lit-lib',
+    });
+  });
+
+  it('resolves runtime libraryImport from source package for PACKAGE_NAME', async () => {
+    await expect(
+      resolveRuntimeImports({
+        source: {
+          type: 'PACKAGE_NAME',
+          packageName: '@qwik-custom-elements/test-lit-lib',
+        },
+        adapterOptions: {},
+      } as Parameters<typeof resolveRuntimeImports>[0]),
+    ).resolves.toEqual({
+      libraryImport: '@qwik-custom-elements/test-lit-lib',
+    });
+  });
+
+  it('reports SSR unavailable when runtime library import is missing', async () => {
+    await expect(probeSsrSubpath()).resolves.toEqual({ available: false });
+  });
+
+  it('reports SSR available when runtime library import is loadable', async () => {
+    await expect(
+      probeSsrSubpath({
+        runtimeImports: {
+          libraryImport: 'lit',
+        },
+      }),
+    ).resolves.toEqual({ available: true });
+  });
+});
 
 describe('adapter-lit metadata contract', () => {
   it('declares deterministic capabilities for source support and SSR probing', () => {
