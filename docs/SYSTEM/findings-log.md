@@ -1,6 +1,20 @@
 # Findings Log
 
-## 2026-05-05 - Lit SSR capability probe must follow runtime import wiring, not placeholder success
+## 2026-05-05 - Lit SSR raw-response proof uses DSD `shadowrootmode` attribute, not `class="hydrated"`
+
+- Sources:
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/44
+- Finding:
+  - Stencil SSR raw-response assertions use `class="hydrated"` on the host element as SSR proof. Lit SSR does not add `class="hydrated"`; instead, server-rendered Lit output contains `<template shadowrootmode="open">` inside the host element (Declarative Shadow DOM).
+  - Shadow DOM internal content (e.g. `data-size="md"` from rendered `<button data-size=${this.size}>`) appears inside the `<template>` block. Light DOM slot content (default and named) appears between the `</template>` and `</tag>`.
+  - Lit has no global `__qce_lit_client_setup_done__` equivalent marker; the "no client-setup flags" assertion for Lit routes checks stencil flag absence instead.
+- Durable guidance:
+  - For Lit SSR raw-response e2e: assert `q:render="ssr"` present, custom-element host tag with serialized props, `<template shadowrootmode="open">` present, shadow DOM content (prop-derived attributes), and light DOM slot content.
+  - Model: `apps/qwik-demo/e2e/lit-smoke.spec.ts` — "lit ssr bridge returns server-rendered lit html".
+  - Model: `apps/qwik-demo/e2e/stencil-smoke.spec.ts` — "stencil ssr bridge returns server-rendered stencil html" (for Stencil parity comparison).
+
+
 
 - Sources:
   - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
