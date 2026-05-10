@@ -35,6 +35,9 @@ test('lit ssr bridge interaction contract: toggles handler and increments active
   const secondHost = page.locator('#second-lit-wrapper de-button');
   await expect(firstHost).toBeVisible();
   await expect(secondHost).toBeVisible();
+  await expect(firstHost).toHaveCount(1);
+  await expect(secondHost).toHaveCount(1);
+  await expect(page.locator('#lit-alert-wrapper de-alert')).toHaveCount(1);
 
   const firstButton = page.locator('#first-lit-wrapper de-button button');
   const secondButton = page.locator('#second-lit-wrapper de-button button');
@@ -100,8 +103,105 @@ test('lit ssr bridge interaction contract: toggles handler and increments active
   await expect(page.locator('#lit-alert-wrapper')).toContainText(
     'Alert footer content',
   );
+  await expect(page.locator('#lit-alert-wrapper .de-alert')).toHaveCount(1);
+  await expect(page.locator('#lit-alert-wrapper > span')).toHaveCount(0);
 
   await expect(page.locator('#first-lit-button')).toHaveCount(0);
+});
+
+test('lit ssr bridge: shadow DOM is not double-rendered after hydration', async ({
+  page,
+}) => {
+  // Intercept the de-alert custom element definition and capture the shadow DOM
+  // count immediately after Lit's first async performUpdate() microtask runs.
+  // Two Promise hops place us after Lit's own queued update
+  // (Lit schedules performUpdate via Promise.resolve().then()).
+  // If @lit-labs/ssr-client/lit-element-hydrate-support.js was NOT loaded
+  // before define(), Lit appends a fresh render to the DSD shadow root and the
+  // count becomes 2. The fix ensures hydrate-support is always loaded first.
+  await page.addInitScript(() => {
+    (window as any).__deAlertShadowCountAfterFirstUpdate = -1;
+    const originalDefine = customElements.define.bind(customElements);
+    Object.defineProperty(customElements, 'define', {
+      value(
+        name: string,
+        ctor: CustomElementConstructor,
+        opts?: ElementDefinitionOptions,
+      ) {
+        const result = originalDefine(name, ctor, opts);
+        if (name === 'de-alert') {
+          Promise.resolve().then(() =>
+            Promise.resolve().then(() => {
+              const el = document.querySelector(
+                '#lit-alert-wrapper de-alert',
+              ) as HTMLElement | null;
+              (window as any).__deAlertShadowCountAfterFirstUpdate =
+                el?.shadowRoot?.querySelectorAll('.de-alert').length ?? -1;
+            }),
+          );
+        }
+        return result;
+      },
+      writable: true,
+      configurable: true,
+    });
+  });
+
+  await page.goto('/lit/ssr/bridge');
+
+  // Wait for the de-alert shadow count to be captured.
+  await page.waitForFunction(
+    () => (window as any).__deAlertShadowCountAfterFirstUpdate !== -1,
+  );
+
+  const count = await page.evaluate(
+    () => (window as any).__deAlertShadowCountAfterFirstUpdate,
+  );
+
+  // Exactly 1 means hydrate-support ran before the element was defined and
+  // Lit hydrated the DSD shadow root rather than appending a duplicate render.
+  expect(count).toBe(1);
+});
+
+test('lit ssr bridge: light DOM slot content is not duplicated after signal change', async ({
+  page,
+}) => {
+  await page.goto('/lit/ssr/bridge');
+
+  await page.waitForFunction(
+    () =>
+      customElements.get('de-button') != null &&
+      customElements.get('de-alert') != null,
+  );
+
+  // Trigger a signal change to force Qwik to re-render the route component.
+  await page.locator('#toggle-size').click();
+  await expect(page.locator('#button-size')).toContainText('Button size: lg');
+
+  // After re-render: the alert wrapper must contain exactly one de-alert element.
+  await expect(page.locator('#lit-alert-wrapper de-alert')).toHaveCount(1);
+
+  // Slot content must be INSIDE <de-alert> — not leaked as loose siblings of it.
+  // Both body and footer spans belong inside the light DOM of <de-alert>.
+  const slotPlacement = await page.evaluate(() => {
+    const alertEl = document.querySelector('#lit-alert-wrapper de-alert');
+    if (!alertEl) return { bodyInAlert: false, footerInAlert: false };
+    const spans = Array.from(alertEl.querySelectorAll('span'));
+    return {
+      bodyInAlert: spans.some((s) => s.textContent?.trim() === 'Alert body content'),
+      footerInAlert: spans.some((s) => s.getAttribute('q:slot') === 'footer'),
+    };
+  });
+
+  expect(slotPlacement.bodyInAlert).toBe(true);
+  expect(slotPlacement.footerInAlert).toBe(true);
+
+  // No slot spans should be outside <de-alert> in the wrapper.
+  const allSpans = await page.locator('#lit-alert-wrapper span').count();
+  const spansInsideAlert = await page
+    .locator('#lit-alert-wrapper de-alert span')
+    .count();
+  expect(spansInsideAlert).toBe(allSpans);
 });
 
 test('lit ssr bridge returns server-rendered lit html', async ({ page }) => {

@@ -250,10 +250,12 @@ export function createLitSSRComponent() {
         );
       }
 
+      const HostTag = tagName as any;
+
       // Client path: the Lit element is already present in the DOM from SSR and
-      // will self-hydrate using the declarative shadow DOM. Qwik projects slot
-      // content into the light DOM via <Slot />. Prop sync and event wiring are
-      // handled by the useTask$ hooks above.
+      // will self-hydrate using the declarative shadow DOM. Render the same host
+      // custom element shape as SSR so Qwik reconciliation keeps slot content
+      // inside the element across signal-driven rerenders.
       return (
         <div
           ref={wrapperRef}
@@ -261,10 +263,12 @@ export function createLitSSRComponent() {
           style={{ display: 'contents' }}
           {...(restProps as Record<string, unknown>)}
         >
-          <Slot />
-          {namedSlots.map((name) => (
-            <Slot name={name} key={name} />
-          ))}
+          <HostTag>
+            <Slot />
+            {namedSlots.map((name) => (
+              <Slot name={name} key={name} />
+            ))}
+          </HostTag>
         </div>
       );
     },

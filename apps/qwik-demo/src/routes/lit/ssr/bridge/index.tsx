@@ -1,6 +1,9 @@
-import { $, component$, useOnDocument, useSignal } from '@builder.io/qwik';
+import { $, component$, useSignal } from '@builder.io/qwik';
 import type { DocumentHead } from '@builder.io/qwik-city';
-import { TestLitLibSSRBridgeComponent } from '../../../../generated/lit/ssr/runtime';
+import {
+  TestLitLibSSRBridgeComponent,
+  useTestLitLibSSRClientSetup,
+} from '../../../../generated/lit/ssr/runtime';
 
 export default component$(() => {
   const buttonSize = useSignal<'md' | 'lg'>('md');
@@ -9,12 +12,7 @@ export default component$(() => {
   const secondCount = useSignal(0);
   const activeHandler = useSignal<'alpha' | 'beta'>('alpha');
 
-  useOnDocument(
-    'readystatechange',
-    $(() => {
-      void import('@qwik-custom-elements/test-lit-lib');
-    }),
-  );
+  useTestLitLibSSRClientSetup();
 
   const handleFirstAlpha$ = $(() => {
     firstAlphaCount.value += 1;

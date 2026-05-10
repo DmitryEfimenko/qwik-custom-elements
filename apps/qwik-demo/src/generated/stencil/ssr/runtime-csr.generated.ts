@@ -10,6 +10,6 @@ export const defineCustomElements = async (): Promise<void> => {
 };
 
 export const defineCustomElementsQrl = $(defineCustomElements);
-export const useGeneratedStencilClientSetup =
+export const useStencilClientSetup =
   createStencilClientSetup(defineCustomElementsQrl);
 export const TestStencilLibCSRBridgeComponent = createStencilCSRComponent();

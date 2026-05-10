@@ -4,10 +4,10 @@ import { createGeneratedOutput, metadata, probeSSR } from './index.js';
 import {
   createGeneratedOutput as createSsrGeneratedOutput,
   probeSSR as probeSsrSubpath,
-  resolveRuntimeImports,
   renderComponentSsrHtml,
+  resolveRuntimeImports,
   validateProject,
-} from './ssr.js';
+} from './ssr/index.js';
 
 describe('adapter-lit SSR runtime import and probe wiring', () => {
   it('rejects non-string runtime libraryImport override', () => {
@@ -387,9 +387,43 @@ describe('adapter-lit metadata contract', () => {
     expect(runtimeSsrWrite?.content).toContain(
       'export const TestLitLibSSRBridgeComponent = createLitSSRComponent();',
     );
+    expect(runtimeSsrWrite?.content).toContain(
+      "import { $ } from '@builder.io/qwik';",
+    );
+    expect(runtimeSsrWrite?.content).toContain(
+      "import { createLitSSRClientSetup } from '@qwik-custom-elements/adapter-lit/client';",
+    );
+    expect(runtimeSsrWrite?.content).toContain(
+      "await import('@qwik-custom-elements/test-lit-lib');",
+    );
+    expect(runtimeSsrWrite?.content).toContain(
+      'export const useTestLitLibSSRClientSetup = createLitSSRClientSetup(importLibraryQrl);',
+    );
   });
 
-  it('omits library import in SSR runtime when runtimeImports.libraryImport is not provided', () => {
+  it('emits default useLitSSRClientSetup name when no libraryName is provided', () => {
+    const plannedWrites = createSsrGeneratedOutput({
+      projectId: 'demo',
+      componentDefinitions: [
+        { tagName: 'lit-button', props: [], events: [], slots: [] },
+      ],
+      runtimeImports: {
+        libraryImport: '@qwik-custom-elements/test-lit-lib',
+      },
+      ssrAvailable: true,
+    });
+
+    const runtimeSsrWrite = plannedWrites.find(
+      (w: { relativePath: string }) =>
+        w.relativePath === 'runtime-ssr.generated.ts',
+    );
+
+    expect(runtimeSsrWrite?.content).toContain(
+      'export const useLitSSRClientSetup = createLitSSRClientSetup(importLibraryQrl);',
+    );
+  });
+
+  it('omits client setup when runtimeImports.libraryImport is not provided', () => {
     const plannedWrites = createSsrGeneratedOutput({
       projectId: 'demo',
       componentDefinitions: [

@@ -235,7 +235,7 @@ The generated client module (`runtime-csr.generated.ts`) provides:
 
 - a resolved `defineCustomElements` wrapper bound to the package-aware loader import
 - `defineCustomElementsQrl`
-- `useGeneratedStencilClientSetup`
+- `useStencilClientSetup`
 - `GeneratedStencilCSRComponent` — the client-only rendering bridge created by `createStencilCSRComponent()`
 
 When a resolved hydrate import is also available, generation additionally emits `runtime-ssr.generated.ts` with a typed `renderToString` export that loads the resolved hydrate runtime through the same Vite-ignored dynamic import boundary used for SSR-safe demo integration.
@@ -289,7 +289,7 @@ Generated wrapper components follow a stable contract:
 
 - Prop typing starts from available CEM attribute and member metadata.
 - Custom events become typed `onEvent$` QRL props when event metadata is available.
-- Wrapper components call `useGeneratedStencilClientSetup()` so client bootstrap stays centralized in generated runtime output.
+- Wrapper components call `useStencilClientSetup()` so client bootstrap stays centralized in generated runtime output.
 - When SSR runtime is available, wrappers render through `GeneratedStencilComponent` from the SSR surface backed by `createStencilSSRComponent`.
 - When only the loader runtime is available, wrappers render through `GeneratedStencilCSRComponent` from the CSR surface backed by `createStencilCSRComponent`, rendering the custom-element tag directly while preserving props, typed `onEvent$` bindings, slot metadata, and client bootstrap.
 - Slot metadata is projected with deterministic Qwik `<Slot />` output, including named slot support when the source metadata declares it.

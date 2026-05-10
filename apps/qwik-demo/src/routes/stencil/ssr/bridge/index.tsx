@@ -3,7 +3,7 @@ import type { DocumentHead } from '@builder.io/qwik-city';
 
 import {
   TestStencilLibSSRBridgeComponent,
-  useGeneratedStencilClientSetup,
+  useStencilClientSetup,
 } from '../../../../generated/stencil/ssr/runtime';
 
 export default component$(() => {
@@ -13,7 +13,7 @@ export default component$(() => {
   const secondCount = useSignal(0);
   const activeHandler = useSignal<'alpha' | 'beta'>('alpha');
 
-  useGeneratedStencilClientSetup();
+  useStencilClientSetup();
 
   const handleFirstAlpha$ = $(() => {
     firstAlphaCount.value += 1;

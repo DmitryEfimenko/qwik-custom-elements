@@ -1,5 +1,36 @@
 # PRD-40 Progress
 
+## 2026-05-10 - Issue #44 follow-up - Generated useGeneratedLitSSRClientSetup hook
+
+- Status: Completed in this slice.
+- Scope:
+  - Added `createLitSSRClientSetup` factory to `packages/adapter-lit/src/client/lit-ssr-client-setup.ts` (TDD: 4 unit tests covering return type, readystatechange listener, immediate execution, idempotency guard).
+  - Exported from `packages/adapter-lit/src/client.ts` barrel.
+  - Updated `renderServerRuntimeModule` in `packages/adapter-lit/src/generated-output.ts` to emit `useGenerated${LibraryName}SSRClientSetup = createLitSSRClientSetup(importLibraryQrl)` when `libraryImport` is provided (TDD: 2 new index.test.ts assertions).
+  - Fixed `probeSSR` in `packages/adapter-lit/src/ssr.ts` to return `available: true` whenever `libraryImport` is configured (was failing because test-lit-lib has no standalone dist/ — pre-existing bug).
+  - Rebuilt adapter-lit and re-ran generator: `apps/qwik-demo/src/generated/lit/ssr/runtime-ssr.generated.ts` now exports `useGeneratedTestLitLibSSRClientSetup`.
+  - Replaced manual `useOnDocument('readystatechange', $(() => { ... }))` block in `apps/qwik-demo/src/routes/lit/ssr/bridge/index.tsx` with generated hook call.
+- Key decisions:
+  - Hook event: `readystatechange` (matches prior working manual code).
+  - Hook name when no libraryName: `useGeneratedLitSSRClientSetup`; with libraryName: `useGenerated${PascalCase(libraryName)}SSRClientSetup`.
+  - `$()` mock in test: returns a callable function-with-resolve (avoids Qwik optimizer requirement in vitest context without qwikVite plugin).
+  - probeSSR simplified: config-presence check (not live import) — generation-time vs runtime concern separated.
+- Validation:
+  - `pnpm typecheck` ✅
+  - `pnpm test` ✅ (23 adapter-lit, 54 core, 33 stencil)
+  - `pnpm build` ✅
+  - `pnpm e2e` ✅ (13/13)
+- Files changed:
+  - `packages/adapter-lit/src/client/lit-ssr-client-setup.ts` (new)
+  - `packages/adapter-lit/src/client/lit-ssr-client-setup.test.ts` (new)
+  - `packages/adapter-lit/src/client.ts` (barrel export added)
+  - `packages/adapter-lit/src/generated-output.ts` (renderServerRuntimeModule + toClientSetupHookName)
+  - `packages/adapter-lit/src/index.test.ts` (2 new test assertions)
+  - `packages/adapter-lit/src/ssr.ts` (probeSSR simplified)
+  - `packages/adapter-lit/package.json` (test script expanded to cover new test file)
+  - `apps/qwik-demo/src/generated/lit/ssr/runtime-ssr.generated.ts` (regenerated)
+  - `apps/qwik-demo/src/routes/lit/ssr/bridge/index.tsx` (uses generated hook)
+
 ## 2026-05-05 - Issue #44 - Raw HTTP response e2e test for Lit SSR bridge
 
 - Status: Completed in this slice.

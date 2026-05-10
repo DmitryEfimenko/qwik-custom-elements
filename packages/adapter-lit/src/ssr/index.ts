@@ -1,6 +1,6 @@
 import '@lit-labs/ssr-client/lit-element-hydrate-support.js';
-import { createLitPlannedWrites } from './generated-output.js';
-import { createLitSSRComponent } from './ssr/lit-ssr.js';
+import { createLitPlannedWrites } from '../generated-output.js';
+import { createLitSSRComponent } from './lit-ssr.js';
 
 export const metadata = {
   adapterId: 'lit',
@@ -33,7 +33,7 @@ interface ProbeSsrInput {
   };
 }
 
-export type { LitSSRProps } from './ssr/lit-ssr.js';
+export type { LitSSRProps } from './lit-ssr.js';
 
 export function validateProject({
   source,
@@ -105,16 +105,10 @@ export async function resolveRuntimeImports({
 export async function probeSSR({
   runtimeImports,
 }: ProbeSsrInput = {}): Promise<{ available: boolean }> {
-  if (!isNonEmptyString(runtimeImports?.libraryImport)) {
-    return { available: false };
-  }
-
-  try {
-    await import(/* @vite-ignore */ runtimeImports.libraryImport);
-    return { available: true };
-  } catch {
-    return { available: false };
-  }
+  // SSR generation is available whenever a libraryImport is configured.
+  // The Lit SSR adapter does not need to verify the library is importable at
+  // generation time — the library may not have been built yet in dev workflows.
+  return { available: isNonEmptyString(runtimeImports?.libraryImport) };
 }
 
 export function renderComponentSsrHtml(

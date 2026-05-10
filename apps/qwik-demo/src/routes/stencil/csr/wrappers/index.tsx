@@ -2,10 +2,10 @@ import { $, component$, useSignal } from '@builder.io/qwik';
 import type { DocumentHead } from '@builder.io/qwik-city';
 
 import { QwikDeAlert, QwikDeButton } from '../../../../generated/stencil/csr';
-import { useGeneratedStencilClientSetup } from '../../../../generated/stencil/csr/runtime';
+import { useStencilClientSetup } from '../../../../generated/stencil/csr/runtime';
 
 export default component$(() => {
-  useGeneratedStencilClientSetup();
+  useStencilClientSetup();
 
   const buttonSize = useSignal<'md' | 'lg'>('md');
   const firstAlphaCount = useSignal(0);

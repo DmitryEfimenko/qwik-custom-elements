@@ -158,9 +158,7 @@ describe('generateFromConfig', () => {
       expect(buttonWrite?.content).toContain(
         "import { GeneratedStencilCSRComponent } from './runtime';",
       );
-      expect(buttonWrite?.content).not.toContain(
-        'useGeneratedStencilClientSetup();',
-      );
+      expect(buttonWrite?.content).not.toContain('useStencilClientSetup();');
       expect(buttonWrite?.content).toContain(
         'export interface QwikAButtonProps {',
       );
@@ -872,9 +870,7 @@ describe('generateFromConfig', () => {
       expect(wrapperWrite?.content).toContain(
         "import { GeneratedStencilCSRComponent } from './runtime';",
       );
-      expect(wrapperWrite?.content).not.toContain(
-        'useGeneratedStencilClientSetup();',
-      );
+      expect(wrapperWrite?.content).not.toContain('useStencilClientSetup();');
       expect(wrapperWrite?.content).toContain(
         '    <GeneratedStencilCSRComponent',
       );
@@ -940,7 +936,7 @@ describe('generateFromConfig', () => {
         "import { defineCustomElements as runtimeDefineCustomElements } from '@acme/stencil-lib/loader';",
       );
       expect(runtimeWrite!.content).toContain(
-        'export const useGeneratedStencilClientSetup =',
+        'export const useStencilClientSetup =',
       );
       expect(runtimeWrite!.content).toContain(
         'createStencilClientSetup(defineCustomElementsQrl);',
@@ -1119,9 +1115,7 @@ describe('generateFromConfig', () => {
       expect(buttonWrite!.content).toContain(
         "import { GeneratedStencilComponent } from './runtime';",
       );
-      expect(buttonWrite!.content).not.toContain(
-        'useGeneratedStencilClientSetup();',
-      );
+      expect(buttonWrite!.content).not.toContain('useStencilClientSetup();');
       expect(buttonWrite!.content).toContain(
         '  const events: Record<string, QRL<(...args: any[]) => void>> = {};',
       );
@@ -1255,7 +1249,7 @@ describe('generateFromConfig', () => {
         "import { createStencilCSRComponent, createStencilClientSetup } from '@qwik-custom-elements/adapter-stencil/client';",
       );
       expect(runtimeWrite!.content).toContain(
-        'export const useGeneratedStencilClientSetup =',
+        'export const useStencilClientSetup =',
       );
       expect(runtimeWrite!.content).toContain(
         'export const GeneratedStencilCSRComponent = createStencilCSRComponent();',

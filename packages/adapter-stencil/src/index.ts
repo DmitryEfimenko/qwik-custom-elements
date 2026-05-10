@@ -311,7 +311,7 @@ function renderClientRuntimeModule(
     '};',
     '',
     'export const defineCustomElementsQrl = $(defineCustomElements);',
-    'export const useGeneratedStencilClientSetup =',
+    'export const useStencilClientSetup =',
     '  createStencilClientSetup(defineCustomElementsQrl);',
     `export const ${csrBridgeName} = createStencilCSRComponent();`,
     '',
