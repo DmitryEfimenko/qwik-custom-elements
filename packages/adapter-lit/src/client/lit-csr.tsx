@@ -1,9 +1,9 @@
 import {
-  Slot,
-  component$,
-  useSignal,
-  useVisibleTask$,
-  type QRL,
+    Slot,
+    component$,
+    useSignal,
+    useVisibleTask$,
+    type QRL,
 } from '@builder.io/qwik';
 
 import { updateLitCSRHostProps } from './lit-csr-props.js';
@@ -213,7 +213,9 @@ export function createLitCSRComponent() {
       <ElementTag ref={hostRef} {...restProps}>
         <Slot />
         {namedSlots.map((name) => (
-          <Slot name={name} />
+          <span key={name} slot={name} style={{ display: 'contents' }}>
+            <Slot name={name} />
+          </span>
         ))}
       </ElementTag>
     );

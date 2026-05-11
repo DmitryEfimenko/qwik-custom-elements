@@ -106,6 +106,12 @@ test('lit ssr bridge interaction contract: toggles handler and increments active
   await expect(page.locator('#lit-alert-wrapper .de-alert')).toHaveCount(1);
   await expect(page.locator('#lit-alert-wrapper > span')).toHaveCount(0);
 
+  // Named slot content must carry native slot= attr so shadow DOM distributes
+  // it to <slot name="footer"> — q:slot alone is ignored by shadow DOM.
+  await expect(
+    page.locator('#lit-alert-wrapper de-alert [slot="footer"]'),
+  ).toContainText('Alert footer content');
+
   await expect(page.locator('#first-lit-button')).toHaveCount(0);
 });
 

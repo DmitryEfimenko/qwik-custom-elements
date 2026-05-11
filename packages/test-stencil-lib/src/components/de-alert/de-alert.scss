@@ -8,4 +8,10 @@
   &__content {
     margin-top: 0.5em;
   }
+
+  &__footer {
+    border-top: 1px solid var(--de-alert-footer-border, #f5c6cb);
+    margin-top: 0.75em;
+    padding-top: 0.5em;
+  }
 }

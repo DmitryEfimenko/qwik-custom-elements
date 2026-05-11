@@ -47,8 +47,18 @@
       "declarations": [
         {
           "kind": "class",
-          "description": "",
+          "description": "Alert component.",
           "name": "DeAlert",
+          "slots": [
+            {
+              "description": "Default slot for alert body content.",
+              "name": ""
+            },
+            {
+              "description": "Footer content area, rendered below the body with a top border.",
+              "name": "footer"
+            }
+          ],
           "members": [
             {
               "kind": "field",

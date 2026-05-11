@@ -1,16 +1,16 @@
 import {
-  $,
-  component$,
-  isBrowser,
-  isServer,
-  type QRL,
-  Slot,
-  SSRRaw,
-  SSRStream,
-  useId,
-  useOnDocument,
-  useSignal,
-  useTask$,
+    $,
+    component$,
+    isBrowser,
+    isServer,
+    type QRL,
+    Slot,
+    SSRRaw,
+    SSRStream,
+    useId,
+    useOnDocument,
+    useSignal,
+    useTask$,
 } from '@builder.io/qwik';
 import { updateLitCSRHostProps } from '../client/lit-csr-props.js';
 
@@ -231,7 +231,11 @@ export function createLitSSRComponent() {
                   yield <SSRRaw data={fullHtml} />;
                   yield <Slot />;
                   for (const slotName of namedSlots) {
-                    yield <Slot name={slotName} />;
+                    yield (
+                      <span slot={slotName} style={{ display: 'contents' }}>
+                        <Slot name={slotName} />
+                      </span>
+                    );
                   }
                 } else {
                   // Emit everything before the closing tag.
@@ -239,7 +243,11 @@ export function createLitSSRComponent() {
                   // Project default and named slot content.
                   yield <Slot />;
                   for (const slotName of namedSlots) {
-                    yield <Slot name={slotName} />;
+                    yield (
+                      <span slot={slotName} style={{ display: 'contents' }}>
+                        <Slot name={slotName} />
+                      </span>
+                    );
                   }
                   // Emit the closing tag.
                   yield <SSRRaw data={closingTag} />;
@@ -266,7 +274,9 @@ export function createLitSSRComponent() {
           <HostTag>
             <Slot />
             {namedSlots.map((name) => (
-              <Slot name={name} key={name} />
+              <span key={name} slot={name} style={{ display: 'contents' }}>
+                <Slot name={name} />
+              </span>
             ))}
           </HostTag>
         </div>

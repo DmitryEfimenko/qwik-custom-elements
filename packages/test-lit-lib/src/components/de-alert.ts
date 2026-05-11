@@ -1,5 +1,11 @@
 import { css, html, LitElement } from 'lit';
 
+/**
+ * Alert component.
+ *
+ * @slot - Default slot for alert body content.
+ * @slot footer - Footer content area, rendered below the body with a top border.
+ */
 export class DeAlert extends LitElement {
   static properties = {
     heading: { type: String },
