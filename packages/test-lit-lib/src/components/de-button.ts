@@ -13,11 +13,14 @@ export class DeButton extends LitElement {
     }
 
     button {
-      border: 1px solid #2e2e2e;
+      background-color: var(--de-button-bg, #007bff);
+      display: inline-block;
+      padding: 0.5em 1em;
+      border: none;
       border-radius: 4px;
+      color: white;
+      font-size: 1rem;
       cursor: pointer;
-      font: inherit;
-      padding: 0.35rem 0.8rem;
     }
 
     button[data-size='sm'] {

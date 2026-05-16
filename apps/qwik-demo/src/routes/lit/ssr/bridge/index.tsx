@@ -1,11 +1,14 @@
-import { $, component$, useSignal } from '@builder.io/qwik';
+import { $, component$, useSignal, useStylesScoped$ } from '@builder.io/qwik';
 import type { DocumentHead } from '@builder.io/qwik-city';
 import {
   TestLitLibSSRBridgeComponent,
   useTestLitLibSSRClientSetup,
 } from '../../../../generated/lit/ssr/runtime';
+import styles from './index.scss?inline';
 
 export default component$(() => {
+  useStylesScoped$(styles);
+
   const buttonSize = useSignal<'md' | 'lg'>('md');
   const firstAlphaCount = useSignal(0);
   const firstBetaCount = useSignal(0);
@@ -53,6 +56,7 @@ export default component$(() => {
       <button id="toggle-handler" onClick$={toggleHandler$}>
         Toggle first handler
       </button>
+
       <button id="toggle-size" onClick$={toggleSize$}>
         Toggle button size
       </button>
@@ -64,6 +68,7 @@ export default component$(() => {
       >
         alpha handler warmup
       </button>
+
       <button
         id="beta-handler-warmup"
         onClick$={handleFirstBeta$}
