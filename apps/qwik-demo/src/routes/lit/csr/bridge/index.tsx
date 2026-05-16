@@ -1,8 +1,11 @@
-import { $, component$, useOnDocument, useSignal } from '@builder.io/qwik';
+import { $, component$, useOnDocument, useSignal, useStylesScoped$ } from '@builder.io/qwik';
 import type { DocumentHead } from '@builder.io/qwik-city';
 import { TestLitLibCSRBridgeComponent } from '../../../../generated/lit/csr/runtime';
+import styles from './index.scss?inline';
 
 export default component$(() => {
+  useStylesScoped$(styles);
+  
   const buttonSize = useSignal<'md' | 'lg'>('md');
   const firstAlphaCount = useSignal(0);
   const firstBetaCount = useSignal(0);
