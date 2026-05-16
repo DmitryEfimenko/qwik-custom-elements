@@ -443,4 +443,73 @@ describe('adapter-lit metadata contract', () => {
       'Register Lit element classes',
     );
   });
+
+  it('includes CSR client setup hook in CSR runtime when runtimeImports.libraryImport is provided', () => {
+    const plannedWrites = createGeneratedOutput({
+      projectId: 'demo',
+      libraryName: 'test-lit-lib',
+      componentDefinitions: [
+        { tagName: 'lit-button', props: [], events: [], slots: [] },
+      ] as Array<{
+        tagName: string;
+        props: Array<{ name: string; type: string; required: boolean }>;
+        events: Array<{ name: string; type: string }>;
+        slots: Array<{ name: string }>;
+      }>,
+      runtimeImports: {
+        libraryImport: '@qwik-custom-elements/test-lit-lib',
+      },
+      ssrAvailable: false,
+    });
+
+    const runtimeCsrWrite = plannedWrites.find(
+      (w: { relativePath: string }) =>
+        w.relativePath === 'runtime-csr.generated.ts',
+    );
+
+    expect(runtimeCsrWrite?.content).toContain(
+      "import { $ } from '@builder.io/qwik';",
+    );
+    expect(runtimeCsrWrite?.content).toContain(
+      "import { createLitCSRClientSetup, createLitCSRComponent } from '@qwik-custom-elements/adapter-lit/client';",
+    );
+    expect(runtimeCsrWrite?.content).toContain(
+      "await import('@qwik-custom-elements/test-lit-lib');",
+    );
+    expect(runtimeCsrWrite?.content).toContain(
+      'export const useTestLitLibCSRClientSetup = createLitCSRClientSetup(importLibraryQrl);',
+    );
+    expect(runtimeCsrWrite?.content).toContain(
+      'export const TestLitLibCSRBridgeComponent = createLitCSRComponent();',
+    );
+  });
+
+  it('omits CSR client setup hook when runtimeImports.libraryImport is not provided', () => {
+    const plannedWrites = createGeneratedOutput({
+      projectId: 'demo',
+      libraryName: 'test-lit-lib',
+      componentDefinitions: [
+        { tagName: 'lit-button', props: [], events: [], slots: [] },
+      ] as Array<{
+        tagName: string;
+        props: Array<{ name: string; type: string; required: boolean }>;
+        events: Array<{ name: string; type: string }>;
+        slots: Array<{ name: string }>;
+      }>,
+      ssrAvailable: false,
+    });
+
+    const runtimeCsrWrite = plannedWrites.find(
+      (w: { relativePath: string }) =>
+        w.relativePath === 'runtime-csr.generated.ts',
+    );
+
+    expect(runtimeCsrWrite?.content).not.toContain('createLitCSRClientSetup');
+    expect(runtimeCsrWrite?.content).not.toContain(
+      'useTestLitLibCSRClientSetup',
+    );
+    expect(runtimeCsrWrite?.content).toContain(
+      "import { createLitCSRComponent } from '@qwik-custom-elements/adapter-lit/client';",
+    );
+  });
 });

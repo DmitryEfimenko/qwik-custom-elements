@@ -1,14 +1,9 @@
-import {
-  $,
-  component$,
-  useOnDocument,
-  useSignal,
-  useStylesScoped$,
-} from '@builder.io/qwik';
+import { $, component$, useSignal, useStylesScoped$ } from '@builder.io/qwik';
 import type { DocumentHead } from '@builder.io/qwik-city';
 import styles from './index.scss?inline';
 
 import { QwikDeAlert, QwikDeButton } from '../../../../generated/lit/csr';
+import { useTestLitLibCSRClientSetup } from '../../../../generated/lit/csr/runtime';
 
 export default component$(() => {
   useStylesScoped$(styles);
@@ -19,12 +14,7 @@ export default component$(() => {
   const secondCount = useSignal(0);
   const activeHandler = useSignal<'alpha' | 'beta'>('alpha');
 
-  useOnDocument(
-    'readystatechange',
-    $(() => {
-      void import('@qwik-custom-elements/test-lit-lib');
-    }),
-  );
+  useTestLitLibCSRClientSetup();
 
   const handleFirstAlpha$ = $(() => {
     firstAlphaCount.value += 1;

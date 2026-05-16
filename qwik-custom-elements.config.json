@@ -44,6 +44,11 @@
         "type": "CEM",
         "path": "./packages/test-lit-lib/custom-elements.json"
       },
+      "adapterOptions": {
+        "runtime": {
+          "libraryImport": "@qwik-custom-elements/test-lit-lib"
+        }
+      },
       "outDir": "./apps/qwik-demo/src/generated/lit/csr",
       "cleanOutput": true
     },
