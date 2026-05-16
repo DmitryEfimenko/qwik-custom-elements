@@ -42,26 +42,19 @@ export function validateProject({
   const runtime = isRecord(adapterOptions?.runtime)
     ? adapterOptions.runtime
     : undefined;
-  const libraryImport = validateOptionalRuntimeOverride(
+  validateOptionalRuntimeOverride(
     runtime,
     'libraryImport',
     'QCE_LIT_RUNTIME_LIBRARY_IMPORT_OVERRIDE_INVALID',
     `Lit ${source.type} projects must provide a non-empty adapterOptions.runtime.libraryImport override when the override is set.`,
   );
-
-  if (source.type === 'CEM' && libraryImport == null) {
-    throw createContractError(
-      'QCE_LIT_RUNTIME_LIBRARY_IMPORT_REQUIRED',
-      'Lit CEM projects must provide adapterOptions.runtime.libraryImport.',
-    );
-  }
 }
 
 export async function resolveRuntimeImports({
   source,
   adapterOptions,
   runtimeResolution,
-}: ResolveRuntimeImportsInput): Promise<{ libraryImport: string }> {
+}: ResolveRuntimeImportsInput): Promise<{ libraryImport?: string }> {
   const runtime = isRecord(adapterOptions?.runtime)
     ? adapterOptions.runtime
     : undefined;
@@ -73,13 +66,9 @@ export async function resolveRuntimeImports({
   );
 
   if (source.type === 'CEM') {
-    if (libraryImportOverride == null) {
-      throw createContractError(
-        'QCE_LIT_RUNTIME_LIBRARY_IMPORT_REQUIRED',
-        'Lit CEM projects must provide adapterOptions.runtime.libraryImport.',
-      );
-    }
-    return { libraryImport: libraryImportOverride };
+    return libraryImportOverride != null
+      ? { libraryImport: libraryImportOverride }
+      : {};
   }
 
   const packageName = source.packageName;
@@ -102,13 +91,15 @@ export async function resolveRuntimeImports({
   return { libraryImport };
 }
 
-export async function probeSSR({
-  runtimeImports,
-}: ProbeSsrInput = {}): Promise<{ available: boolean }> {
-  // SSR generation is available whenever a libraryImport is configured.
-  // The Lit SSR adapter does not need to verify the library is importable at
-  // generation time — the library may not have been built yet in dev workflows.
-  return { available: isNonEmptyString(runtimeImports?.libraryImport) };
+export async function probeSSR(
+  _input: ProbeSsrInput = {},
+): Promise<{ available: boolean }> {
+  // SSR is available whenever the Lit SSR adapter subpath can be loaded.
+  // @lit-labs/ssr-client/lit-element-hydrate-support.js is imported at module
+  // load time above — if this module resolves, the hydration infrastructure is
+  // ready. libraryImport is optional and only affects whether the library is
+  // pre-registered before server rendering.
+  return { available: true };
 }
 
 export function renderComponentSsrHtml(

@@ -27,17 +27,13 @@ describe('adapter-lit SSR runtime import and probe wiring', () => {
     );
   });
 
-  it('requires runtime libraryImport override for CEM sources', () => {
+  it('accepts CEM source without a libraryImport override', () => {
     expect(() =>
       validateProject({
         source: { type: 'CEM' },
         adapterOptions: {},
       } as Parameters<typeof validateProject>[0]),
-    ).toThrowError(
-      expect.objectContaining({
-        code: 'QCE_LIT_RUNTIME_LIBRARY_IMPORT_REQUIRED',
-      }),
-    );
+    ).not.toThrow();
   });
 
   it('resolves runtime libraryImport from override for CEM sources', async () => {
@@ -69,8 +65,8 @@ describe('adapter-lit SSR runtime import and probe wiring', () => {
     });
   });
 
-  it('reports SSR unavailable when runtime library import is missing', async () => {
-    await expect(probeSsrSubpath()).resolves.toEqual({ available: false });
+  it('reports SSR available when the Lit SSR adapter subpath is loaded', async () => {
+    await expect(probeSsrSubpath()).resolves.toEqual({ available: true });
   });
 
   it('reports SSR available when runtime library import is loadable', async () => {
