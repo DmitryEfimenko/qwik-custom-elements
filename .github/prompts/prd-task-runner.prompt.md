@@ -161,6 +161,7 @@ Before committing, format all changed files.
 - First try the repo-standard formatter command (for example `npm run format` or `pnpm format`) if it exists.
 - If no project-wide formatter script exists, run a file-targeted formatter for only the changed files.
 - Re-check git diff after formatting and include those formatting changes in the same commit.
+- If formatting introduces additional changes in files touched by this task (or directly adjacent integration files), classify them via diff review and include formatting-only edits automatically; do not treat them as unexpected changes that require pausing.
 
 # PROGRESS
 
