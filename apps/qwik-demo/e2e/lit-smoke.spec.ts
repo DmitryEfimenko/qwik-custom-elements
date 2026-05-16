@@ -389,7 +389,74 @@ test('lit csr wrappers route renders generated wrapper hosts', async ({ page }) 
       customElements.get('de-alert') != null,
   );
 
-  await expect(page.locator('#first-lit-wrapper de-button')).toHaveCount(1);
-  await expect(page.locator('#second-lit-wrapper de-button')).toHaveCount(1);
+  const firstHost = page.locator('#first-lit-wrapper de-button');
+  const secondHost = page.locator('#second-lit-wrapper de-button');
+  const firstButton = page.locator('#first-lit-wrapper de-button button');
+  const secondButton = page.locator('#second-lit-wrapper de-button button');
+
+  await expect(firstHost).toHaveCount(1);
+  await expect(secondHost).toHaveCount(1);
   await expect(page.locator('#lit-alert-wrapper de-alert')).toHaveCount(1);
+  await expect(firstButton).toBeVisible();
+  await expect(secondButton).toBeVisible();
+
+  const clickTriple = async (locator: typeof firstButton) => {
+    await locator.click();
+    await locator.click();
+    await locator.click();
+  };
+
+  await expect(page.locator('#active-handler')).toContainText(
+    'Active handler: alpha',
+  );
+  await clickTriple(firstButton);
+  await expect(page.locator('#first-alpha-count')).toContainText(
+    'First alpha count: 1',
+  );
+  await expect(page.locator('#first-beta-count')).toContainText(
+    'First beta count: 0',
+  );
+
+  await page.locator('#toggle-handler').click();
+  await expect(page.locator('#active-handler')).toContainText(
+    'Active handler: beta',
+  );
+  await clickTriple(firstButton);
+  await expect(page.locator('#first-alpha-count')).toContainText(
+    'First alpha count: 1',
+  );
+  await expect(page.locator('#first-beta-count')).toContainText(
+    'First beta count: 1',
+  );
+
+  await clickTriple(secondButton);
+  await expect(page.locator('#second-count')).toContainText('Second count: 1');
+
+  await firstHost.evaluate((host) => {
+    (globalThis as Record<string, unknown>).__qce_first_lit_wrapper_host__ =
+      host;
+  });
+
+  await page.locator('#toggle-size').click();
+  await expect(page.locator('#button-size')).toContainText('Button size: lg');
+  await expect(page.locator('#first-lit-wrapper de-button[size="lg"]')).toBeVisible();
+  await expect(page.locator('#second-lit-wrapper de-button[size="lg"]')).toBeVisible();
+
+  const hostInstanceWasPreserved = await firstHost.evaluate((host) => {
+    return (
+      (globalThis as Record<string, unknown>)
+        .__qce_first_lit_wrapper_host__ === host
+    );
+  });
+  expect(hostInstanceWasPreserved).toBe(true);
+
+  await expect(page.locator('#lit-alert-wrapper')).toContainText(
+    'Validation Alert',
+  );
+  await expect(page.locator('#lit-alert-wrapper')).toContainText(
+    'Alert body content',
+  );
+  await expect(page.locator('#lit-alert-wrapper')).toContainText(
+    'Alert footer content',
+  );
 });

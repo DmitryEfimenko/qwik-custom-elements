@@ -1,5 +1,30 @@
 # PRD-40 Progress
 
+## 2026-05-16 - Issue #46 - Lit CSR wrappers interaction/stability e2e proof (single-task slice)
+
+- Status: Completed in this slice (partial issue progress).
+- Scope:
+  - Expanded `lit csr wrappers route renders generated wrapper hosts` in `apps/qwik-demo/e2e/lit-smoke.spec.ts` from host-presence smoke to interaction/stability proof on `/lit/csr/wrappers`.
+  - Added wrapper-route assertions for: triple-click event delivery, active-handler toggle (alpha -> beta), independent second-button counter updates, size reactivity (`de-button[size="lg"]`), host-instance preservation across size updates, and alert content/slot rendering.
+  - Included existing formatting-only route changes in commit scope for `apps/qwik-demo/src/routes/lit/csr/bridge/index.tsx` and `apps/qwik-demo/src/routes/lit/csr/wrappers/index.tsx`.
+- Key decisions:
+  - Kept this run to one tracer-bullet task only: direct behavioral proof for wrappers-route interactions and stability (acceptance criterion 3), using bridge route tests as parity baseline.
+  - Verified behavior through wrapper route surface directly (`/lit/csr/wrappers`), not through bridge route fallbacks.
+- Validation:
+  - `pnpm format` ✅
+  - focused wrappers e2e invocation ✅ (target test passed)
+  - `pnpm typecheck` ✅
+  - `pnpm test` ✅
+  - `pnpm build` ✅
+  - `pnpm lint` ✅
+  - `pnpm e2e` ✅
+- Files changed:
+  - `apps/qwik-demo/e2e/lit-smoke.spec.ts`
+  - `apps/qwik-demo/src/routes/lit/csr/bridge/index.tsx` (formatting-only)
+  - `apps/qwik-demo/src/routes/lit/csr/wrappers/index.tsx` (formatting-only)
+- Notes for next iteration:
+  - Remaining unchecked acceptance item for #46 is typed CEM-based CSR wrapper generation proof/details.
+
 ## 2026-05-16 - Issue #46 - Lit CSR wrappers route consumes generated wrappers (single-task slice)
 
 - Status: Completed in this slice (partial issue progress).

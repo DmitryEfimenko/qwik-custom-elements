@@ -1,5 +1,17 @@
 # Findings Log
 
+## 2026-05-16 - Lit CSR wrapper-route completion requires interaction/stability proof, not host-presence smoke
+
+- Sources:
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/46
+- Finding:
+  - For `/lit/csr/wrappers`, asserting only generated host presence (`de-button` / `de-alert`) is insufficient to claim wrappers-route completion.
+  - Durable parity proof must validate wrapper-surface behavior dimensions directly: event delivery (triple-click), handler switching, prop reactivity (`size` updates), host stability across prop updates, and slot/content rendering.
+- Durable guidance:
+  - Keep bridge-route interaction contract as baseline and require wrappers-route e2e assertions for all listed behavior dimensions before checking interaction/stability acceptance criteria complete.
+  - Treat unverified dimensions as remaining scope even when route wiring and host rendering already pass.
+
 ## 2026-05-05 - Lit SSR raw-response proof uses DSD `shadowrootmode` attribute, not `class="hydrated"`
 
 - Sources:
