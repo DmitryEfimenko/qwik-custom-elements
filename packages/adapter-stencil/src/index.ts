@@ -408,7 +408,8 @@ function renderStencilComponentWrapper(
   const slotLines = [
     '    <Slot />',
     ...componentDefinition.slots.map(
-      (slot) => `    <Slot name=${JSON.stringify(slot.name)} />`,
+      (slot) =>
+        `    <span q:slot=${JSON.stringify(slot.name)} style={{ display: 'contents' }}>\n      <Slot name=${JSON.stringify(slot.name)} />\n    </span>`,
     ),
   ];
   const slotListToken =

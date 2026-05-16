@@ -140,6 +140,20 @@ test('stencil ssr bridge returns server-rendered stencil html', async ({
   expect(html).not.toContain('__qce_stencil_client_setup_done__');
 });
 
+test('stencil ssr wrappers returns server-rendered stencil html', async ({
+  page,
+}) => {
+  const response = await page.request.get('/stencil/ssr/wrappers');
+  expect(response.ok()).toBe(true);
+  const html = await response.text();
+
+  expect(html).toContain('q:render="ssr"');
+  expect(html).toMatch(/<h1[^>]*>Stencil Wrappers Validation<\/h1>/);
+  expect(html).toMatch(
+    /<de-alert[^>]*class="hydrated"[^>]*heading="Validation Alert"[^>]*>[\s\S]*?<div[^>]*class="de-alert"[^>]*>[\s\S]*?<strong[^>]*>[\s\S]*?Validation Alert[\s\S]*?<\/strong>[\s\S]*?<div[^>]*class="de-alert__content"[^>]*>[\s\S]*?Alert body content[\s\S]*?<\/div>[\s\S]*?<div[^>]*class="de-alert__footer"[^>]*>[\s\S]*?Alert footer content[\s\S]*?<\/div>[\s\S]*?<\/div>[\s\S]*?<\/de-alert>/,
+  );
+});
+
 test('stencil wrappers interaction contract: toggles handler and increments active counters', async ({
   page,
 }) => {
@@ -148,6 +162,27 @@ test('stencil wrappers interaction contract: toggles handler and increments acti
     '/stencil/ssr/wrappers',
     'Stencil Wrappers Validation',
   );
+
+  await expect(page.locator('#alert-stencil-wrapper de-alert')).toHaveCount(1);
+  await expect(
+    page.locator('#alert-stencil-wrapper de-alert [slot="footer"]'),
+  ).toContainText('Alert footer content');
+  const footerContainer = await page.evaluate(() => {
+    const alertEl = document.querySelector(
+      '#alert-stencil-wrapper de-alert',
+    ) as HTMLElement | null;
+    const footer = alertEl?.querySelector('.de-alert__footer');
+    if (!footer) return null;
+    const style = window.getComputedStyle(footer);
+    return {
+      borderTopStyle: style.borderTopStyle,
+      borderTopWidth: style.borderTopWidth,
+    };
+  });
+  expect(footerContainer).toEqual({
+    borderTopStyle: 'solid',
+    borderTopWidth: '1px',
+  });
 });
 
 test('stencil csr bridge interaction contract: toggles handler and increments active counters', async ({

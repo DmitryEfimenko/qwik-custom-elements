@@ -36,10 +36,13 @@ export const QwikDeAlert = component$<QwikDeAlertProps>((props) => {
       tagName="de-alert"
       props={elementProps}
       events={mappedEvents}
-      slots={undefined}
+      slots={["footer"]}
       {...passthroughEventProps}
     >
     <Slot />
+    <span q:slot="footer" style={{ display: 'contents' }}>
+      <Slot name="footer" />
+    </span>
     </TestStencilLibSSRBridgeComponent>
   );
 });
