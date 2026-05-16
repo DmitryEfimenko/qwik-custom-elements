@@ -1,16 +1,16 @@
 import {
-    $,
-    component$,
-    isBrowser,
-    isServer,
-    type QRL,
-    Slot,
-    SSRRaw,
-    SSRStream,
-    useId,
-    useOnDocument,
-    useSignal,
-    useTask$,
+  $,
+  component$,
+  isBrowser,
+  isServer,
+  type QRL,
+  Slot,
+  SSRRaw,
+  SSRStream,
+  useId,
+  useOnDocument,
+  useSignal,
+  useTask$,
 } from '@builder.io/qwik';
 import { updateLitCSRHostProps } from '../client/lit-csr-props.js';
 

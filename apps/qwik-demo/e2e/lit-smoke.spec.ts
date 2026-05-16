@@ -372,3 +372,24 @@ test('lit csr bridge regression: size toggles preserve mounted host instance and
     'First alpha count: 1',
   );
 });
+
+test('lit csr wrappers route renders generated wrapper hosts', async ({ page }) => {
+  await page.goto('/lit/csr/wrappers');
+
+  await expect(
+    page.getByRole('heading', {
+      level: 1,
+      name: 'Lit CSR Wrappers Validation',
+    }),
+  ).toBeVisible();
+
+  await page.waitForFunction(
+    () =>
+      customElements.get('de-button') != null &&
+      customElements.get('de-alert') != null,
+  );
+
+  await expect(page.locator('#first-lit-wrapper de-button')).toHaveCount(1);
+  await expect(page.locator('#second-lit-wrapper de-button')).toHaveCount(1);
+  await expect(page.locator('#lit-alert-wrapper de-alert')).toHaveCount(1);
+});

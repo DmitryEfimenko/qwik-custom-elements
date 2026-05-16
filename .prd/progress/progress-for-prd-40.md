@@ -1,5 +1,31 @@
 # PRD-40 Progress
 
+## 2026-05-16 - Issue #46 - Lit CSR wrappers route consumes generated wrappers (single-task slice)
+
+- Status: Completed in this slice (partial issue progress).
+- Scope:
+  - Added new Lit CSR wrappers route at `apps/qwik-demo/src/routes/lit/csr/wrappers/index.tsx` that consumes generated wrappers (`QwikDeButton`, `QwikDeAlert`) end-to-end.
+  - Kept runtime registration deterministic in the route via existing `useOnDocument('readystatechange', ...)` import pattern used by current Lit CSR bridge flow.
+  - Added focused e2e test `lit csr wrappers route renders generated wrapper hosts` in `apps/qwik-demo/e2e/lit-smoke.spec.ts`.
+- Key decisions:
+  - Kept this run to one tracer-bullet task only: prove wrappers route consumption path exists and renders generated hosts.
+  - Deferred richer wrapper interaction/stability assertions to a follow-up task in the same issue.
+- Validation:
+  - Focused e2e (`--grep "lit csr wrappers route renders generated wrapper hosts"`) ✅
+  - `pnpm format` ✅
+  - `pnpm typecheck` ✅
+  - `pnpm test` ✅
+  - `pnpm build` ✅
+  - `pnpm lint` ✅
+  - `pnpm e2e` ❌ (pre-existing unrelated failure in Lit SSR test: `lit ssr bridge: light DOM slot content is not duplicated after signal change`)
+- Files changed:
+  - `apps/qwik-demo/src/routes/lit/csr/wrappers/index.tsx` (new)
+  - `apps/qwik-demo/e2e/lit-smoke.spec.ts`
+  - `packages/adapter-lit/src/client/lit-csr.tsx` (formatter-only import indentation)
+  - `packages/adapter-lit/src/ssr/lit-ssr.tsx` (formatter-only import indentation)
+- Notes for next iteration:
+  - Continue issue #46 with wrapper interaction/stability e2e coverage before checking the e2e acceptance criterion complete.
+
 ## 2026-05-10 - Issue #44 follow-up - Generated useGeneratedLitSSRClientSetup hook
 
 - Status: Completed in this slice.
