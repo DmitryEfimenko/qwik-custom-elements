@@ -6,7 +6,6 @@ import type { QRL } from '@builder.io/qwik';
 import { TestLitLibSSRBridgeComponent } from './runtime';
 
 export interface QwikDeButtonProps {
-  '#clicks'?: number;
   size?: 'sm' | 'md' | 'lg';
   onTripleClick$?: QRL<(event: CustomEvent) => void>;
   [key: string]: unknown;
