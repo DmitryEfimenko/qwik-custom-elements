@@ -118,7 +118,9 @@ export function createStencilCSRComponent() {
         <ElementTag ref={hostRef} {...restProps}>
           <Slot />
           {namedSlots.map((name) => (
-            <Slot name={name} key={name} />
+            <span key={name} slot={name} style={{ display: 'contents' }}>
+              <Slot name={name} />
+            </span>
           ))}
         </ElementTag>
       );
