@@ -1,5 +1,17 @@
 # Findings Log
 
+## 2026-05-16 - CEM private members must not leak into generated wrapper prop interfaces
+
+- Sources:
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/46
+- Finding:
+  - CEM `members` entries with `privacy: "private"` can leak implementation-only fields (for example `#clicks`) into generated typed wrapper props if core metadata extraction does not filter by privacy.
+  - This creates incorrect public wrapper contracts and can expose non-bindable/internal element state as if it were a supported prop.
+- Durable guidance:
+  - At core CEM parsing stage, ignore `members` fields where `privacy === "private"` before constructing adapter-facing prop metadata.
+  - Keep privacy filtering core-owned so all adapters inherit the same contract guardrail without per-adapter duplication.
+
 ## 2026-05-16 - Lit CSR wrapper-route completion requires interaction/stability proof, not host-presence smoke
 
 - Sources:

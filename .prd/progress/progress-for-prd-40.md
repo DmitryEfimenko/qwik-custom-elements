@@ -1,5 +1,30 @@
 # PRD-40 Progress
 
+## 2026-05-16 - Issue #46 - Filter private CEM members from typed Lit CSR wrapper props (single-task slice)
+
+- Status: Completed in this slice (remaining issue criterion).
+- Scope:
+  - Added a regression assertion in core generator tests to ensure private CEM member fields are not emitted into generated wrapper props.
+  - Updated core CEM member parsing to skip `members[].privacy === 'private'` when building typed wrapper props metadata.
+  - Regenerated Lit CSR output and verified private `#clicks` is no longer present in `QwikDeButtonProps`.
+- Key decisions:
+  - Keep filtering at core metadata extraction boundary so every adapter using parsed CEM props gets the same privacy-safe contract.
+  - Keep public/protected member fields eligible for typed wrapper props; only private fields are excluded.
+- Validation:
+  - Focused red/green test (`packages/core/src/__tests__/generator.test.ts`) ✅
+  - `npm run typecheck` ✅
+  - `npm run lint` ✅
+  - `npm run test` ❌ (`@qwik-custom-elements/core` existing unrelated SSR subpath test failure)
+  - `npm run build` ❌ (`qwik-demo` existing unresolved `@qwik-custom-elements/test-stencil-lib/loader` import in generated stencil runtime)
+  - `npm run e2e` ❌ (`qwik-demo` suite exit 1; pre-existing root-suite instability)
+  - `npm run format` ✅
+- Files changed:
+  - `packages/core/src/__tests__/generator.test.ts`
+  - `packages/core/src/generator.ts`
+  - `apps/qwik-demo/src/generated/lit/csr/de-button.tsx`
+- Notes for next iteration:
+  - Re-run full root validation once existing root test/build/e2e baseline failures are stabilized.
+
 ## 2026-05-16 - Issue #46 - Lit CSR wrappers interaction/stability e2e proof (single-task slice)
 
 - Status: Completed in this slice (partial issue progress).

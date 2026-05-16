@@ -79,6 +79,20 @@ describe('generateFromConfig', () => {
                         type: { text: '"lg" | "md" | "sm"' },
                       },
                     ],
+                    members: [
+                      {
+                        kind: 'field',
+                        name: '#internalCount',
+                        privacy: 'private',
+                        type: { text: 'number' },
+                      },
+                      {
+                        kind: 'field',
+                        name: 'variant',
+                        privacy: 'public',
+                        type: { text: '"primary" | "secondary"' },
+                      },
+                    ],
                     events: [
                       {
                         name: 'tripleClick',
@@ -163,6 +177,10 @@ describe('generateFromConfig', () => {
         'export interface QwikAButtonProps {',
       );
       expect(buttonWrite?.content).toContain('  size?: "lg" | "md" | "sm";');
+      expect(buttonWrite?.content).toContain(
+        '  variant?: "primary" | "secondary";',
+      );
+      expect(buttonWrite?.content).not.toContain('#internalCount');
       expect(buttonWrite?.content).toContain(
         '  onTripleClick$?: QRL<(event: CustomEvent<MouseEvent>) => void>;',
       );

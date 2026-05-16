@@ -1090,10 +1090,15 @@ function readComponentPropsFromMembers(members: unknown): CemComponentProp[] {
     const memberRecord = member as {
       kind?: unknown;
       name?: unknown;
+      privacy?: unknown;
       type?: { text?: unknown };
     };
 
     if (memberRecord.kind !== 'field') {
+      continue;
+    }
+
+    if (memberRecord.privacy === 'private') {
       continue;
     }
 
