@@ -31,16 +31,6 @@
               "readonly": true,
               "attribute": "heading"
             }
-          ],
-          "slots": [
-            {
-              "name": "",
-              "description": "Default slot for alert body content."
-            },
-            {
-              "name": "footer",
-              "description": "Footer content area, rendered below the body with a top border."
-            }
           ]
         }
       ],

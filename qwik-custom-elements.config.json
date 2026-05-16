@@ -1,7 +1,7 @@
 {
   "projects": [
     {
-      "id": "demo",
+      "id": "demo-stencil-ssr",
       "adapter": "stencil",
       "adapterPackage": "@qwik-custom-elements/adapter-stencil",
       "libraryName": "test-stencil-lib",
@@ -19,7 +19,7 @@
       "cleanOutput": true
     },
     {
-      "id": "demo-csr",
+      "id": "demo-stencil-csr",
       "adapter": "stencil",
       "adapterPackage": "@qwik-custom-elements/adapter-stencil",
       "libraryName": "test-stencil-lib",

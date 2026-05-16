@@ -1,9 +1,5 @@
 import { Component, Prop, h } from '@stencil/core';
 
-/**
- * @slot - Default slot for alert body content.
- * @slot footer - Footer content area, rendered below the body with a top border.
- */
 @Component({
   tag: 'de-alert',
   styleUrl: 'de-alert.scss',

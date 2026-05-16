@@ -192,7 +192,15 @@ async function generateProject(
   const outDirPath = path.resolve(cwd, project.outDir);
   const componentDefinitions =
     await readComponentDefinitionsFromCem(sourcePath);
-  const componentTags = componentDefinitions.map(
+  const augmentedComponentDefinitions =
+    await augmentAdapterComponentDefinitions(
+      componentDefinitions,
+      adapterModule,
+      runtimeImports,
+      outDirPath,
+      cwd,
+    );
+  const componentTags = augmentedComponentDefinitions.map(
     (componentDefinition) => componentDefinition.tagName,
   );
   const adapterSsrCapabilities = resolveAdapterSsrCapabilities(adapterModule);
@@ -204,7 +212,7 @@ async function generateProject(
   const adapterPlannedWrites = await createAdapterPlannedWrites(
     project,
     outDirPath,
-    componentDefinitions,
+    augmentedComponentDefinitions,
     adapterModule,
     runtimeImports,
     ssrProbe.available,
@@ -212,7 +220,7 @@ async function generateProject(
   const plannedWrites = createPlannedWrites(
     project.id,
     outDirPath,
-    componentDefinitions,
+    augmentedComponentDefinitions,
     adapterModule,
     ssrProbe.available,
     adapterPlannedWrites,
@@ -282,6 +290,86 @@ function resolveAdapterSsrCapabilities(
     supportsSsrProbe,
     ssrRuntimeSubpath,
   };
+}
+
+async function augmentAdapterComponentDefinitions(
+  componentDefinitions: CemComponentDefinition[],
+  adapterModule: Record<string, unknown>,
+  runtimeImports: Record<string, unknown> | undefined,
+  outDirPath: string,
+  cwd: string,
+): Promise<CemComponentDefinition[]> {
+  const augmentFn =
+    adapterModule != null &&
+    typeof adapterModule.augmentComponentDefinitions === 'function'
+      ? adapterModule.augmentComponentDefinitions
+      : undefined;
+
+  if (augmentFn == null) {
+    return componentDefinitions;
+  }
+
+  const resolvedRuntimeImports = resolveProbeRuntimeImports(
+    runtimeImports,
+    outDirPath,
+    cwd,
+  );
+
+  const result = (await augmentFn({
+    componentDefinitions,
+    runtimeImports: resolvedRuntimeImports,
+  })) as unknown;
+
+  if (!Array.isArray(result)) {
+    return componentDefinitions;
+  }
+
+  return result as CemComponentDefinition[];
+}
+
+function resolveProbeRuntimeImports(
+  runtimeImports: Record<string, unknown> | undefined,
+  outDirPath: string,
+  cwd: string,
+): Record<string, unknown> | undefined {
+  if (runtimeImports == null) return undefined;
+
+  const hydrateImport = runtimeImports.hydrateImport;
+  if (typeof hydrateImport !== 'string' || hydrateImport.trim() === '') {
+    return runtimeImports;
+  }
+
+  const resolved = tryResolveSpecifier(hydrateImport, outDirPath, cwd);
+  if (resolved === hydrateImport) return runtimeImports;
+
+  return { ...runtimeImports, hydrateImport: resolved };
+}
+
+function tryResolveSpecifier(
+  specifier: string,
+  outDirPath: string,
+  cwd: string,
+): string {
+  if (
+    specifier.startsWith('file://') ||
+    specifier.startsWith('.') ||
+    path.isAbsolute(specifier)
+  ) {
+    return specifier;
+  }
+
+  for (const dir of [outDirPath, cwd]) {
+    try {
+      const resolved = createRequire(
+        path.join(dir, '__qce_probe__.cjs'),
+      ).resolve(specifier);
+      return pathToFileURL(resolved).href;
+    } catch {
+      // try next candidate
+    }
+  }
+
+  return specifier;
 }
 
 async function probeProjectSsrAvailability(

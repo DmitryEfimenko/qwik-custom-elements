@@ -1822,4 +1822,119 @@ describe('generateFromConfig', () => {
       });
     });
   });
+
+  describe('augmentComponentDefinitions adapter hook', () => {
+    it('calls augmentComponentDefinitions when exported and passes enriched slots to createGeneratedOutput', async () => {
+      await withTempDir(async (tempDir) => {
+        await writeFile(
+          path.join(tempDir, 'custom-elements.json'),
+          JSON.stringify({
+            modules: [{ declarations: [{ tagName: 'app-root' }] }],
+          }),
+          'utf8',
+        );
+        await writeFile(
+          path.join(tempDir, 'adapter-with-augment.mjs'),
+          [
+            'export const metadata = {',
+            "  supportedSourceTypes: ['CEM', 'PACKAGE_NAME'],",
+            '  supportsSsrProbe: false,',
+            '  ssrRuntimeSubpath: null,',
+            '};',
+            '',
+            'export async function augmentComponentDefinitions({ componentDefinitions }) {',
+            '  return componentDefinitions.map((def) => ({',
+            '    ...def,',
+            "    slots: [...def.slots, { name: 'probe-injected' }],",
+            '  }));',
+            '}',
+            '',
+            'export function createGeneratedOutput({ componentDefinitions }) {',
+            '  return componentDefinitions.map((def) => ({',
+            '    relativePath: `${def.tagName}.txt`,',
+            '    content: def.slots.map((s) => s.name).join(","),',
+            '  }));',
+            '}',
+            '',
+          ].join('\n'),
+          'utf8',
+        );
+
+        const config: GeneratorConfig = {
+          dryRun: true,
+          projects: [
+            {
+              id: 'demo',
+              adapter: 'stencil',
+              adapterPackage: `${pathToFileURL(path.join(tempDir, 'adapter-with-augment.mjs'))}`,
+              source: { type: 'CEM', path: './custom-elements.json' },
+              outDir: './src/generated',
+            },
+          ],
+        };
+
+        const result = await generateFromConfig(config, { cwd: tempDir });
+
+        expect(result.projects[0].plannedWrites).toEqual([
+          expect.objectContaining({
+            path: path.join(tempDir, 'src', 'generated', 'app-root.txt'),
+            content: 'probe-injected',
+          }),
+        ]);
+      });
+    });
+
+    it('skips augmentComponentDefinitions when adapter does not export it', async () => {
+      await withTempDir(async (tempDir) => {
+        await writeFile(
+          path.join(tempDir, 'custom-elements.json'),
+          JSON.stringify({
+            modules: [{ declarations: [{ tagName: 'app-root' }] }],
+          }),
+          'utf8',
+        );
+        await writeFile(
+          path.join(tempDir, 'adapter-without-augment.mjs'),
+          [
+            'export const metadata = {',
+            "  supportedSourceTypes: ['CEM', 'PACKAGE_NAME'],",
+            '  supportsSsrProbe: false,',
+            '  ssrRuntimeSubpath: null,',
+            '};',
+            '',
+            'export function createGeneratedOutput({ componentDefinitions }) {',
+            '  return componentDefinitions.map((def) => ({',
+            '    relativePath: `${def.tagName}.txt`,',
+            '    content: def.slots.map((s) => s.name).join(","),',
+            '  }));',
+            '}',
+            '',
+          ].join('\n'),
+          'utf8',
+        );
+
+        const config: GeneratorConfig = {
+          dryRun: true,
+          projects: [
+            {
+              id: 'demo',
+              adapter: 'stencil',
+              adapterPackage: `${pathToFileURL(path.join(tempDir, 'adapter-without-augment.mjs'))}`,
+              source: { type: 'CEM', path: './custom-elements.json' },
+              outDir: './src/generated',
+            },
+          ],
+        };
+
+        const result = await generateFromConfig(config, { cwd: tempDir });
+
+        expect(result.projects[0].plannedWrites).toEqual([
+          expect.objectContaining({
+            path: path.join(tempDir, 'src', 'generated', 'app-root.txt'),
+            content: '',
+          }),
+        ]);
+      });
+    });
+  });
 });

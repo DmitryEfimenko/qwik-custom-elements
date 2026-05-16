@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  augmentComponentDefinitions,
   createGeneratedOutput,
   metadata,
   probeSSR,
@@ -482,5 +483,80 @@ describe('adapter-stencil metadata contract', () => {
     expect(wrapperWrite?.content).toContain(
       '    </TestStencilLibCSRBridgeComponent>',
     );
+  });
+});
+
+describe('adapter-stencil augmentComponentDefinitions contract', () => {
+  function makeHydrateImport(code: string): string {
+    return `data:text/javascript,${encodeURIComponent(code)}`;
+  }
+
+  it('discovers named slots via renderToString for a component with no CEM slots', async () => {
+    const hydrateImport = makeHydrateImport(
+      `export async function renderToString() { return { html: '<!--s.1.0.0.0.--><!--s.1.1.0.0.footer-->' }; }`,
+    );
+
+    const result = await augmentComponentDefinitions({
+      componentDefinitions: [
+        { tagName: 'de-alert', props: [], events: [], slots: [] },
+      ],
+      runtimeImports: { hydrateImport, loaderImport: '@acme/loader' },
+    });
+
+    expect(result[0].slots).toEqual([{ name: 'footer' }]);
+  });
+
+  it('returns definitions unchanged when hydrateImport is absent', async () => {
+    const result = await augmentComponentDefinitions({
+      componentDefinitions: [
+        { tagName: 'de-alert', props: [], events: [], slots: [] },
+      ],
+      runtimeImports: { loaderImport: '@acme/loader' },
+    });
+
+    expect(result).toEqual([
+      { tagName: 'de-alert', props: [], events: [], slots: [] },
+    ]);
+  });
+
+  it('merges CEM slots with probe-discovered slots without duplicating existing', async () => {
+    const hydrateImport = makeHydrateImport(
+      `export async function renderToString() { return { html: '<!--s.1.0.0.0.--><!--s.1.1.0.0.footer--><!--s.1.2.0.0.toolbar-->' }; }`,
+    );
+
+    const result = await augmentComponentDefinitions({
+      componentDefinitions: [
+        {
+          tagName: 'de-alert',
+          props: [],
+          events: [],
+          slots: [{ name: 'footer' }],
+        },
+      ],
+      runtimeImports: { hydrateImport, loaderImport: '@acme/loader' },
+    });
+
+    expect(result[0].slots).toEqual([{ name: 'footer' }, { name: 'toolbar' }]);
+  });
+
+  it('probes each component independently', async () => {
+    const hydrateImport = makeHydrateImport(
+      `export async function renderToString(html) {
+        if (html.includes('de-alert')) return { html: '<!--s.1.0.0.0.--><!--s.1.1.0.0.footer-->' };
+        if (html.includes('de-badge')) return { html: '<!--s.1.0.0.0.--><!--s.1.1.0.0.icon-->' };
+        return { html: '' };
+      }`,
+    );
+
+    const result = await augmentComponentDefinitions({
+      componentDefinitions: [
+        { tagName: 'de-alert', props: [], events: [], slots: [] },
+        { tagName: 'de-badge', props: [], events: [], slots: [] },
+      ],
+      runtimeImports: { hydrateImport, loaderImport: '@acme/loader' },
+    });
+
+    expect(result[0].slots).toEqual([{ name: 'footer' }]);
+    expect(result[1].slots).toEqual([{ name: 'icon' }]);
   });
 });

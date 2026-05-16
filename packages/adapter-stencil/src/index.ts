@@ -213,6 +213,83 @@ export async function probeSSR({
   }
 }
 
+interface AugmentComponentDefinitionsInput {
+  componentDefinitions: CemComponentDefinition[];
+  runtimeImports?: {
+    loaderImport?: unknown;
+    hydrateImport?: unknown;
+  };
+}
+
+export async function augmentComponentDefinitions({
+  componentDefinitions,
+  runtimeImports,
+}: AugmentComponentDefinitionsInput): Promise<CemComponentDefinition[]> {
+  if (!isNonEmptyString(runtimeImports?.hydrateImport)) {
+    return componentDefinitions;
+  }
+
+  let renderToString:
+    | ((html: string) => Promise<{ html?: string }>)
+    | undefined;
+
+  try {
+    const mod = (await import(
+      /* @vite-ignore */ runtimeImports.hydrateImport
+    )) as { renderToString?: unknown };
+    if (typeof mod.renderToString === 'function') {
+      renderToString = mod.renderToString as (
+        html: string,
+      ) => Promise<{ html?: string }>;
+    }
+  } catch {
+    // hydrate module unavailable — return definitions unchanged
+  }
+
+  if (renderToString == null) {
+    return componentDefinitions;
+  }
+
+  const augmented: CemComponentDefinition[] = [];
+  for (const def of componentDefinitions) {
+    const probedNames = await probeComponentNamedSlots(
+      renderToString,
+      def.tagName,
+    );
+    const existingNames = new Set(def.slots.map((s) => s.name));
+    const newSlots = probedNames
+      .filter((name) => !existingNames.has(name))
+      .map((name) => ({ name }));
+    augmented.push({ ...def, slots: [...def.slots, ...newSlots] });
+  }
+
+  return augmented;
+}
+
+async function probeComponentNamedSlots(
+  renderToString: (html: string) => Promise<{ html?: string }>,
+  tagName: string,
+): Promise<string[]> {
+  try {
+    const result = await renderToString(`<${tagName}></${tagName}>`);
+    return extractNamedSlotNames(result.html ?? '');
+  } catch {
+    return [];
+  }
+}
+
+function extractNamedSlotNames(html: string): string[] {
+  const re = /<!--s\.(?:\d+\.){4}(.*?)-->/g;
+  const names: string[] = [];
+  for (const match of html.matchAll(re)) {
+    const name = match[1];
+    if (name.length > 0 && !names.includes(name)) {
+      names.push(name);
+    }
+  }
+  return names;
+}
+
 export function createGeneratedOutput({
   projectId,
   libraryName,
