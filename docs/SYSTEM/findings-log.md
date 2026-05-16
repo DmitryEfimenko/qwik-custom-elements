@@ -1,5 +1,19 @@
 # Findings Log
 
+## 2026-05-16 - Lit CSR wrappers must forward named slots with native slot wrappers and avoid bridge-side duplication
+
+- Sources:
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/46
+- Finding:
+  - Lit CSR generated wrappers that forward named slots as raw Qwik `<Slot name="..." />` can fail to place footer content into Lit shadow slot outlets on `/lit/csr/wrappers`.
+  - Wrappers must forward named slots through native `slot="..."` wrappers (for example `<span slot="footer" style={{ display: 'contents' }}>`) so browser slot distribution can target Lit shadow DOM outlets.
+  - If generated wrappers use native slot wrappers, they must disable bridge-side named-slot wrapper generation for the same wrapper path (`slots={undefined}`) to avoid duplicate slotted nodes.
+- Durable guidance:
+  - For generated Lit CSR wrappers, emit default slot forwarding with `<Slot />` and named-slot forwarding with native `slot` wrappers around `<Slot name="..." />`.
+  - In generated wrappers that already provide native named-slot wrappers, pass `slots={undefined}` into the CSR bridge to keep a single source of slot wrapping.
+  - E2E coverage for `/lit/csr/wrappers` and `/lit/csr/bridge` must assert named footer slot node presence and footer container/separator rendering structure, not only text presence.
+
 ## 2026-05-16 - CEM private members must not leak into generated wrapper prop interfaces
 
 - Sources:
@@ -37,8 +51,6 @@
   - For Lit SSR raw-response e2e: assert `q:render="ssr"` present, custom-element host tag with serialized props, `<template shadowrootmode="open">` present, shadow DOM content (prop-derived attributes), and light DOM slot content.
   - Model: `apps/qwik-demo/e2e/lit-smoke.spec.ts` — "lit ssr bridge returns server-rendered lit html".
   - Model: `apps/qwik-demo/e2e/stencil-smoke.spec.ts` — "stencil ssr bridge returns server-rendered stencil html" (for Stencil parity comparison).
-
-
 
 - Sources:
   - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40

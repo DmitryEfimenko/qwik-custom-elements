@@ -40,7 +40,9 @@ export const QwikDeAlert = component$<QwikDeAlertProps>((props) => {
       {...passthroughEventProps}
     >
     <Slot />
-    <Slot name="footer" />
+    <span q:slot="footer" style={{ display: 'contents' }}>
+      <Slot name="footer" />
+    </span>
     </TestLitLibCSRBridgeComponent>
   );
 });

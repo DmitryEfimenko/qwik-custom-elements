@@ -180,7 +180,10 @@ describe('adapter-lit metadata contract', () => {
     expect(wrapperWrite?.content).toContain('      events={mappedEvents}');
     expect(wrapperWrite?.content).toContain('      slots={["footer"]}');
     expect(wrapperWrite?.content).toContain('    <Slot />');
-    expect(wrapperWrite?.content).toContain('    <Slot name="footer" />');
+    expect(wrapperWrite?.content).toContain(
+      '    <span q:slot="footer" style={{ display: \'contents\' }}>',
+    );
+    expect(wrapperWrite?.content).toContain('      <Slot name="footer" />');
     expect(wrapperWrite?.content).not.toContain('QwikLitButtonSsrHtml');
   });
 

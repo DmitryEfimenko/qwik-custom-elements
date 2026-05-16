@@ -330,6 +330,31 @@ test('lit csr bridge interaction contract: toggles handler and increments active
   await expect(page.locator('#lit-alert-wrapper')).toContainText(
     'Alert footer content',
   );
+  await expect(page.locator('#lit-alert-wrapper de-alert')).toHaveCount(1);
+  await expect(
+    page.locator('#lit-alert-wrapper de-alert [slot="footer"]'),
+  ).toContainText('Alert footer content');
+
+  const csrBridgeFooterContainer = await page.evaluate(() => {
+    const alertEl = document.querySelector(
+      '#lit-alert-wrapper de-alert',
+    ) as HTMLElement | null;
+    const footer = alertEl?.shadowRoot?.querySelector('.de-alert__footer');
+    if (!footer) {
+      return null;
+    }
+
+    const style = window.getComputedStyle(footer);
+    return {
+      borderTopStyle: style.borderTopStyle,
+      borderTopWidth: style.borderTopWidth,
+    };
+  });
+
+  expect(csrBridgeFooterContainer).toEqual({
+    borderTopStyle: 'solid',
+    borderTopWidth: '1px',
+  });
 });
 
 test('lit csr bridge regression: size toggles preserve mounted host instance and interaction', async ({
@@ -459,4 +484,29 @@ test('lit csr wrappers route renders generated wrapper hosts', async ({ page }) 
   await expect(page.locator('#lit-alert-wrapper')).toContainText(
     'Alert footer content',
   );
+  await expect(page.locator('#lit-alert-wrapper de-alert')).toHaveCount(1);
+  await expect(
+    page.locator('#lit-alert-wrapper de-alert [slot="footer"]'),
+  ).toContainText('Alert footer content');
+
+  const wrapperFooterContainer = await page.evaluate(() => {
+    const alertEl = document.querySelector(
+      '#lit-alert-wrapper de-alert',
+    ) as HTMLElement | null;
+    const footer = alertEl?.shadowRoot?.querySelector('.de-alert__footer');
+    if (!footer) {
+      return null;
+    }
+
+    const style = window.getComputedStyle(footer);
+    return {
+      borderTopStyle: style.borderTopStyle,
+      borderTopWidth: style.borderTopWidth,
+    };
+  });
+
+  expect(wrapperFooterContainer).toEqual({
+    borderTopStyle: 'solid',
+    borderTopWidth: '1px',
+  });
 });

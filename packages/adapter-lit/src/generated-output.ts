@@ -179,14 +179,14 @@ function renderComponentWrapper(input: {
   const slotLines = [
     '    <Slot />',
     ...componentDefinition.slots.map(
-      (slot) => `    <Slot name=${JSON.stringify(slot.name)} />`,
+      (slot) =>
+        `    <span q:slot=${JSON.stringify(slot.name)} style={{ display: 'contents' }}>\n      <Slot name=${JSON.stringify(slot.name)} />\n    </span>`,
     ),
   ];
   const slotListToken =
     componentDefinition.slots.length > 0
       ? JSON.stringify(componentDefinition.slots.map((slot) => slot.name))
       : 'undefined';
-
   const splitPropsLines = [
     '  const isEventBindingKey = (key: string) =>',
     "    /^on[A-Z].*\\$$/.test(key) || key.includes(':');",
