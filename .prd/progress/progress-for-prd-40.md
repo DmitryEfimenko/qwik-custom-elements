@@ -1,5 +1,39 @@
 # PRD-40 Progress
 
+## 2026-05-16 - Issue #47 - Wire /lit/ssr/wrappers route with e2e (single-task slice)
+
+- Status: Completed — all 3 acceptance criteria satisfied.
+- Scope:
+  - Created `/lit/ssr/wrappers` route at `apps/qwik-demo/src/routes/lit/ssr/wrappers/index.tsx`.
+    - Imports `QwikDeAlert`, `QwikDeButton` from `apps/qwik-demo/src/generated/lit/ssr` (generated SSR wrappers).
+    - Calls `useTestLitLibSSRClientSetup()` from generated SSR runtime — no manual `useOnDocument` glue.
+    - Structure mirrors CSR wrappers route exactly.
+  - Created `apps/qwik-demo/src/routes/lit/ssr/wrappers/index.scss`.
+  - Added 3 e2e tests to `apps/qwik-demo/e2e/lit-smoke.spec.ts`:
+    1. `lit ssr wrappers route renders generated wrapper hosts` — interaction + slot/footer/separator check.
+    2. `lit ssr wrappers: shadow DOM is not double-rendered after hydration` — DSD SSR parity check.
+    3. `lit ssr wrappers: light DOM slot content is not duplicated after signal change` — slot stability check.
+  - Also fixed `NONE_PATTERN` in `.github/skills/select-next-prd-issue/scripts/select-next-child-issue.js` to allow optional trailing period (was blocking `next` selector due to closed issue #50 body format).
+- Key decisions:
+  - SSR wrappers route uses the same structural pattern as CSR wrappers (typed component imports + generated hook).
+  - DSD non-duplication and slot-stability tests are included to cover SSR-specific behavioral dimensions (parity with SSR bridge tests).
+- Validation:
+  - `pnpm format` ✅
+  - New SSR wrappers e2e (3 tests) ✅
+  - `pnpm typecheck` ✅
+  - `pnpm test` ✅
+  - `pnpm build` ✅
+  - `pnpm lint` ✅
+  - `pnpm e2e` — 17 pass, 1 pre-existing fail (`lit ssr bridge: light DOM slot content is not duplicated after signal change`).
+- Files changed:
+  - `apps/qwik-demo/src/routes/lit/ssr/wrappers/index.tsx` (new)
+  - `apps/qwik-demo/src/routes/lit/ssr/wrappers/index.scss` (new)
+  - `apps/qwik-demo/e2e/lit-smoke.spec.ts` (3 new SSR wrappers tests)
+  - `.github/skills/select-next-prd-issue/scripts/select-next-child-issue.js` (NONE_PATTERN fix)
+- Notes for next iteration:
+  - Pre-existing failure: `lit ssr bridge: light DOM slot content is not duplicated after signal change` needs investigation (tracked as known failure, not introduced by this slice).
+  - Next issue: #48 (Structured mode signaling). Now unblocked since #47 is closed.
+
 ## 2026-05-16 - Issue #46 - Filter private CEM members from typed Lit CSR wrapper props (single-task slice)
 
 - Status: Completed in this slice (remaining issue criterion).

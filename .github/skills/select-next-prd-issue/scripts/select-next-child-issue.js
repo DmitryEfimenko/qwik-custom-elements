@@ -3,7 +3,7 @@ import { spawn, spawnSync } from 'node:child_process';
 import { pathToFileURL } from 'node:url';
 
 const BLOCKER_PATTERN = /^[-*]\s+Blocked\s+by\s+#(\d+)(\s|:|$)/;
-const NONE_PATTERN = /^None\s*-\s*can\s+start\s+immediately$/;
+const NONE_PATTERN = /^None\s*-\s*can\s+start\s+immediately\.?$/;
 
 function extractSection(body, headingPattern) {
   const headingRe = new RegExp('^\\s*##\\s*' + headingPattern + '\\s*$', 'i');

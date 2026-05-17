@@ -510,3 +510,181 @@ test('lit csr wrappers route renders generated wrapper hosts', async ({ page }) 
     borderTopWidth: '1px',
   });
 });
+
+test('lit ssr wrappers route renders generated wrapper hosts', async ({ page }) => {
+  await page.goto('/lit/ssr/wrappers');
+
+  await expect(
+    page.getByRole('heading', {
+      level: 1,
+      name: 'Lit SSR Wrappers Validation',
+    }),
+  ).toBeVisible();
+
+  await page.waitForFunction(
+    () =>
+      customElements.get('de-button') != null &&
+      customElements.get('de-alert') != null,
+  );
+
+  const firstHost = page.locator('#first-lit-wrapper de-button');
+  const secondHost = page.locator('#second-lit-wrapper de-button');
+  const firstButton = page.locator('#first-lit-wrapper de-button button');
+  const secondButton = page.locator('#second-lit-wrapper de-button button');
+
+  await expect(firstHost).toHaveCount(1);
+  await expect(secondHost).toHaveCount(1);
+  await expect(page.locator('#lit-alert-wrapper de-alert')).toHaveCount(1);
+  await expect(firstButton).toBeVisible();
+  await expect(secondButton).toBeVisible();
+
+  const clickTriple = async (locator: typeof firstButton) => {
+    await locator.click();
+    await locator.click();
+    await locator.click();
+  };
+
+  await expect(page.locator('#active-handler')).toContainText(
+    'Active handler: alpha',
+  );
+  await clickTriple(firstButton);
+  await expect(page.locator('#first-alpha-count')).toContainText(
+    'First alpha count: 1',
+  );
+  await expect(page.locator('#first-beta-count')).toContainText(
+    'First beta count: 0',
+  );
+
+  await page.locator('#toggle-handler').click();
+  await expect(page.locator('#active-handler')).toContainText(
+    'Active handler: beta',
+  );
+  await clickTriple(firstButton);
+  await expect(page.locator('#first-alpha-count')).toContainText(
+    'First alpha count: 1',
+  );
+  await expect(page.locator('#first-beta-count')).toContainText(
+    'First beta count: 1',
+  );
+
+  await clickTriple(secondButton);
+  await expect(page.locator('#second-count')).toContainText('Second count: 1');
+
+  await page.locator('#toggle-size').click();
+  await expect(page.locator('#button-size')).toContainText('Button size: lg');
+  await expect(
+    page.locator('#first-lit-wrapper de-button[size="lg"]'),
+  ).toBeVisible();
+  await expect(
+    page.locator('#second-lit-wrapper de-button[size="lg"]'),
+  ).toBeVisible();
+
+  await expect(page.locator('#lit-alert-wrapper')).toContainText(
+    'Validation Alert',
+  );
+  await expect(page.locator('#lit-alert-wrapper')).toContainText(
+    'Alert body content',
+  );
+  await expect(page.locator('#lit-alert-wrapper')).toContainText(
+    'Alert footer content',
+  );
+  await expect(page.locator('#lit-alert-wrapper de-alert')).toHaveCount(1);
+  await expect(
+    page.locator('#lit-alert-wrapper de-alert [slot="footer"]'),
+  ).toContainText('Alert footer content');
+
+  const wrapperFooterContainer = await page.evaluate(() => {
+    const alertEl = document.querySelector(
+      '#lit-alert-wrapper de-alert',
+    ) as HTMLElement | null;
+    const footer = alertEl?.shadowRoot?.querySelector('.de-alert__footer');
+    if (!footer) {
+      return null;
+    }
+
+    const style = window.getComputedStyle(footer);
+    return {
+      borderTopStyle: style.borderTopStyle,
+      borderTopWidth: style.borderTopWidth,
+    };
+  });
+
+  expect(wrapperFooterContainer).toEqual({
+    borderTopStyle: 'solid',
+    borderTopWidth: '1px',
+  });
+});
+
+test('lit ssr wrappers: shadow DOM is not double-rendered after hydration', async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    (window as any).__deAlertShadowCountAfterFirstUpdate = -1;
+    const originalDefine = customElements.define.bind(customElements);
+    Object.defineProperty(customElements, 'define', {
+      value(
+        name: string,
+        ctor: CustomElementConstructor,
+        opts?: ElementDefinitionOptions,
+      ) {
+        const result = originalDefine(name, ctor, opts);
+        if (name === 'de-alert') {
+          Promise.resolve().then(() =>
+            Promise.resolve().then(() => {
+              const el = document.querySelector(
+                '#lit-alert-wrapper de-alert',
+              ) as HTMLElement | null;
+              (window as any).__deAlertShadowCountAfterFirstUpdate =
+                el?.shadowRoot?.querySelectorAll('.de-alert').length ?? -1;
+            }),
+          );
+        }
+        return result;
+      },
+      writable: true,
+      configurable: true,
+    });
+  });
+
+  await page.goto('/lit/ssr/wrappers');
+
+  await page.waitForFunction(
+    () => (window as any).__deAlertShadowCountAfterFirstUpdate !== -1,
+  );
+
+  const count = await page.evaluate(
+    () => (window as any).__deAlertShadowCountAfterFirstUpdate,
+  );
+
+  expect(count).toBe(1);
+});
+
+test('lit ssr wrappers: light DOM slot content is not duplicated after signal change', async ({
+  page,
+}) => {
+  await page.goto('/lit/ssr/wrappers');
+
+  await page.waitForFunction(
+    () =>
+      customElements.get('de-button') != null &&
+      customElements.get('de-alert') != null,
+  );
+
+  await page.locator('#toggle-size').click();
+  await expect(page.locator('#button-size')).toContainText('Button size: lg');
+
+  await expect(page.locator('#lit-alert-wrapper de-alert')).toHaveCount(1);
+
+  const slotPlacement = await page.evaluate(() => {
+    const alertEl = document.querySelector('#lit-alert-wrapper de-alert');
+    if (!alertEl) return { bodyInAlert: false, footerInAlert: false };
+    const spans = Array.from(alertEl.querySelectorAll('span'));
+    return {
+      bodyInAlert: spans.some((s) => s.textContent?.trim() === 'Alert body content'),
+      footerInAlert: spans.some((s) => s.getAttribute('q:slot') === 'footer'),
+    };
+  });
+
+  expect(slotPlacement.bodyInAlert).toBe(true);
+  expect(slotPlacement.footerInAlert).toBe(true);
+});

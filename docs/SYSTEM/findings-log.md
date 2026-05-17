@@ -1,6 +1,18 @@
 # Findings Log
 
-## 2026-05-16 - Lit CSR wrappers must forward named slots with native slot wrappers and avoid bridge-side duplication
+## 2026-05-16 - Lit SSR wrapper-route completion requires interaction/stability and DSD-specific proof
+
+- Sources:
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/47
+- Finding:
+  - For `/lit/ssr/wrappers`, interaction and stability coverage requires the same behavioral dimensions as CSR wrappers (event delivery, handler switching, prop reactivity, slot/content rendering) PLUS SSR-specific dimensions: DSD non-duplication after hydration, and slot-content stability after signal changes.
+  - The SSR-specific tests require `addInitScript` interception of `customElements.define` to measure shadow DOM count immediately after Lit's first update.
+- Durable guidance:
+  - Use CSR wrappers tests as the behavioral baseline and add two SSR-specific coverage items: (1) shadow DOM count === 1 after first Lit update (hydrate-support loaded before define), (2) slot content not duplicated after signal-triggered re-render.
+  - Model: `apps/qwik-demo/e2e/lit-smoke.spec.ts` — "lit ssr wrappers: shadow DOM is not double-rendered after hydration" and "lit ssr wrappers: light DOM slot content is not duplicated after signal change".
+
+
 
 - Sources:
   - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
