@@ -10,7 +10,7 @@
  */
 
 import { readFileSync } from 'node:fs';
-import { join, dirname } from 'node:path';
+import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -41,14 +41,12 @@ export function parseVersionsFromSection(markdown, heading) {
   const lines = markdown.split('\n');
   const sectionPattern = new RegExp(`^###\\s+${heading}\\s*$`);
   let inSection = false;
-  let tableStarted = false;
   let headerRow = true;
   const versions = [];
 
   for (const line of lines) {
     if (sectionPattern.test(line)) {
       inSection = true;
-      tableStarted = false;
       headerRow = true;
       continue;
     }
@@ -62,8 +60,6 @@ export function parseVersionsFromSection(markdown, heading) {
 
     const trimmed = line.trim();
     if (!trimmed.startsWith('|')) continue;
-
-    tableStarted = true;
 
     // Skip the separator row (| --- | --- |)
     if (/^\|[\s|:-]+\|$/.test(trimmed)) continue;
@@ -115,21 +111,23 @@ export function checkMatrix(matrix) {
   });
 }
 
-// --- Main ---
-const matrix = readText('COMPATIBILITY.md');
-const results = checkMatrix(matrix);
+// --- Main (only when run directly, not when imported) ---
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  const matrix = readText('COMPATIBILITY.md');
+  const results = checkMatrix(matrix);
 
-let exitCode = 0;
-for (const { package: pkg, version, found } of results) {
-  if (found) {
-    console.log(`✓  ${pkg}@${version} — found in COMPATIBILITY.md`);
-  } else {
-    console.error(
-      `✗  ${pkg}@${version} — NOT found in COMPATIBILITY.md. ` +
-        `Update the compatibility matrix before merging this change.`,
-    );
-    exitCode = 1;
+  let exitCode = 0;
+  for (const { package: pkg, version, found } of results) {
+    if (found) {
+      console.log(`✓  ${pkg}@${version} — found in COMPATIBILITY.md`);
+    } else {
+      console.error(
+        `✗  ${pkg}@${version} — NOT found in COMPATIBILITY.md. ` +
+          `Update the compatibility matrix before merging this change.`,
+      );
+      exitCode = 1;
+    }
   }
-}
 
-process.exit(exitCode);
+  process.exit(exitCode);
+}
