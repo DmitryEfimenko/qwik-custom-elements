@@ -1,5 +1,19 @@
 # Decisions
 
+## DEC-2026-05-30-LIT-GENERATED-INDEX-MODE-CONSTANT
+
+- Status: Accepted
+- Sources:
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/48
+- Decision:
+  - Adapter-lit's generated `index.ts` must emit `export const generatedMode = 'ssr' | 'csr' as const;` alongside `generatedComponentTags`.
+  - Value is `'ssr'` when `ssrAvailable === true`; `'csr'` otherwise (covers both CSR-configured and SSR-fallback projects).
+  - This constant is adapter-lit owned (not core owned), consistent with adapter-owned output shape decisions.
+- Rationale:
+  - Makes mode explicitly machine-verifiable at the generated output level, satisfying the "client-only and SSR-capable mode signals must be explicit" requirement.
+  - Complements the `generated-run-summary.json` `ssrCapabilities.available` flag with an in-file signal usable at import/bundling time.
+
 ## DEC-2026-05-05-LIT-SSR-RUNTIME-IMPORT-PROBE-WIRING
 
 - Status: Accepted
