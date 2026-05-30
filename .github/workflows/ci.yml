@@ -30,6 +30,10 @@ jobs:
       - name: Type check
         run: pnpm typecheck
 
+      - name: Install Playwright Chrome (uses apt, no zip extraction)
+        run: pnpm --filter @qwik-custom-elements/test-stencil-lib exec playwright install chrome --with-deps
+        timeout-minutes: 5
+
       - name: Test
         run: pnpm test
         env:
