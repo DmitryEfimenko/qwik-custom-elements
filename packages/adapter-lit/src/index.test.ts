@@ -141,6 +141,9 @@ describe('adapter-lit metadata contract', () => {
       'export const generatedComponentTags = ["lit-button"] as const;',
     );
     expect(indexWrite?.content).toContain(
+      "export const generatedMode = 'csr' as const;",
+    );
+    expect(indexWrite?.content).toContain(
       "export { QwikLitButton } from './lit-button';",
     );
     expect(wrapperWrite?.content).toContain(
@@ -181,6 +184,24 @@ describe('adapter-lit metadata contract', () => {
     );
     expect(wrapperWrite?.content).toContain('      <Slot name="footer" />');
     expect(wrapperWrite?.content).not.toContain('QwikLitButtonSsrHtml');
+  });
+
+  it('emits generatedMode ssr constant in SSR index output', () => {
+    const plannedWrites = createSsrGeneratedOutput({
+      projectId: 'demo',
+      componentDefinitions: [
+        { tagName: 'lit-button', props: [], events: [], slots: [] },
+      ],
+      ssrAvailable: true,
+    });
+
+    const indexWrite = plannedWrites.find(
+      (w: { relativePath: string }) => w.relativePath === 'index.ts',
+    );
+
+    expect(indexWrite?.content).toContain(
+      "export const generatedMode = 'ssr' as const;",
+    );
   });
 
   it('keeps SSR placeholder markup ownership in the Lit SSR subpath', () => {

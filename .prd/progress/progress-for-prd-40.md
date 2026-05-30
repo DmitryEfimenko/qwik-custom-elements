@@ -1,5 +1,38 @@
 # PRD-40 Progress
 
+## 2026-05-30 - Issue #48 - Add generatedMode constant to generated index.ts (tracer bullet)
+
+- Status: Partial — first tracer bullet for AC1 complete; AC2 and AC3 remain.
+- Scope:
+  - Added `export const generatedMode = 'ssr' | 'csr' as const;` to generated `index.ts` in adapter-lit.
+  - Updated `renderGeneratedIndex` in `packages/adapter-lit/src/generated-output.ts` to accept `ssrAvailable` parameter and emit the mode constant.
+  - Updated `createLitPlannedWrites` to pass `ssrAvailable` to `renderGeneratedIndex`.
+  - Rebuilt adapter-lit, rebuilt core, and re-ran generator.
+  - Generated demo outputs (`apps/qwik-demo/src/generated/lit/ssr/index.ts` and `apps/qwik-demo/src/generated/lit/csr/index.ts`) now contain `generatedMode = 'ssr'` and `generatedMode = 'csr'` respectively.
+- Key decisions:
+  - Mode constant emits `'ssr'` when `ssrAvailable === true`, otherwise `'csr'` (covers fallback path).
+  - Adapter-lit owns the mode constant (not core), consistent with DEC-2026-04-20-ADAPTER-OWNED-GENERATED-OUTPUT.
+  - Kept constant adjacent to `generatedComponentTags` in the same index.ts file for discoverability.
+- TDD:
+  - RED: Added assertion `expect(indexWrite?.content).toContain("export const generatedMode = 'csr' as const;")` to existing CSR test; added new `it('emits generatedMode ssr constant in SSR index output')` test.
+  - GREEN: Updated `renderGeneratedIndex` to accept and emit mode; 30/30 tests pass.
+- Validation:
+  - `pnpm format` ✅
+  - `pnpm typecheck` ✅
+  - `pnpm test` ✅ (30/30 adapter-lit)
+  - `pnpm build` ✅
+  - `pnpm lint` ✅
+  - `pnpm e2e` ✅ (18/18)
+- Files changed:
+  - `packages/adapter-lit/src/generated-output.ts` (renderGeneratedIndex + createLitPlannedWrites)
+  - `packages/adapter-lit/src/index.test.ts` (2 new assertions: 1 in existing test, 1 new it block)
+  - `apps/qwik-demo/src/generated/lit/ssr/index.ts` (regenerated — generatedMode = 'ssr')
+  - `apps/qwik-demo/src/generated/lit/csr/index.ts` (regenerated — generatedMode = 'csr')
+- Notes for next iteration:
+  - AC1 satisfied: structured output distinguishes modes via `generatedMode` constant.
+  - AC2 (fallback diagnostics alignment): `generatedMode = 'csr'` when `ssrAvailable === false` IS the explicit fallback signal; `QCE_SSR_UNSUPPORTED_FALLBACK` error code is already emitted in summary. AC2 may be satisfied; needs review.
+  - AC3 (demo assertions/e2e mode coverage): existing e2e tests verify SSR vs CSR behavioral differences end-to-end. May satisfy AC3 as-is, or a specific mode-signal e2e assertion could be added.
+
 ## 2026-05-16 - Issue #47 - Wire /lit/ssr/wrappers route with e2e (single-task slice)
 
 - Status: Completed — all 3 acceptance criteria satisfied.
