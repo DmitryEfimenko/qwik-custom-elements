@@ -21,7 +21,11 @@ export default defineVitestConfig({
           setupFiles: ['./vitest-setup.ts'],
           browser: {
             enabled: true,
-            provider: playwright(),
+            provider: playwright({
+              launchOptions: {
+                executablePath: process.env.PLAYWRIGHT_EXECUTABLE_PATH,
+              },
+            }),
             headless: true,
             instances: [{ browser: 'chromium' }],
           },

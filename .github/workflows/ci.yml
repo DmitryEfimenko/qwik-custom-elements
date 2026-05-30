@@ -30,26 +30,10 @@ jobs:
       - name: Type check
         run: pnpm typecheck
 
-      - name: Cache Playwright browsers
-        uses: actions/cache@v5
-        id: playwright-cache
-        with:
-          path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('packages/test-stencil-lib/package.json') }}
-
-      - name: Install Playwright browser system deps
-        run: pnpm --filter @qwik-custom-elements/test-stencil-lib exec playwright install-deps chromium
-        timeout-minutes: 5
-
-      - name: Install Playwright browsers
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: pnpm --filter @qwik-custom-elements/test-stencil-lib exec playwright install chromium
-        timeout-minutes: 15
-        env:
-          DEBUG: pw:install
-
       - name: Test
         run: pnpm test
+        env:
+          PLAYWRIGHT_EXECUTABLE_PATH: /usr/bin/google-chrome-stable
 
       - name: Lint
         run: pnpm lint
