@@ -1,5 +1,22 @@
 # Decisions
 
+## DEC-2026-05-30-GOVERNANCE-AND-RELEASE-READINESS
+
+- Status: Accepted
+- Sources:
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/15
+- Decision:
+  - Governance requirements for core and adapter changes are codified in `CONTRIBUTING.md`.
+  - Package ownership boundaries (core owns orchestration/config/CEM/planning; adapters own runtime/generated output shape) are the authoritative source of truth for PR review.
+  - All quality gates (build, typecheck, test, lint, format, drift-check, compatibility-matrix-check) are required before merge and enforced by CI.
+  - Breaking changes must include an explicit `BREAKING` section in PR description and release notes, and require `COMPATIBILITY.md` update before merging.
+  - Enforcement mechanism: `.github/pull_request_template.md` checklist requires contributors to confirm quality gates, ownership boundary documentation, and BREAKING discipline on each PR.
+- Rationale:
+  - Codified governance prevents ownership boundary drift as the project grows.
+  - PR template enforcement makes the policy visible and actionable at the point of contribution.
+  - BREAKING section discipline + COMPATIBILITY.md gate ensure release notes are informative and tested combinations are always documented.
+
 ## DEC-2026-05-30-LIT-GENERATED-INDEX-MODE-CONSTANT
 
 - Status: Accepted
