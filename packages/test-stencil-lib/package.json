@@ -43,6 +43,7 @@
     "e2e": "node -e \"console.log('test-stencil-lib e2e noop')\"",
     "test": "stencil-test",
     "test:watch": "stencil-test --watch",
+    "playwright:install": "playwright install chrome --with-deps",
     "generate": "stencil generate"
   },
   "devDependencies": {
