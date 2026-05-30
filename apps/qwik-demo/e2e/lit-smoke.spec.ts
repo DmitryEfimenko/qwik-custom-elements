@@ -195,9 +195,6 @@ test('lit ssr bridge: light DOM slot content is not duplicated after signal chan
       throw new Error('de-alert element not found in wrapper');
     }
     const spans = Array.from(alertEl.querySelectorAll('span'));
-    // if (spans.length > 0) {
-    //   throw new Error(`spans.length: ${spans.length}`);
-    // }
     return {
       bodyInAlert: spans.some((s) => s.textContent?.trim() === 'Alert body content'),
       footerInAlert: spans.some((s) => s.getAttribute('q:slot') === 'footer'),
