@@ -458,6 +458,7 @@ function renderServerRuntimeModule(
     '',
     'export const renderToString: StencilRenderToString = async (input, options) => {',
     '  const { renderToString: runtimeRenderToString } = await import(',
+    '    // Variable indirection + @vite-ignore: prevents Vite from bundling the Node.js-only hydrate module into the client bundle.',
     '    /* @vite-ignore */ hydrateModuleId',
     '  );',
     '  return runtimeRenderToString(input, options);',
