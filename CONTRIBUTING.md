@@ -49,15 +49,15 @@ When a change moves responsibility across the core/adapter boundary:
 
 All of the following must pass before a PR can be merged. They are enforced by CI.
 
-| Gate | Command | CI job |
-|---|---|---|
-| Build | `pnpm build` | `quality` |
-| Type check | `pnpm typecheck` | `quality` |
-| Tests | `pnpm test` | `quality` |
-| Lint | `pnpm lint` | `quality` |
-| Format | `pnpm format:check` | `quality` |
-| Generated output drift | `pnpm generate` then `git diff --exit-code` | `drift-check` |
-| Compatibility matrix | `pnpm compatibility:check` | `compatibility-matrix-check` |
+| Gate                   | Command                                     | CI job                       |
+| ---------------------- | ------------------------------------------- | ---------------------------- |
+| Build                  | `pnpm build`                                | `quality`                    |
+| Type check             | `pnpm typecheck`                            | `quality`                    |
+| Tests                  | `pnpm test`                                 | `quality`                    |
+| Lint                   | `pnpm lint`                                 | `quality`                    |
+| Format                 | `pnpm format:check`                         | `quality`                    |
+| Generated output drift | `pnpm generate` then `git diff --exit-code` | `drift-check`                |
+| Compatibility matrix   | `pnpm compatibility:check`                  | `compatibility-matrix-check` |
 
 Run all gates locally before pushing:
 
