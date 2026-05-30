@@ -1,6 +1,6 @@
 {
   "name": "@qwik-custom-elements/adapter-lit",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "types": "./dist/index.d.ts",
   "exports": {

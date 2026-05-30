@@ -1,6 +1,6 @@
 {
   "name": "@qwik-custom-elements/adapter-stencil",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "main": "./dist/index.qwik.cjs",
   "module": "./dist/index.qwik.mjs",
