@@ -1,5 +1,26 @@
 # Findings Log
 
+## 2026-05-30 - Lit SSR happy-path proof: complete route map and reproducible end-to-end validation
+
+- Sources:
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
+  - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/49
+- Finding:
+  - The Lit SSR happy path is fully proven end-to-end across two demo routes (`/lit/ssr/bridge` and `/lit/ssr/wrappers`), eight Playwright tests, and two generator-level integration tests (SSR + CSR real adapter-lit path).
+  - Happy-path proof dimensions:
+    1. **Server response contains DSD**: `GET /lit/ssr/bridge` returns HTML with `q:render="ssr"`, `<template shadowrootmode="open">`, prop-derived shadow content (`data-size="md"`), and light-DOM slot content. Test: `lit ssr bridge returns server-rendered lit html`.
+    2. **Hydration non-duplication**: Shadow DOM count is exactly 1 after Lit's first async update when `@lit-labs/ssr-client/lit-element-hydrate-support.js` is loaded before element registration. Tests: `lit ssr bridge: shadow DOM is not double-rendered after hydration`, `lit ssr wrappers: shadow DOM is not double-rendered after hydration`.
+    3. **Slot stability after signal change**: Light-DOM slot content stays inside `<de-alert>` and is not duplicated when Qwik signals trigger route re-render. Tests: `lit ssr bridge: light DOM slot content is not duplicated after signal change`, `lit ssr wrappers: light DOM slot content is not duplicated after signal change`.
+    4. **Full interaction contract (bridge)**: Event delivery, handler toggling, debounced count increments, prop reactivity (size updates). Test: `lit ssr bridge interaction contract: toggles handler and increments active counters`.
+    5. **Full interaction contract (wrappers)**: Same interaction dimensions as bridge, plus host-instance stability across prop updates, footer separator rendering, named-slot placement. Test: `lit ssr wrappers route renders generated wrapper hosts`.
+    6. **Mode signal**: Generated `index.ts` exports `generatedMode = 'ssr' as const` for SSR path; `generatedMode = 'csr' as const` for CSR/fallback path. Proven in generator-level integration tests in `packages/core/src/__tests__/generator.test.ts`.
+  - Reproducibility command: `pnpm e2e` from repo root runs all 18 tests (Lit + Stencil); Lit SSR-specific subset passes in under 5 seconds.
+  - All 18 e2e tests pass (10 Lit + 8 Stencil): `pnpm typecheck && pnpm test && pnpm build && pnpm lint && pnpm e2e` all green.
+- Durable guidance:
+  - Treat these eight Playwright tests plus two generator-level integration tests as the canonical Lit SSR happy-path proof gate. Any regression in any dimension invalidates the happy-path claim.
+  - The SSR proof for Lit uses `<template shadowrootmode="open">` (DSD), not `class="hydrated"` (Stencil). These are the distinguishing SSR markers for the two adapters.
+  - `generatedMode` constant in generated `index.ts` is the machine-verifiable mode signal; `ssrCapabilities.available` in `generated-run-summary.json` is the generator-level probe signal. Both must align.
+
 ## 2026-05-16 - Lit SSR wrapper-route completion requires interaction/stability and DSD-specific proof
 
 - Sources:
