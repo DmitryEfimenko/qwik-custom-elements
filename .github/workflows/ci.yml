@@ -31,7 +31,7 @@ jobs:
         run: pnpm typecheck
 
       - name: Install Playwright browsers
-        run: pnpm exec playwright install chromium --with-deps
+        run: pnpm --filter @qwik-custom-elements/test-stencil-lib exec playwright install chromium --with-deps
 
       - name: Test
         run: pnpm test
