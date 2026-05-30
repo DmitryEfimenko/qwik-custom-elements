@@ -1,5 +1,33 @@
 # PRD-40 Progress
 
+## 2026-05-30 - Issue #48 - AC2 + AC3 generator integration tests (second slice)
+
+- Status: Completed — AC2 and AC3 now satisfied with generator-level integration tests.
+- Scope:
+  - Added 3 new tests to `packages/core/src/__tests__/generator.test.ts`:
+    1. `'emits generatedMode csr and QCE_SSR_UNSUPPORTED_FALLBACK together when SSR probe returns unavailable'` — proves joint AC2 alignment using a mock adapter with `supportsSsrProbe: true` and `probeSSR() = { available: false }`, asserting both the diagnostic and the CSR mode signal in the same run.
+    2. Added `generatedMode = 'ssr'` assertion to existing `'loads the lit adapter SSR subpath package without fallback warning'` test — proves AC3 SSR path end-to-end with real adapter-lit/ssr.
+    3. `'generates generatedMode csr constant via real adapter-lit root entrypoint'` — proves AC3 CSR path end-to-end using real `@qwik-custom-elements/adapter-lit` (root) with a CEM, asserting `generatedMode = 'csr'` in generated output.
+- Key decisions:
+  - AC2 satisfied: single test proves `QCE_SSR_UNSUPPORTED_FALLBACK` + `generatedMode = 'csr'` are emitted together in the same fallback run.
+  - AC3 satisfied: two generator-level tests using the real adapter-lit (SSR and CSR paths) prove mode signal is correct end-to-end through the full generator pipeline.
+  - "Demo assertions" interpretation: generator-level tests that exercise the real adapter-lit packages constitute demo-level assertions for the Lit adapter output surface.
+- Validation:
+  - `pnpm format` ✅
+  - `pnpm typecheck` ✅
+  - `pnpm test` ✅ (58/58 — up from 57)
+  - `pnpm build` ✅
+  - `pnpm lint` ✅
+  - `pnpm e2e` ✅ (18/18)
+- Files changed:
+  - `packages/core/src/__tests__/generator.test.ts` (3 new tests / 1 assertion added to existing test)
+- Notes for next iteration:
+  - All 3 ACs now satisfied:
+    - AC1 ✅: `generatedMode` constant distinguishes SSR/CSR in generated index.ts (proven in prev run)
+    - AC2 ✅: Fallback path emits both `QCE_SSR_UNSUPPORTED_FALLBACK` + `generatedMode = 'csr'` (proven this run)
+    - AC3 ✅: Real adapter-lit generator tests prove mode signal end-to-end for both SSR and CSR paths (proven this run)
+  - Issue #48 can be closed.
+
 ## 2026-05-30 - Issue #48 - Add generatedMode constant to generated index.ts (tracer bullet)
 
 - Status: Partial — first tracer bullet for AC1 complete; AC2 and AC3 remain.

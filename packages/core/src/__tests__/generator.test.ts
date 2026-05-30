@@ -461,6 +461,69 @@ describe('generateFromConfig', () => {
     });
   });
 
+  it('emits generatedMode csr and QCE_SSR_UNSUPPORTED_FALLBACK together when SSR probe returns unavailable', async () => {
+    await withTempDir(async (tempDir) => {
+      await writeFile(
+        path.join(tempDir, 'custom-elements.json'),
+        JSON.stringify({
+          modules: [{ declarations: [{ tagName: 'lit-button' }] }],
+        }),
+        'utf8',
+      );
+      await writeFile(
+        path.join(tempDir, 'adapter-ssr-probe-unavailable.mjs'),
+        [
+          'export const metadata = {',
+          "  supportedSourceTypes: ['CEM', 'PACKAGE_NAME'],",
+          '  supportsSsrProbe: true,',
+          "  ssrRuntimeSubpath: './ssr',",
+          '};',
+          '',
+          'export async function probeSSR() {',
+          '  return { available: false };',
+          '}',
+          '',
+          'export function createGeneratedOutput({ componentDefinitions, ssrAvailable }) {',
+          '  const tags = componentDefinitions.map((d) => JSON.stringify(d.tagName)).join(",");',
+          "  const mode = ssrAvailable ? 'ssr' : 'csr';",
+          '  return [{',
+          "    relativePath: 'index.ts',",
+          "    content: `export const generatedComponentTags = [${tags}] as const;\\nexport const generatedMode = '${mode}' as const;\\n`,",
+          '  }];',
+          '}',
+          '',
+        ].join('\n'),
+        'utf8',
+      );
+
+      const config: GeneratorConfig = {
+        dryRun: true,
+        projects: [
+          {
+            id: 'demo',
+            adapter: 'lit',
+            adapterPackage: './adapter-ssr-probe-unavailable.mjs',
+            source: { type: 'CEM', path: './custom-elements.json' },
+            outDir: './src/generated',
+          },
+        ],
+      };
+
+      const result = await generateFromConfig(config, { cwd: tempDir });
+
+      expect(result.projects[0].status).toBe('success');
+      expect(result.projects[0].observedErrorCodes).toContain(
+        'QCE_SSR_UNSUPPORTED_FALLBACK',
+      );
+      const indexWrite = result.projects[0].plannedWrites.find((w) =>
+        w.path.endsWith(path.join('src', 'generated', 'index.ts')),
+      );
+      expect(indexWrite?.content).toContain(
+        "export const generatedMode = 'csr' as const;",
+      );
+    });
+  });
+
   it('uses the primary adapter generation contract when the adapter exposes createGeneratedOutput', async () => {
     await withTempDir(async (tempDir) => {
       await writeFile(
@@ -1314,8 +1377,54 @@ describe('generateFromConfig', () => {
       expect(indexWrite?.content).toContain(
         "export { QwikLitButton } from './lit-button';",
       );
+      expect(indexWrite?.content).toContain(
+        "export const generatedMode = 'ssr' as const;",
+      );
     });
   });
+
+  it('generates generatedMode csr constant via real adapter-lit root entrypoint', async () => {
+    await withTempDir(async (tempDir) => {
+      await writeFile(
+        path.join(tempDir, 'custom-elements.json'),
+        JSON.stringify({
+          modules: [{ declarations: [{ tagName: 'lit-button' }] }],
+        }),
+        'utf8',
+      );
+      const config: GeneratorConfig = {
+        dryRun: true,
+        projects: [
+          {
+            id: 'demo-lit-csr',
+            adapter: 'lit',
+            adapterPackage: '@qwik-custom-elements/adapter-lit',
+            source: { type: 'CEM', path: './custom-elements.json' },
+            outDir: './src/generated',
+          },
+        ],
+      };
+
+      const result = await generateFromConfig(config, { cwd: tempDir });
+
+      expect(result.projects[0].status).toBe('success');
+      expect(result.projects[0].ssrCapabilities).toEqual({
+        available: false,
+        supportsSsrProbe: true,
+        ssrRuntimeSubpath: './ssr',
+      });
+      expect(result.projects[0].observedErrorCodes).toContain(
+        'QCE_SSR_UNSUPPORTED_FALLBACK',
+      );
+      const indexWrite = result.projects[0].plannedWrites.find((w) =>
+        w.path.endsWith(path.join('src', 'generated', 'index.ts')),
+      );
+      expect(indexWrite?.content).toContain(
+        "export const generatedMode = 'csr' as const;",
+      );
+    });
+  });
+
   it('fails when adapter capabilities do not support the project source type', async () => {
     await withTempDir(async (tempDir) => {
       await writeFile(
