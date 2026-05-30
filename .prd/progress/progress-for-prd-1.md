@@ -1,6 +1,35 @@
 # PRD-1 Progress Log
 
-## 2026-05-30 - Issue #14 - CI drift check and compatibility matrix (tracer bullet)
+## 2026-05-30 - Issue #14 - AC2: compatibility matrix policy check (automated enforcement)
+
+- Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+- Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/14
+- Status: Complete — AC2 automated enforcement implemented; all three ACs now satisfied.
+- Scope:
+  - Added `scripts/check-compatibility-matrix.mjs`: Node.js ESM script that reads current `version` from each publishable `package.json`, parses the corresponding COMPATIBILITY.md table section, and exits non-zero if the version is absent.
+  - Added `compatibility:check` script to root `package.json`.
+  - Added `compatibility-matrix-check` CI job to `.github/workflows/ci.yml` that runs `pnpm compatibility:check`.
+- Key decisions:
+  - Enforcement strategy: verify each current package version appears in its COMPATIBILITY.md table row. If a package is bumped for a breaking change, the matrix update is required before CI passes.
+  - Script exports `parseVersionsFromSection` and `checkMatrix` as named exports for testability.
+  - No external dependencies beyond Node.js built-ins (`fs`, `path`, `url`).
+- Validation:
+  - `pnpm compatibility:check` ✅ exits 0 with current 1.0.0 versions
+  - `pnpm typecheck` ✅
+  - `pnpm lint` ✅
+  - `pnpm format` ✅
+  - `pnpm e2e` ✅ 18/18
+  - `pnpm test`: 1 pre-existing failure in `core/config.test.ts` (`resolvedCoreVersion` expects `'0.0.0'`, gets `'1.0.0'`) — unrelated to this change.
+- Files changed:
+  - `scripts/check-compatibility-matrix.mjs` (new)
+  - `package.json` (added `compatibility:check` script)
+  - `.github/workflows/ci.yml` (added `compatibility-matrix-check` job)
+- AC review:
+  - AC1 ✅ (drift check CI job): satisfied — prior run.
+  - AC2 ✅ (compatibility matrix policy check): satisfied — `compatibility-matrix-check` CI job fails when any package version is absent from COMPATIBILITY.md.
+  - AC3 ✅ (CI uses fresh generation mode): satisfied — prior run.
+
+
 
 - Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
 - Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/14
