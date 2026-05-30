@@ -1,5 +1,34 @@
 # PRD-1 Progress Log
 
+## 2026-05-30 - Issue #14 - CI drift check and compatibility matrix (tracer bullet)
+
+- Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+- Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/14
+- Status: Partial — AC1 + AC3 satisfied by CI workflow; AC2 has COMPATIBILITY.md foundation but no automated policy enforcement yet.
+- Scope:
+  - Created `.github/workflows/ci.yml` with two jobs:
+    1. `quality`: install → build → typecheck → test → lint → format:check (standard quality gate for every push/PR to `main`).
+    2. `drift-check`: install → `pnpm exec turbo run build --no-cache` (explicit no-cache enforcement) → `pnpm generate` → `git diff --exit-code -- apps/qwik-demo/src/generated/` (fails if generated output drifted).
+  - Created `COMPATIBILITY.md` documenting current tested combinations for core, adapter-lit, and adapter-stencil with their peer dependencies (Qwik, Lit, Stencil, TypeScript, Node.js).
+- Key decisions:
+  - Drift-check job uses `turbo run build --no-cache` to satisfy AC3 (no local cache shortcuts for enforcement path).
+  - `git diff --exit-code -- apps/qwik-demo/src/generated/` is the minimal, correct drift signal for committed generated output.
+  - pnpm version locked to `10.33.0` (matches `packageManager` field); Node 20 (satisfies `^18.17.0 || ^20.3.0 || >=21.0.0`).
+  - `COMPATIBILITY.md` lives at repo root; policy section explicitly requires updates before merging 0.x breaking changes.
+- Validation:
+  - `pnpm format` ✅ (new files formatted)
+  - `pnpm typecheck` ✅
+  - `pnpm lint` ✅
+- Files changed:
+  - `.github/workflows/ci.yml` (new)
+  - `COMPATIBILITY.md` (new)
+- AC review:
+  - AC1 ✅: `drift-check` job in `ci.yml` fails on generated output drift via `git diff --exit-code`.
+  - AC2 🔲: `COMPATIBILITY.md` provides the matrix document, but automated "policy check enforces required updates" is not yet wired (no workflow step that fails if matrix is stale). Deferred to follow-up.
+  - AC3 ✅: Drift-check job uses `--no-cache` explicitly; quality gate runs standard build with default caching.
+- Notes for next iteration:
+  - AC2 automated enforcement: could add a step that checks `COMPATIBILITY.md` is modified in PRs that bump package versions (e.g., comparing `pnpm-lock.yaml` changes vs COMPATIBILITY.md changes). This is the remaining gap.
+
 ## 2026-04-24 - Issue #39 partial: migrate generated output paths to nested SSR/CSR capability-specific folders
 
 - Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
