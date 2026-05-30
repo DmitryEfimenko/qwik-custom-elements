@@ -755,10 +755,10 @@ describe('runCli', () => {
           supportsSsrProbe: true,
           ssrRuntimeSubpath: './ssr',
         });
-        expect(summary.projects[0].resolvedCoreVersion).toBe('0.0.0');
-        expect(summary.projects[1].resolvedCoreVersion).toBe('0.0.0');
-        expect(summary.projects[0].resolvedAdapterVersion).toBe('0.0.0');
-        expect(summary.projects[1].resolvedAdapterVersion).toBe('0.0.0');
+        expect(summary.projects[0].resolvedCoreVersion).toBe('1.0.0');
+        expect(summary.projects[1].resolvedCoreVersion).toBe('1.0.0');
+        expect(summary.projects[0].resolvedAdapterVersion).toBe('1.0.0');
+        expect(summary.projects[1].resolvedAdapterVersion).toBe('1.0.0');
       } finally {
         process.chdir(previousCwd);
       }

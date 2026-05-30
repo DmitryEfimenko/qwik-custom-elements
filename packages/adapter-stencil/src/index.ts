@@ -484,10 +484,10 @@ function renderStencilComponentWrapper(
     ? toBridgeComponentName(libraryName, 'SSR', 'GeneratedStencilComponent')
     : toBridgeComponentName(libraryName, 'CSR', 'GeneratedStencilCSRComponent');
   const slotLines = [
-    '    <Slot />',
+    '      <Slot />',
     ...componentDefinition.slots.map(
       (slot) =>
-        `    <span q:slot=${JSON.stringify(slot.name)} style={{ display: 'contents' }}>\n      <Slot name=${JSON.stringify(slot.name)} />\n    </span>`,
+        `      <span q:slot=${JSON.stringify(slot.name)} style={{ display: 'contents' }}>\n        <Slot name=${JSON.stringify(slot.name)} />\n      </span>`,
     ),
   ];
   const slotListToken =

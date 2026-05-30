@@ -206,8 +206,8 @@ describe('generateFromConfig', () => {
       expect(buttonWrite?.content).toContain(
         '    </GeneratedStencilCSRComponent>',
       );
-      expect(buttonWrite?.content).toContain('    <Slot />');
-      expect(buttonWrite?.content).toContain('    <Slot name="footer" />');
+      expect(buttonWrite?.content).toContain('      <Slot />');
+      expect(buttonWrite?.content).toContain('        <Slot name="footer" />');
       expect(cardWrite?.content).toContain('export interface QwikZCardProps {');
       expect(runtimeBarrelWrite?.content).toContain(
         "export * from './runtime-csr.generated';",

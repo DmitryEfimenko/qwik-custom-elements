@@ -49,7 +49,7 @@ export const QwikDeButton = component$<QwikDeButtonProps>((props) => {
       slots={undefined}
       {...passthroughEventProps}
     >
-    <Slot />
+      <Slot />
     </TestLitLibSSRBridgeComponent>
   );
 });

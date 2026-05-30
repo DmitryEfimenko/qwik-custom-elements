@@ -312,9 +312,9 @@ describe('adapter-stencil metadata contract', () => {
       '    </GeneratedStencilCSRComponent>',
     );
     expect(wrapperWrite?.content).toContain(
-      '    <span q:slot="icon" style={{ display: \'contents\' }}>',
+      '      <span q:slot="icon" style={{ display: \'contents\' }}>',
     );
-    expect(wrapperWrite?.content).toContain('      <Slot name="icon" />');
+    expect(wrapperWrite?.content).toContain('        <Slot name="icon" />');
   });
 
   it('generates SSR Stencil wrapper modules when ssrAvailable is true', () => {

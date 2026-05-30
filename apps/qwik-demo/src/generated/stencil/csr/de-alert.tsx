@@ -39,7 +39,7 @@ export const QwikDeAlert = component$<QwikDeAlertProps>((props) => {
       slots={undefined}
       {...passthroughEventProps}
     >
-    <Slot />
+      <Slot />
     </TestStencilLibCSRBridgeComponent>
   );
 });

@@ -39,7 +39,7 @@ export const QwikDeButtonShadow = component$<QwikDeButtonShadowProps>((props) =>
       slots={undefined}
       {...passthroughEventProps}
     >
-    <Slot />
+      <Slot />
     </TestStencilLibSSRBridgeComponent>
   );
 });
