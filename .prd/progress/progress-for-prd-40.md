@@ -31,8 +31,21 @@
   - `apps/qwik-demo/e2e/lit-smoke.spec.ts` (3 new SSR wrappers tests)
   - `.github/skills/select-next-prd-issue/scripts/select-next-child-issue.js` (NONE_PATTERN fix)
 - Notes for next iteration:
-  - Pre-existing failure: `lit ssr bridge: light DOM slot content is not duplicated after signal change` needs investigation (tracked as known failure, not introduced by this slice).
+  - Pre-existing failure: `lit ssr bridge: light DOM slot content is not duplicated after signal change` — resolved in follow-up (see below).
   - Next issue: #48 (Structured mode signaling). Now unblocked since #47 is closed.
+
+## 2026-05-30 - Issue #47 follow-up - Fix pre-existing e2e failure
+
+- Status: Completed.
+- Scope:
+  - Fixed `lit ssr bridge: light DOM slot content is not duplicated after signal change` e2e test failure.
+  - Root cause: `bridge/index.tsx` used `<div>` elements for slot content while the test (and wrappers route) expected `<span>` elements. `querySelectorAll('span')` found only the adapter wrapper span, causing `bodyInAlert` and `footerInAlert` assertions to fail.
+  - Fix: changed slot content in `apps/qwik-demo/src/routes/lit/ssr/bridge/index.tsx` from `<div>` to `<span>` for consistency with wrappers route.
+- Validation:
+  - `pnpm e2e` — 18 pass ✅
+- Files changed:
+  - `apps/qwik-demo/src/routes/lit/ssr/bridge/index.tsx`
+- Commented on GitHub issue #47: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/47#issuecomment-4583531906
 
 ## 2026-05-16 - Issue #46 - Filter private CEM members from typed Lit CSR wrapper props (single-task slice)
 

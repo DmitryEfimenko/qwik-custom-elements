@@ -105,8 +105,8 @@ export default component$(() => {
           props={{ heading: 'Validation Alert' }}
           slots={['footer']}
         >
-          <div>Alert body content</div>
-          <div q:slot="footer">Alert footer content</div>
+          <span>Alert body content</span>
+          <span q:slot="footer">Alert footer content</span>
         </TestLitLibSSRBridgeComponent>
       </div>
     </>

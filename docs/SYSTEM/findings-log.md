@@ -12,8 +12,6 @@
   - Use CSR wrappers tests as the behavioral baseline and add two SSR-specific coverage items: (1) shadow DOM count === 1 after first Lit update (hydrate-support loaded before define), (2) slot content not duplicated after signal-triggered re-render.
   - Model: `apps/qwik-demo/e2e/lit-smoke.spec.ts` — "lit ssr wrappers: shadow DOM is not double-rendered after hydration" and "lit ssr wrappers: light DOM slot content is not duplicated after signal change".
 
-
-
 - Sources:
   - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/40
   - https://github.com/DmitryEfimenko/qwik-custom-elements/issues/46
