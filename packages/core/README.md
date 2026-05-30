@@ -2,6 +2,47 @@
 
 Deterministic generation orchestration for Qwik custom-element wrappers.
 
+## Install
+
+```
+npm install @qwik-custom-elements/core
+```
+
+## Quickstart
+
+Create a `qwik-custom-elements.config.json` at your project root:
+
+```json
+{
+  "projects": [
+    {
+      "id": "my-lib",
+      "adapter": "stencil",
+      "adapterPackage": "@qwik-custom-elements/adapter-stencil",
+      "source": {
+        "type": "PACKAGE_NAME",
+        "packageName": "my-stencil-lib"
+      },
+      "outDir": "./src/generated/my-lib"
+    }
+  ]
+}
+```
+
+Then run the generator:
+
+```
+npx qwik-custom-elements
+```
+
+Generated Qwik wrapper files are written to the configured `outDir`. Re-run after upgrading the component library to regenerate.
+
+## Support Policy
+
+This package follows semantic versioning. See [COMPATIBILITY.md](../../COMPATIBILITY.md) for the tested combinations of core, adapters, Qwik, and Node.js.
+
+Breaking changes always include an explicit `BREAKING` section in the release notes and require an update to `COMPATIBILITY.md` before merging.
+
 ## Ownership Boundary
 
 `@qwik-custom-elements/core` owns the adapter-agnostic parts of generation:

@@ -1,5 +1,38 @@
 # PRD-1 Progress Log
 
+## 2026-05-30 - Issue #15 - AC2: install/quickstart/support policy docs in publishable package READMEs
+
+- Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1
+- Child issue: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/15
+- Status: Partial — AC2 satisfied; AC1 (governance enforcement) and AC3 (BREAKING section discipline) remain.
+- Scope:
+  - Added **Install**, **Quickstart**, and **Support Policy** sections to all three publishable package READMEs.
+  - `packages/core/README.md`: install command, config + CLI quickstart, support policy pointing to COMPATIBILITY.md.
+  - `packages/adapter-lit/README.md`: install + peer deps, CSR/SSR config quickstart, support policy.
+  - `packages/adapter-stencil/README.md`: install + peer deps, SSR/CSR config quickstart (with note to omit `hydrateImport` for CSR-only), support policy.
+- Key decisions:
+  - Support policy text references COMPATIBILITY.md and explicitly states BREAKING section discipline and COMPATIBILITY.md update requirement for breaking changes.
+  - Quickstart uses PACKAGE_NAME source mode (primary portable UX, per PRD decision) as the primary example.
+  - Adapter-stencil quickstart cross-references existing Manual Runtime Usage section rather than duplicating it.
+- Validation:
+  - `pnpm typecheck` ✅
+  - `pnpm lint` ✅
+  - `pnpm format` ✅
+  - `pnpm build` ✅
+  - `pnpm test`: 1 pre-existing failure in `core/config.test.ts` (`resolvedCoreVersion` expects `'0.0.0'`, gets `'1.0.0'`) — unrelated.
+  - `pnpm e2e` ✅ 18/18
+- Files changed:
+  - `packages/core/README.md`
+  - `packages/adapter-lit/README.md`
+  - `packages/adapter-stencil/README.md`
+- AC review:
+  - AC1 🔲 (governance requirements codified and enforced): needs explicit CONTRIBUTING.md or governance doc with codified rules.
+  - AC2 ✅ (publishable packages contain concise install/quickstart/support policy documentation): satisfied — all three READMEs now have Install, Quickstart, and Support Policy sections.
+  - AC3 🔲 (release process with BREAKING section discipline): support policy sections reference the BREAKING convention, but no formal release process doc (e.g., CONTRIBUTING.md or CHANGELOG template) exists yet.
+- Notes for next iteration:
+  - AC1: Create a CONTRIBUTING.md or governance section documenting ownership rules for core and adapter changes.
+  - AC3: Create a release process document (CONTRIBUTING.md release section or similar) with explicit BREAKING section discipline.
+
 ## 2026-05-30 - Issue #14 - AC2: compatibility matrix policy check (automated enforcement)
 
 - Parent PRD: https://github.com/DmitryEfimenko/qwik-custom-elements/issues/1

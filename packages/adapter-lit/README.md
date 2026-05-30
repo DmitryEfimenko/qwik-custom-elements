@@ -2,6 +2,60 @@
 
 Lit-specific adapter contract and SSR surface for generated Qwik custom-element integration.
 
+## Install
+
+```
+npm install @qwik-custom-elements/adapter-lit
+```
+
+Peer dependencies:
+
+```
+npm install @builder.io/qwik lit
+```
+
+For SSR support, also install the optional peers:
+
+```
+npm install @lit-labs/ssr @lit-labs/ssr-client
+```
+
+## Quickstart
+
+Reference this adapter in your `qwik-custom-elements.config.json`:
+
+```json
+{
+  "projects": [
+    {
+      "id": "my-lit-lib",
+      "adapter": "lit",
+      "adapterPackage": "@qwik-custom-elements/adapter-lit",
+      "source": {
+        "type": "PACKAGE_NAME",
+        "packageName": "my-lit-lib"
+      },
+      "adapterOptions": {
+        "runtime": {
+          "libraryImport": "my-lit-lib"
+        }
+      },
+      "outDir": "./src/generated/lit/csr"
+    }
+  ]
+}
+```
+
+For SSR-capable generation, set `"adapterPackage"` to `"@qwik-custom-elements/adapter-lit/ssr"` and point `"outDir"` to a separate SSR folder.
+
+Run `npx qwik-custom-elements` to generate Qwik wrappers from the Lit component library.
+
+## Support Policy
+
+This package follows semantic versioning. See [COMPATIBILITY.md](../../COMPATIBILITY.md) for tested combinations of adapter-lit, Qwik, Lit, `@lit-labs/ssr`, and Node.js.
+
+Breaking changes always include an explicit `BREAKING` section in the release notes and require an update to `COMPATIBILITY.md` before merging.
+
 ## Ownership Boundary
 
 `@qwik-custom-elements/adapter-lit` owns Lit-specific generation behavior.

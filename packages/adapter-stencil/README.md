@@ -2,6 +2,57 @@
 
 Qwik runtime helpers for integrating Stencil custom elements.
 
+## Install
+
+```
+npm install @qwik-custom-elements/adapter-stencil
+```
+
+Peer dependencies:
+
+```
+npm install @builder.io/qwik @builder.io/qwik-city @stencil/core
+```
+
+## Quickstart
+
+Reference this adapter in your `qwik-custom-elements.config.json`:
+
+```json
+{
+  "projects": [
+    {
+      "id": "my-stencil-lib",
+      "adapter": "stencil",
+      "adapterPackage": "@qwik-custom-elements/adapter-stencil",
+      "source": {
+        "type": "PACKAGE_NAME",
+        "packageName": "my-stencil-lib"
+      },
+      "adapterOptions": {
+        "runtime": {
+          "loaderImport": "my-stencil-lib/loader",
+          "hydrateImport": "my-stencil-lib/hydrate"
+        }
+      },
+      "outDir": "./src/generated/stencil/ssr"
+    }
+  ]
+}
+```
+
+Omit `hydrateImport` to generate a CSR-only (loader-only) surface without Stencil SSR.
+
+Run `npx qwik-custom-elements` to generate Qwik wrappers from the Stencil component library.
+
+See the [Manual Runtime Usage](#manual-runtime-usage) section below for direct API usage without the generator.
+
+## Support Policy
+
+This package follows semantic versioning. See [COMPATIBILITY.md](../../COMPATIBILITY.md) for tested combinations of adapter-stencil, Qwik, Stencil, and Node.js.
+
+Breaking changes always include an explicit `BREAKING` section in the release notes and require an update to `COMPATIBILITY.md` before merging.
+
 ## Ownership Boundary
 
 `@qwik-custom-elements/adapter-stencil` owns Stencil-specific generation behavior and runtime integration.
