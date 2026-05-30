@@ -23,7 +23,7 @@ export default defineVitestConfig({
             enabled: true,
             provider: playwright({
               launchOptions: {
-                executablePath: process.env.PLAYWRIGHT_EXECUTABLE_PATH,
+                channel: process.env.PLAYWRIGHT_CHANNEL as string | undefined,
               },
             }),
             headless: true,

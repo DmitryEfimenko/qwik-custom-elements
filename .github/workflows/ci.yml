@@ -33,7 +33,7 @@ jobs:
       - name: Test
         run: pnpm test
         env:
-          PLAYWRIGHT_EXECUTABLE_PATH: /usr/bin/google-chrome-stable
+          PLAYWRIGHT_CHANNEL: chrome
 
       - name: Lint
         run: pnpm lint
