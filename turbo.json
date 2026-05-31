@@ -18,6 +18,7 @@
       "dependsOn": ["^test"]
     },
     "e2e": {
+      "dependsOn": ["build"],
       "cache": false
     },
     "e2e:install": {

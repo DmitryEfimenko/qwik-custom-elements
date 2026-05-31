@@ -28,6 +28,16 @@
 **/.netlify
 **/tsconfig.tsbuildinfo
 **/*.spec.ts
+
+# Generated build artifacts
+**/custom-elements.json
+packages/test-stencil-lib/src/components.d.ts
+packages/test-stencil-lib/src/components/*/readme.md
+packages/test-stencil-lib/www/**
+apps/qwik-demo/server/**
+apps/qwik-demo/test-results/**
+apps/qwik-demo/playwright-report/**
+apps/qwik-demo/src/generated/**
 **/*.spec.tsx
 **/src/generated/**
 packages/test-stencil-lib/hydrate/**
