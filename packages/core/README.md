@@ -77,6 +77,6 @@ Adapters are responsible for returning the generated file set for their framewor
 
 Changes that alter core or adapter ownership boundaries should be reflected in:
 
-- `docs/SYSTEM/decisions.md`
-- `docs/SYSTEM/findings-log.md`
+- an ADR in `docs/adr/` (system-wide) or the affected package's `docs/adr/` (context-specific)
+- the affected `CONTEXT.md` if new domain terms are introduced
 - the package README files for any affected packages

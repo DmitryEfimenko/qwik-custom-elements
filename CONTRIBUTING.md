@@ -41,8 +41,8 @@ The canonical Lit SSR subpath is `@qwik-custom-elements/adapter-lit/ssr`.
 
 When a change moves responsibility across the core/adapter boundary:
 
-1. Update `docs/SYSTEM/decisions.md` with a dated decision record.
-2. Update `docs/SYSTEM/findings-log.md` with the rationale.
+1. Add an ADR in `docs/adr/` (system-wide) or the affected package's `docs/adr/` (context-specific).
+2. Update the affected `CONTEXT.md` if new domain terms are introduced.
 3. Update the README files for all affected packages.
 
 ## Quality gates
@@ -152,8 +152,8 @@ pnpm changeset pre exit
 
 Changes that alter core or adapter ownership boundaries must be reflected in:
 
-- `docs/SYSTEM/decisions.md`
-- `docs/SYSTEM/findings-log.md`
+- an ADR in `docs/adr/` (system-wide) or the affected package's `docs/adr/` (context-specific)
+- the affected `CONTEXT.md` if new domain terms are introduced
 - the package README files for any affected packages
 
 Changes to the public API surface must be reflected in the relevant package README `## Current Exports` section.

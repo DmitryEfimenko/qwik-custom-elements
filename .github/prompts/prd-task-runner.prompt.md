@@ -80,7 +80,7 @@ Explore the repo and fill your context window with relevant information that wil
 
 - First, refresh canonical PRD decision context (do not rely on stale memory):
   - Re-read the current parent PRD issue body and extract only decisions relevant to this child issue/slice.
-  - Re-read repository decision artifacts (for example `docs/qwik-custom-elements-decisions.md`, files under `docs/SYSTEM/*`) and treat PRD issue text as canonical for feature intent if conflicts exist.
+  - Re-read repository decision artifacts (`CONTEXT-MAP.md`, per-package `CONTEXT.md` files, and ADRs under `docs/adr/` or each package's `docs/adr/`) and treat PRD issue text as canonical for feature intent if conflicts exist.
   - If the selected child issue narrows or overrides wording, capture that as part of the decision context.
 - Create a short "decision snapshot" before coding:
   - List the 3-7 highest-impact constraints that must hold for this slice.

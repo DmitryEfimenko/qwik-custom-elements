@@ -6,7 +6,7 @@
 
 - [ ] All quality gates pass locally (`pnpm build && pnpm typecheck && pnpm test && pnpm lint && pnpm format:check && pnpm compatibility:check`)
 - [ ] If generated output changed, `pnpm generate` was run and changed files under `apps/qwik-demo/src/generated/` are committed
-- [ ] If this moves responsibility across the core/adapter boundary, `docs/SYSTEM/decisions.md`, `docs/SYSTEM/findings-log.md`, and affected package READMEs are updated
+- [ ] If this moves responsibility across the core/adapter boundary, an ADR is added in `docs/adr/` or the affected package's `docs/adr/`, and the relevant `CONTEXT.md` is updated if new domain terms are introduced
 
 ## Breaking changes
 

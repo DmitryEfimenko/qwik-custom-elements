@@ -1,12 +1,12 @@
 ---
 name: 'sync-to-system-prd'
-description: 'Consolidate one feature PRD run into canonical docs/SYSTEM artifacts when durable system-level information should be promoted.'
+description: 'Consolidate one feature PRD run into canonical CONTEXT.md and ADR artifacts when durable system-level information should be promoted.'
 argument-hint: 'Parent PRD issue URL/number and/or progress file path, plus optional constraints and target sections. Infer progress path when possible.'
 ---
 
-You are synchronizing durable decisions, findings, etc for the work completed into system-level documentation.
+You are synchronizing durable decisions and domain terms from a completed feature PRD run into the repository's multi-context documentation.
 
-Canonical destination is `docs/SYSTEM/*`.
+Canonical destinations are per-package `CONTEXT.md` files and `docs/adr/` directories.
 
 ## Required Inputs
 
@@ -29,66 +29,60 @@ Progress file handling:
 
 Sync only durable, cross-feature facts:
 
-- User-facing API contracts
-- User-facing UI behavior contracts
+- New domain terms introduced into a package's vocabulary
 - Architectural decisions that apply beyond the feature
-- Durable findings that reduce repeated mistakes
+- Clarifications to existing CONTEXT.md terms (update in place)
 
-Do not sync temporary notes, implementation minutiae, or in-progress discussion.
+Do not sync temporary notes, implementation minutiae, in-progress discussion, or findings that are only relevant to the specific feature run.
 There could be no findings to sync, and that's fine. Sync only what is valuable and durable.
 
 ## Output Targets
 
-Update these files in `docs/SYSTEM/`:
+### New domain terms → `CONTEXT.md`
 
-- `prd.md` (system overview, active surfaces, roadmap)
-- `api-contracts.md` (versioned contract registry)
-- `decisions.md` (ADR-style decisions)
-- `findings-log.md` (aggregated durable findings)
+Add new terms to the affected package's `CONTEXT.md` under `## Language`. If the term spans multiple packages, add it to each relevant `CONTEXT.md`. Follow the term format in [CONTEXT-FORMAT.md](../grill-with-docs/CONTEXT-FORMAT.md).
 
-If any target file does not exist, create it.
+Do not add general programming concepts. Only terms specific to this project's domain.
+
+### Qualifying decisions → `docs/adr/`
+
+Apply the ADR three-criteria gate defined in [grill-with-docs](../grill-with-docs/SKILL.md) before promoting any decision. If all three criteria hold, determine scope:
+
+- **Cross-cutting** (spans `packages/core` + one or more adapters): write to `docs/adr/`
+- **Package-specific** (scoped to one adapter or core alone): write to `packages/{name}/docs/adr/`
+
+Scan the target `docs/adr/` for the highest existing number and increment by one. ADR body is 1–3 sentences: context, decision, reason. No sections needed unless consequences are non-obvious.
 
 ## Backlink Rules
 
-- Each system entry must link to source feature PRD.
+- Each ADR must include a reference to the source feature PRD issue URL.
 
-## Findings Deduplication & Relevance
+## Deduplication
 
-When syncing findings to `findings-log.md`:
-
-1. **Search for overlaps**: Check existing findings for semantic duplicates or partial overlap
-   - If a new finding subsumes or merges with an existing finding, consolidate them
-   - Preserve both source feature PRD links in the consolidated entry
-   - Update or remove the old entry if it becomes redundant
-2. **Check relevance**: Evaluate whether each existing finding is still applicable
-   - Remove obsolete findings if they're superseded by newer, more complete findings, or if the pattern no longer applies
-   - Document removal reason (superseded by X, or no longer applicable) in the sync summary
-3. **Apply dedup directly**: When overlap or obsolescence is detected, consolidate or remove findings in the same sync pass and report what changed in the final response
+Before adding a new term or ADR, check existing `CONTEXT.md` and `docs/adr/` files for semantic duplicates or partial overlap. Consolidate rather than duplicate.
 
 ## Verification
 
 Run lightweight checks before finalizing:
 
-- Confirm links resolve
-- Confirm no duplicate conflicting contract entries
-- Confirm each promoted decision has a stable identifier
-- **Confirm findings dedup**: No duplicate findings, no obsolete entries remain, each finding has clear source(s)
+- Confirm ADR numbering is sequential with no gaps or conflicts
+- Confirm no duplicate or conflicting term definitions across context files
+- Confirm each promoted ADR has a source issue backlink
+- Confirm `CONTEXT-MAP.md` at the repo root still accurately lists all context paths
 
 ## Final Response Format
 
 Provide:
 
 1. Sync result (`Done` or `Blocked`)
-2. Files updated
-3. Promoted API/UI/decision/findings summary
+2. Files updated or created
+3. Promoted terms and ADR summary
 4. Remaining risks or follow-up actions
 
 ## Final Rules
 
 - Sync exactly one feature PRD per run.
 - `prd-task-runner` may invoke this skill after every run, including runs that only complete part of a child issue.
-- If a run produced no durable system-level change, leave `docs/SYSTEM/*` unchanged and report that explicitly.
+- If a run produced no durable system-level change, leave all context files unchanged and report that explicitly.
 - Do not execute implementation tasks in this prompt.
-- Keep `docs/SYSTEM/*` concise and durable.
-- **Findings are living knowledge**: Actively deduplicate and prune findings to prevent decay and false patterns.
-- **Document finding lifecycle**: Mark findings with source feature PRD and date promoted.
+- Follow `CONTEXT.md` and ADR format conventions from [grill-with-docs](../grill-with-docs/SKILL.md).
