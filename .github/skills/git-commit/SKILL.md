@@ -64,6 +64,21 @@ git diff
 git status --porcelain
 ```
 
+### 1a. Changeset check
+
+Before staging or committing, check whether a changeset is needed:
+
+- If the diff touches `packages/core`, `packages/adapter-lit`, or `packages/adapter-stencil` with user-facing impact (new behavior, bug fix, API change), a changeset is required.
+- Check whether a `.changeset/*.md` (excluding `README.md`) is already staged or present for this change:
+  ```bash
+  git diff --staged --name-only | grep '^\.changeset/' | grep -v README
+  ls .changeset/*.md 2>/dev/null | grep -v README
+  ```
+- If none exists and a changeset is needed, invoke the `create-changeset` skill first, then continue.
+- If the change only touches `apps/`, `packages/test-*`, CI, or docs — skip; no changeset needed.
+
+Reference: `.github/skills/create-changeset/SKILL.md`
+
 ### 2. Stage Files (if needed)
 
 If nothing is staged or you want to group changes differently:

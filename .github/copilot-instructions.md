@@ -24,6 +24,10 @@ rtk discover          # Find missed rtk opportunities
 rtk proxy <cmd>       # Run raw (no filtering) but track usage
 ```
 
+# Changesets
+
+User-facing changes to `packages/core`, `packages/adapter-lit`, or `packages/adapter-stencil` require a `.changeset/*.md` file before committing. Use the `create-changeset` skill (`.github/skills/create-changeset/SKILL.md`) to write it. Skip for `apps/`, `packages/test-*`, CI, and docs-only changes.
+
 # Caveman
 
 Respond terse like smart caveman. All technical substance stay. Only fluff die.

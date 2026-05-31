@@ -177,7 +177,25 @@ After completing:
 
 # COMMIT
 
-If the selected task resulted in code or docs changes, make a git commit with a clear message referencing the issue.
+If the selected task resulted in code or docs changes:
+
+## Changeset check (before committing)
+
+Check whether a changeset is needed for this task:
+
+- If the task touched `packages/core`, `packages/adapter-lit`, or `packages/adapter-stencil` with user-facing impact (new behavior, bug fix, API change), a changeset is required.
+- Verify one does not already exist for this change:
+  ```bash
+  ls .changeset/*.md 2>/dev/null | grep -v README
+  ```
+- If missing, invoke the `create-changeset` skill to write `.changeset/<descriptive-name>.md` and stage it before committing.
+- Skip the changeset if the task only touched `apps/`, `packages/test-*`, CI, or pure docs.
+
+Reference: `.github/skills/create-changeset/SKILL.md`
+
+## Git commit
+
+Make a git commit with a clear message referencing the issue.
 
 Use the format: `feat(<domain>): PRD-<parent-issue-number> #<child-issue-number> - <short description of the change>`.
 
