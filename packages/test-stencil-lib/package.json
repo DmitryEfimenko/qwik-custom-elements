@@ -52,6 +52,7 @@
     "@stencil/vitest": "^1.8.3",
     "@types/node": "^22.13.5",
     "@vitest/browser-playwright": "^4.0.0",
+    "playwright": "^1.59.1",
     "typescript": "^5.9.3",
     "vitest": "^4.0.0"
   },
