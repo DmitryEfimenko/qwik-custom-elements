@@ -69,9 +69,37 @@ For generated output drift, run `pnpm generate` and commit any changed files und
 
 ## Release process
 
+This project uses [Changesets](https://github.com/changesets/changesets) to manage versioning and publishing. All publishable packages (`core`, `adapter-stencil`, `adapter-lit`) are versioned independently.
+
+### Workflow overview
+
+1. **Add a changeset** alongside your PR whenever you make a user-facing change to a publishable package.
+2. Once the PR is merged to `main`, the Release GitHub Action opens (or updates) a **"Version Packages" PR** that bumps `package.json` versions and writes CHANGELOG entries from your changeset files.
+3. When you are ready to publish, merge the Version Packages PR. The Release workflow then runs `pnpm release` (builds all packages and calls `changeset publish`), creates GitHub Releases for each bumped package, and publishes to npm.
+
+### Adding a changeset
+
+Run this from the repo root:
+
+```bash
+pnpm changeset
+```
+
+The interactive CLI asks which packages are affected and what type of bump applies (patch / minor / major). It creates a file under `.changeset/` that should be committed with your PR.
+
+**When to add a changeset:**
+
+- Any user-facing change to `core`, `adapter-lit`, or `adapter-stencil` needs a changeset.
+- Pure infrastructure changes (CI config, tooling, test helpers, demo app) do not.
+
+**When not to add a changeset:**
+
+- Changes only to `apps/qwik-demo`, `packages/test-lit-lib`, or `packages/test-stencil-lib`.
+- Documentation-only changes that have no impact on package behavior.
+
 ### Versioning
 
-This project follows [Semantic Versioning](https://semver.org/). All publishable packages (`core`, `adapter-stencil`, `adapter-lit`) are versioned independently.
+This project follows [Semantic Versioning](https://semver.org/).
 
 ### Breaking changes
 
@@ -102,6 +130,23 @@ Example PR description structure for a breaking change:
 ### Non-breaking changes
 
 Non-breaking changes (new features, bug fixes, internal refactors) do not require a `BREAKING` section, but still require all quality gates to pass.
+
+### Pre-releases (alpha / beta / next)
+
+To publish a pre-release channel:
+
+```bash
+# Enter pre-release mode (replace "beta" with "alpha", "next", etc.)
+pnpm changeset pre enter beta
+
+# Add changesets and merge PRs as normal — versions become e.g. 1.1.0-beta.0
+# Packages are published to the "beta" npm dist-tag (not "latest")
+
+# When ready to cut a stable release, exit pre-release mode
+pnpm changeset pre exit
+
+# Then add a final changeset and merge — a normal stable release is published
+```
 
 ## Documentation expectations
 

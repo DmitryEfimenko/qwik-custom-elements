@@ -14,9 +14,13 @@
     "qwik-demo:dev": "turbo run dev --filter=qwik-demo",
     "qwik-demo:preview": "turbo run preview --filter=qwik-demo",
     "generate": "node packages/core/dist/cli.js",
-    "compatibility:check": "node scripts/check-compatibility-matrix.mjs"
+    "compatibility:check": "node scripts/check-compatibility-matrix.mjs",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "pnpm build && changeset publish"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.31.0",
     "@eslint/js": "^9.36.0",
     "eslint": "^9.36.0",
     "eslint-config-prettier": "^10.1.8",
