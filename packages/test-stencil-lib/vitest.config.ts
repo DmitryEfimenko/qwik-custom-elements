@@ -1,6 +1,24 @@
 import { defineVitestConfig } from '@stencil/vitest/config';
 import { playwright } from '@vitest/browser-playwright';
 
+const browserProject = {
+  test: {
+    name: 'browser',
+    include: ['src/**/*.cmp.test.{ts,tsx}'],
+    setupFiles: ['./vitest-setup.ts'],
+    browser: {
+      enabled: true,
+      provider: playwright({
+        launchOptions: {
+          channel: process.env.PLAYWRIGHT_CHANNEL as string | undefined,
+        },
+      }),
+      headless: true,
+      instances: [{ browser: 'chromium' as const }],
+    },
+  },
+};
+
 export default defineVitestConfig({
   stencilConfig: './stencil.config.ts',
   test: {
@@ -13,24 +31,8 @@ export default defineVitestConfig({
           environment: 'stencil',
         },
       },
-      // Component browser tests - real browser via Playwright
-      {
-        test: {
-          name: 'browser',
-          include: ['src/**/*.cmp.test.{ts,tsx}'],
-          setupFiles: ['./vitest-setup.ts'],
-          browser: {
-            enabled: true,
-            provider: playwright({
-              launchOptions: {
-                channel: process.env.PLAYWRIGHT_CHANNEL as string | undefined,
-              },
-            }),
-            headless: true,
-            instances: [{ browser: 'chromium' }],
-          },
-        },
-      },
+      // Component browser tests - real browser via Playwright (skipped in CI)
+      ...(process.env.CI ? [] : [browserProject]),
     ],
   },
 });
