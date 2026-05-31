@@ -1,6 +1,20 @@
 # @qwik-custom-elements/core
 
-Deterministic generation orchestration for Qwik custom-element wrappers.
+Qwik does not natively provide server-side rendering support for custom elements. Without additional tooling, Web Components render as empty tags on the server, lose SSR benefits, and require manual boilerplate to integrate typed props and events. `@qwik-custom-elements/core` is the CLI and orchestration layer that generates typed, SSR-capable Qwik wrapper components from a Custom Elements Manifest — giving you correct server output, full type safety, and automatic event wiring, with no per-component boilerplate.
+
+`core` does not contain framework-specific logic. Instead, it delegates generated output to an adapter that understands your component library (Stencil, Lit, etc.). You configure a project once; the CLI does the rest.
+
+## Ecosystem
+
+This package is part of the `qwik-custom-elements` toolchain:
+
+| Package                                                                     | Role                                                                                                         |
+| --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| **`@qwik-custom-elements/core`** _(this package)_                           | CLI entry point and adapter-agnostic orchestration: config loading, CEM parsing, write planning, diagnostics |
+| [**`@qwik-custom-elements/adapter-stencil`**](../adapter-stencil/README.md) | Stencil-specific generation: SSR/CSR bridge components, typed Qwik wrappers, hydrate runtime integration     |
+| [**`@qwik-custom-elements/adapter-lit`**](../adapter-lit/README.md)         | Lit-specific generation: SSR/CSR bridge components, typed Qwik wrappers, Declarative Shadow DOM hydration    |
+
+Install `core` alongside whichever adapter matches your component library. You will interact with `core` only through the config file and the CLI — all framework-specific behavior lives in the adapter.
 
 ## Install
 

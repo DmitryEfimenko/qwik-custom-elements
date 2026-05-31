@@ -1,4 +1,9 @@
 {
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
   "chat.tools.terminal.autoApprove": {
     "/^powershell -File \\./\\.github/skills/select-next-prd-issue/scripts/select-next-child-issue\\.ps1 -Repo DmitryEfimenko/qwik-custom-elements -ParentIssueNumber \\d+$/": {
       "approve": true,
