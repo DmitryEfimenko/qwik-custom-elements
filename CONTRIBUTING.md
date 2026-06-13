@@ -112,7 +112,7 @@ A breaking change is any change that:
 Every breaking change **must**:
 
 1. Include an explicit `BREAKING` section in the PR description and in the release notes. The section must describe what changed, what consumers must update, and why.
-2. Update `COMPATIBILITY.md` before the PR is merged. The compatibility matrix row for the bumped package version must be added. CI (`compatibility-matrix-check`) enforces this: if the new package version is absent from `COMPATIBILITY.md`, CI fails.
+2. Update `COMPATIBILITY.md` before the PR is merged. The compatibility matrix is automatically updated during `pnpm version-packages` by copying the previous row and updating the package version. For breaking changes that alter peer dependencies, manually edit the generated row in the Version Packages PR before merging. CI (`compatibility-matrix-check`) enforces this: if the new package version is absent from `COMPATIBILITY.md`, CI fails.
 
 Example PR description structure for a breaking change:
 

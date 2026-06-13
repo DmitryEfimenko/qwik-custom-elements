@@ -16,7 +16,7 @@
     "generate": "node packages/core/dist/cli.js",
     "compatibility:check": "node scripts/check-compatibility-matrix.mjs",
     "changeset": "changeset",
-    "version-packages": "changeset version && pnpm install --lockfile-only --no-frozen-lockfile",
+    "version-packages": "changeset version && node scripts/update-compatibility-matrix.mjs && pnpm install --lockfile-only --no-frozen-lockfile",
     "release": "pnpm build && changeset publish"
   },
   "devDependencies": {
@@ -27,8 +27,12 @@
     "globals": "^16.4.0",
     "lefthook": "^2.1.9",
     "prettier": "^3.6.2",
+    "remark-gfm": "^4.0.0",
+    "remark-parse": "^11.0.0",
+    "remark-stringify": "^11.0.0",
     "turbo": "^2.9.3",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.44.1"
+    "typescript-eslint": "^8.44.1",
+    "unified": "^11.0.5"
   }
 }
