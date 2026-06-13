@@ -1,6 +1,6 @@
 {
   "name": "@qwik-custom-elements/adapter-lit",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "types": "./dist/index.d.ts",
   "exports": {
@@ -39,7 +39,7 @@
     "@lit-labs/ssr": ">=4.0.0",
     "@lit-labs/ssr-client": ">=1.1.0",
     "lit": ">=3.0.0",
-    "@qwik-custom-elements/core": "^1.0.0"
+    "@qwik-custom-elements/core": "^1.0.1"
   },
   "peerDependenciesMeta": {
     "@lit-labs/ssr": {
