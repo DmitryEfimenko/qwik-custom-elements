@@ -37,6 +37,7 @@ jobs:
         with:
           # When changesets are pending: opens/updates the "Version Packages" PR
           # When Version PR is merged: runs this command to publish
+          version: pnpm changeset version && pnpm install --no-frozen-lockfile
           publish: pnpm release
           title: 'chore: version packages'
           commit: 'chore: version packages'
