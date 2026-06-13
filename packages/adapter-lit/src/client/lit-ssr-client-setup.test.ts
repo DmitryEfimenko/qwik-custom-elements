@@ -67,10 +67,9 @@ describe('createLitSSRClientSetup', () => {
 
     const useLitSSRClientSetup = createLitSSRClientSetup(importLibraryQrl);
 
-    Object.defineProperty(document, 'readyState', {
-      configurable: true,
-      value: 'complete',
-    });
+    (globalThis as Record<string, unknown>).document = {
+      readyState: 'complete',
+    };
 
     useLitSSRClientSetup();
 
