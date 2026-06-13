@@ -1,4 +1,4 @@
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import path from 'node:path';
@@ -772,10 +772,38 @@ function resolvePackageRootForProject(
   try {
     const packageJsonPath = require.resolve(packageSpecifier, { paths: [cwd] });
     return path.dirname(packageJsonPath);
-  } catch (error) {
+  } catch (primaryError) {
+    // Fallback for packages with strict exports maps that don't expose ./package.json.
+    // Resolve via the main entry point, then walk up the directory tree to find
+    // the ancestor directory whose package.json `name` matches the package name.
+    // This approach is robust across npm, pnpm (virtual store), and Yarn PnP because
+    // it matches on the canonical `name` field rather than path segments.
+    try {
+      const mainEntry = require.resolve(source.packageName, { paths: [cwd] });
+      let dir = path.dirname(mainEntry);
+      while (true) {
+        const pkgJsonPath = path.join(dir, 'package.json');
+        if (existsSync(pkgJsonPath)) {
+          try {
+            const pkg = JSON.parse(readFileSync(pkgJsonPath, 'utf8')) as {
+              name?: unknown;
+            };
+            if (pkg.name === source.packageName) return dir;
+          } catch {
+            // Not a valid JSON package.json — keep walking up
+          }
+        }
+        const parent = path.dirname(dir);
+        if (parent === dir) break; // Reached filesystem root with no match
+        dir = parent;
+      }
+    } catch {
+      // Main entry also not resolvable — fall through to the original error
+    }
+
     throw new GenerationError(
       'QCE_PACKAGE_NAME_RESOLVE_FAILED',
-      `Project "${projectId}" could not resolve source package "${source.packageName}" from ${cwd}: ${toErrorMessage(error)}`,
+      `Project "${projectId}" could not resolve source package "${source.packageName}" from ${cwd}: ${toErrorMessage(primaryError)}`,
     );
   }
 }

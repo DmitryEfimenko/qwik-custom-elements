@@ -2047,3 +2047,73 @@ describe('generateFromConfig', () => {
     });
   });
 });
+
+it('resolves package root for PACKAGE_NAME source with strict exports map (no ./package.json)', async () => {
+  await withTempDir(async (tempDir) => {
+    const packageName = '@demo/strict-exports-lib';
+    const packageRoot = path.join(
+      tempDir,
+      'node_modules',
+      '@demo',
+      'strict-exports-lib',
+    );
+    await mkdir(path.join(packageRoot, 'dist'), { recursive: true });
+    // package.json has strict exports — no ./package.json export
+    await writeFile(
+      path.join(packageRoot, 'package.json'),
+      JSON.stringify({
+        name: packageName,
+        version: '1.0.0',
+        exports: {
+          '.': './dist/index.js',
+        },
+      }),
+      'utf8',
+    );
+    // A real CJS-style file so require.resolve can find it
+    await writeFile(
+      path.join(packageRoot, 'dist', 'index.js'),
+      'exports.noop = () => undefined;\\n',
+      'utf8',
+    );
+    await writeFile(
+      path.join(packageRoot, 'custom-elements.json'),
+      JSON.stringify({
+        modules: [{ declarations: [{ tagName: 'strict-button' }] }],
+      }),
+      'utf8',
+    );
+
+    await writeFile(
+      path.join(tempDir, 'adapter-minimal.mjs'),
+      [
+        'export const metadata = {',
+        "  supportedSourceTypes: ['PACKAGE_NAME'],",
+        '};',
+        'export function createGeneratedOutput() { return []; }',
+        '',
+      ].join('\\n'),
+      'utf8',
+    );
+
+    const config: GeneratorConfig = {
+      dryRun: true,
+      projects: [
+        {
+          id: 'demo',
+          adapter: 'stencil',
+          adapterPackage: './adapter-minimal.mjs',
+          source: { type: 'PACKAGE_NAME', packageName },
+          outDir: './src/generated',
+        },
+      ],
+    };
+
+    const result = await generateFromConfig(config, { cwd: tempDir });
+    expect(result.projects[0].status).toBe('success');
+    expect(result.projects[0].componentTags).toEqual(['strict-button']);
+    expect(result.projects[0].sourcePath).toBe(
+      path.join(packageRoot, 'custom-elements.json'),
+    );
+  });
+});
