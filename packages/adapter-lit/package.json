@@ -38,10 +38,14 @@
     "@builder.io/qwik": "^1.19.2",
     "@lit-labs/ssr": ">=4.0.0",
     "@lit-labs/ssr-client": ">=1.1.0",
-    "lit": ">=3.0.0"
+    "lit": ">=3.0.0",
+    "@qwik-custom-elements/core": "^1.0.0"
   },
   "peerDependenciesMeta": {
     "@lit-labs/ssr": {
+      "optional": true
+    },
+    "@qwik-custom-elements/core": {
       "optional": true
     }
   },

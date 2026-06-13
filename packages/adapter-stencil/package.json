@@ -38,7 +38,13 @@
   ],
   "peerDependencies": {
     "@builder.io/qwik": "^1.19.2",
-    "@builder.io/qwik-city": "^1.19.2"
+    "@builder.io/qwik-city": "^1.19.2",
+    "@qwik-custom-elements/core": "^1.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@qwik-custom-elements/core": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@builder.io/qwik": "^1.19.2",
