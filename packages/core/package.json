@@ -35,5 +35,34 @@
   },
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "description": "Generate typed, SSR-capable Qwik components from Web Component libraries (CLI + orchestration)",
+  "keywords": [
+    "qwik",
+    "web-components",
+    "custom-elements",
+    "ssr",
+    "server-side-rendering",
+    "wrapper",
+    "manifest",
+    "cli",
+    "generator",
+    "code-generation"
+  ],
+  "author": "Dmitry A. Efimenko (https://github.com/DmitryEfimenko)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DmitryEfimenko/qwik-custom-elements.git",
+    "directory": "packages/core"
+  },
+  "homepage": "https://github.com/DmitryEfimenko/qwik-custom-elements#readme",
+  "bugs": {
+    "url": "https://github.com/DmitryEfimenko/qwik-custom-elements/issues"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "funding": "https://github.com/sponsors/DmitryEfimenko",
+  "sideEffects": false
 }

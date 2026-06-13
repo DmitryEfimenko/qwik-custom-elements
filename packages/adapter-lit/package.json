@@ -60,5 +60,34 @@
   },
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "description": "Lit adapter for @qwik-custom-elements — SSR via @lit-labs/ssr (Declarative Shadow DOM)",
+  "keywords": [
+    "qwik",
+    "web-components",
+    "custom-elements",
+    "ssr",
+    "server-side-rendering",
+    "wrapper",
+    "manifest",
+    "lit",
+    "lit-element",
+    "declarative-shadow-dom"
+  ],
+  "author": "Dmitry A. Efimenko (https://github.com/DmitryEfimenko)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DmitryEfimenko/qwik-custom-elements.git",
+    "directory": "packages/adapter-lit"
+  },
+  "homepage": "https://github.com/DmitryEfimenko/qwik-custom-elements#readme",
+  "bugs": {
+    "url": "https://github.com/DmitryEfimenko/qwik-custom-elements/issues"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "funding": "https://github.com/sponsors/DmitryEfimenko",
+  "sideEffects": false
 }
