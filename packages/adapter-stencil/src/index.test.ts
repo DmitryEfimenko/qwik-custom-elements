@@ -1,7 +1,11 @@
+import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
+import os from 'node:os';
+import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 import {
   augmentComponentDefinitions,
+  buildMissingCemHint,
   createGeneratedOutput,
   metadata,
   probeSSR,
@@ -558,5 +562,47 @@ describe('adapter-stencil augmentComponentDefinitions contract', () => {
 
     expect(result[0].slots).toEqual([{ name: 'footer' }]);
     expect(result[1].slots).toEqual([{ name: 'icon' }]);
+  });
+});
+
+describe('buildMissingCemHint', () => {
+  async function withTempPackage(
+    run: (packageRoot: string) => Promise<void>,
+  ): Promise<void> {
+    const dir = await mkdtemp(
+      path.join(os.tmpdir(), 'qce-adapter-stencil-hint-'),
+    );
+    try {
+      await run(dir);
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  }
+
+  it('returns a hint if collection-manifest.json exists', async () => {
+    await withTempPackage(async (packageRoot) => {
+      await mkdir(path.join(packageRoot, 'dist', 'collection'), {
+        recursive: true,
+      });
+      await writeFile(
+        path.join(
+          packageRoot,
+          'dist',
+          'collection',
+          'collection-manifest.json',
+        ),
+        '{}',
+        'utf8',
+      );
+      const hint = buildMissingCemHint({ packageRoot });
+      expect(hint).toContain('docs-custom-elements-manifest');
+    });
+  });
+
+  it('returns null if collection-manifest.json does not exist', async () => {
+    await withTempPackage(async (packageRoot) => {
+      const hint = buildMissingCemHint({ packageRoot });
+      expect(hint).toBeNull();
+    });
   });
 });

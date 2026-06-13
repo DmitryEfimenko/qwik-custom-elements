@@ -188,7 +188,12 @@ async function generateProject(
   );
   const { runtimeImports } = runtimeImportResult;
 
-  const sourcePath = resolveProjectSourcePath(project.id, project.source, cwd);
+  const sourcePath = resolveProjectSourcePath(
+    project.id,
+    project.source,
+    cwd,
+    adapterModule,
+  );
   const outDirPath = path.resolve(cwd, project.outDir);
   const componentDefinitions =
     await readComponentDefinitionsFromCem(sourcePath);
@@ -748,6 +753,7 @@ function resolveProjectSourcePath(
   projectId: string,
   source: GeneratorProjectSource,
   cwd: string,
+  adapterModule: Record<string, unknown>,
 ): string {
   if (source.type === 'CEM') {
     return path.resolve(cwd, source.path);
@@ -759,7 +765,12 @@ function resolveProjectSourcePath(
     return resolvePackageNameOverrideCemPath(projectId, source, packageRoot);
   }
 
-  return discoverPackageNameCemPath(projectId, source, packageRoot);
+  return discoverPackageNameCemPath(
+    projectId,
+    source,
+    packageRoot,
+    adapterModule,
+  );
 }
 
 function resolvePackageRootForProject(
@@ -843,6 +854,7 @@ function discoverPackageNameCemPath(
   projectId: string,
   source: Extract<GeneratorProjectSource, { type: 'PACKAGE_NAME' }>,
   packageRoot: string,
+  adapterModule: Record<string, unknown>,
 ): string {
   const candidatePaths = PACKAGE_NAME_CEM_DISCOVERY_CANDIDATES.map(
     (candidate) => path.resolve(packageRoot, candidate),
@@ -860,9 +872,10 @@ function discoverPackageNameCemPath(
   }
 
   if (existingCandidates.length === 0) {
+    const hint = tryAdapterMissingCemHintHook(adapterModule, packageRoot);
     throw new GenerationError(
       'QCE_PACKAGE_NAME_CEM_NOT_FOUND',
-      `Project "${projectId}" could not discover a CEM file for source package "${source.packageName}". Checked: ${PACKAGE_NAME_CEM_DISCOVERY_CANDIDATES.join(', ')}. Set source.cemPath to the manifest path relative to the package root.`,
+      `Project "${projectId}" could not discover a CEM file for source package "${source.packageName}". Checked: ${PACKAGE_NAME_CEM_DISCOVERY_CANDIDATES.join(', ')}. Set source.cemPath to the manifest path relative to the package root.${hint}`,
     );
   }
 
@@ -870,6 +883,24 @@ function discoverPackageNameCemPath(
     'QCE_PACKAGE_NAME_CEM_AMBIGUOUS',
     `Project "${projectId}" discovered multiple CEM candidates for source package "${source.packageName}": ${existingCandidates.join(', ')}. Set source.cemPath to disambiguate.`,
   );
+}
+
+function tryAdapterMissingCemHintHook(
+  adapterModule: Record<string, unknown>,
+  packageRoot: string,
+): string {
+  const hook = adapterModule.buildMissingCemHint;
+  if (typeof hook !== 'function') {
+    return '';
+  }
+
+  try {
+    const result = hook({ packageRoot });
+    return typeof result === 'string' ? result : '';
+  } catch {
+    // Hook errors are non-fatal
+    return '';
+  }
 }
 
 function resolveRuntimeImportSpecifier(

@@ -1536,6 +1536,46 @@ describe('generateFromConfig', () => {
       });
     });
   });
+  it('includes adapter-provided guidance in QCE_PACKAGE_NAME_CEM_NOT_FOUND when hook returns a hint', async () => {
+    await withTempDir(async (tempDir) => {
+      const packageName = '@demo/stencil-no-cem';
+      const _packageRoot = await createFixturePackage(tempDir, packageName);
+
+      // Mock adapter with the hint hook
+      await writeFile(
+        path.join(tempDir, 'adapter-with-hint-hook.mjs'),
+        [
+          'export const metadata = {',
+          "  supportedSourceTypes: ['PACKAGE_NAME'],",
+          '};',
+          'export function buildMissingCemHint({ packageRoot }) {',
+          '  return " Hint from adapter! ";',
+          '}',
+        ].join('\n'),
+        'utf8',
+      );
+
+      const config: GeneratorConfig = {
+        dryRun: true,
+        projects: [
+          {
+            id: 'stencil-demo',
+            adapter: 'stencil',
+            adapterPackage: './adapter-with-hint-hook.mjs',
+            source: { type: 'PACKAGE_NAME', packageName },
+            outDir: './src/generated',
+          },
+        ],
+      };
+
+      await expect(
+        generateFromConfig(config, { cwd: tempDir }),
+      ).rejects.toMatchObject({
+        code: 'QCE_PACKAGE_NAME_CEM_NOT_FOUND',
+        message: expect.stringContaining('Hint from adapter!'),
+      });
+    });
+  });
   it('fails deterministically when PACKAGE_NAME CEM discovery is ambiguous', async () => {
     await withTempDir(async (tempDir) => {
       const packageName = '@demo/components';
@@ -2073,7 +2113,7 @@ it('resolves package root for PACKAGE_NAME source with strict exports map (no ./
     // A real CJS-style file so require.resolve can find it
     await writeFile(
       path.join(packageRoot, 'dist', 'index.js'),
-      'exports.noop = () => undefined;\\n',
+      'exports.noop = () => undefined;\n',
       'utf8',
     );
     await writeFile(
@@ -2092,7 +2132,7 @@ it('resolves package root for PACKAGE_NAME source with strict exports map (no ./
         '};',
         'export function createGeneratedOutput() { return []; }',
         '',
-      ].join('\\n'),
+      ].join('\n'),
       'utf8',
     );
 

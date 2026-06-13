@@ -21,6 +21,9 @@ export default defineConfig({
         return `${entryName}.${format === 'es' ? 'js' : 'cjs'}`;
       },
     },
+    rollupOptions: {
+      external: ['node:fs', 'node:path'],
+    },
   },
   plugins: [qwikVite({ csr: true })],
 });

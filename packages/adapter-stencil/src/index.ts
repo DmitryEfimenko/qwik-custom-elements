@@ -1,9 +1,36 @@
+import { existsSync } from 'node:fs';
+import path from 'node:path';
+
 export const metadata = {
   adapterId: 'stencil',
   supportedSourceTypes: ['CEM', 'PACKAGE_NAME'],
   supportsSsrProbe: true,
   ssrRuntimeSubpath: './ssr',
 };
+
+export function buildMissingCemHint({
+  packageRoot,
+}: {
+  packageRoot: string;
+}): string | null {
+  const collectionManifestPath = path.join(
+    packageRoot,
+    'dist',
+    'collection',
+    'collection-manifest.json',
+  );
+
+  if (!existsSync(collectionManifestPath)) {
+    return null;
+  }
+
+  return (
+    ' This looks like a Stencil package. To fix this, ask the library author to add' +
+    ' the `docs-custom-elements-manifest` output target to their `stencil.config.ts`:' +
+    " `{ type: 'docs-custom-elements-manifest', file: 'custom-elements.json' }`." +
+    ' Alternatively, set source.cemPath to the path of a manually generated CEM file.'
+  );
+}
 
 interface ValidateProjectInput {
   projectId?: string;
