@@ -1,9 +1,30 @@
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { parseCliArgs, runCli } from '../cli.js';
 import { ConfigValidationError, loadGeneratorConfig } from '../config.js';
+
+async function readVersionFromPackageJson(
+  packageJsonPath: string,
+): Promise<string> {
+  try {
+    const packageJsonText = await readFile(packageJsonPath, 'utf8');
+    const packageJson = JSON.parse(packageJsonText) as Record<string, unknown>;
+    if (
+      packageJson != null &&
+      typeof packageJson.version === 'string' &&
+      packageJson.version.length > 0
+    ) {
+      return packageJson.version;
+    }
+    return 'unknown';
+  } catch {
+    return 'unknown';
+  }
+}
+
 async function withTempDir(
   run: (tempDir: string) => Promise<void>,
 ): Promise<void> {
@@ -755,10 +776,40 @@ describe('runCli', () => {
           supportsSsrProbe: true,
           ssrRuntimeSubpath: './ssr',
         });
-        expect(summary.projects[0].resolvedCoreVersion).toBe('1.0.0');
-        expect(summary.projects[1].resolvedCoreVersion).toBe('1.0.0');
-        expect(summary.projects[0].resolvedAdapterVersion).toBe('1.0.0');
-        expect(summary.projects[1].resolvedAdapterVersion).toBe('1.0.0');
+
+        // Read actual versions from package.json to make test resilient to version bumps
+        const corePackageJsonPath = path.resolve(
+          path.dirname(fileURLToPath(import.meta.url)),
+          '..',
+          '..',
+          'package.json',
+        );
+        const adapterPackageJsonPath = path.resolve(
+          path.dirname(fileURLToPath(import.meta.url)),
+          '..',
+          '..',
+          '..',
+          'adapter-stencil',
+          'package.json',
+        );
+        const expectedCoreVersion =
+          await readVersionFromPackageJson(corePackageJsonPath);
+        const expectedAdapterVersion = await readVersionFromPackageJson(
+          adapterPackageJsonPath,
+        );
+
+        expect(summary.projects[0].resolvedCoreVersion).toBe(
+          expectedCoreVersion,
+        );
+        expect(summary.projects[1].resolvedCoreVersion).toBe(
+          expectedCoreVersion,
+        );
+        expect(summary.projects[0].resolvedAdapterVersion).toBe(
+          expectedAdapterVersion,
+        );
+        expect(summary.projects[1].resolvedAdapterVersion).toBe(
+          expectedAdapterVersion,
+        );
       } finally {
         process.chdir(previousCwd);
       }

@@ -3,6 +3,9 @@ output:
   - failure
 
 pre-commit:
+  skip:
+    - run: '[ -n "$CI" ]'
+      reason: 'Skipping pre-commit hooks in CI environment'
   parallel: true
   jobs:
     - name: lint
@@ -12,6 +15,9 @@ pre-commit:
       run: pnpm format:check
 
 pre-push:
+  skip:
+    - run: '[ -n "$CI" ]'
+      reason: 'Skipping pre-push hooks in CI environment'
   jobs:
     - name: typecheck
       run: pnpm typecheck
