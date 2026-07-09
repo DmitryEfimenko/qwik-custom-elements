@@ -1,29 +1,52 @@
 import { qwikVite } from '@builder.io/qwik/optimizer';
 import { defineConfig } from 'vite';
+import dts from 'vite-plugin-dts';
+
+const externalDependencies = [
+  '@builder.io/qwik',
+  '@builder.io/qwik/jsx-runtime',
+  '@builder.io/qwik-city',
+  '@qwik-custom-elements/core',
+  'node:fs',
+  'node:path',
+];
 
 export default defineConfig({
   build: {
     target: 'es2020',
     outDir: 'dist',
     emptyOutDir: true,
+    // Keep Qwik-oriented symbols stable in emitted library code.
+    // Minification can rename locals to `$`, which the consumer optimizer
+    // interprets as a QRL marker and rejects.
+    minify: false,
     lib: {
       entry: {
         index: './src/index.ts',
         'client/index': './src/client/index.ts',
         'ssr/index': './src/ssr/index.ts',
       },
-      formats: ['es', 'cjs'],
-      fileName: (format, entryName) => {
-        if (entryName === 'index') {
-          return format === 'es' ? 'index.qwik.mjs' : 'index.qwik.cjs';
-        }
-
-        return `${entryName}.${format === 'es' ? 'js' : 'cjs'}`;
-      },
+      formats: ['es'],
+      fileName: (_format, entryName) => `${entryName}.qwik.mjs`,
     },
     rollupOptions: {
-      external: ['node:fs', 'node:path'],
+      external: (id) => {
+        if (id === '@builder.io/qwik/qwikloader.js') {
+          return false;
+        }
+
+        return externalDependencies.some(
+          (dependency) => id === dependency || id.startsWith(`${dependency}/`),
+        );
+      },
     },
   },
-  plugins: [qwikVite({ csr: true })],
+  plugins: [
+    qwikVite({ csr: true, entryStrategy: { type: 'inline' } }),
+    dts({
+      entryRoot: 'src',
+      insertTypesEntry: true,
+      tsconfigPath: './tsconfig.build.json',
+    }),
+  ],
 });

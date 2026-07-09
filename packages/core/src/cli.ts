@@ -1,3 +1,4 @@
+import { realpathSync } from 'node:fs';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -404,7 +405,14 @@ function isMainModule(): boolean {
     return false;
   }
 
-  return import.meta.url === pathToFileURL(executedPath).href;
+  try {
+    return (
+      realpathSync(fileURLToPath(import.meta.url)) ===
+      realpathSync(executedPath)
+    );
+  } catch {
+    return import.meta.url === pathToFileURL(executedPath).href;
+  }
 }
 
 if (isMainModule()) {

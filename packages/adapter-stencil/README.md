@@ -95,8 +95,7 @@ import {
 import { defineCustomElements } from '@acme/stencil-lib/loader';
 
 const renderToString: StencilRenderToString = async (input, options) => {
-  const hydrateModuleId = '@acme/stencil-lib/hydrate';
-  const { renderToString } = await import(/* @vite-ignore */ hydrateModuleId);
+  const { renderToString } = await import('@acme/stencil-lib/hydrate');
   return renderToString(input, options);
 };
 
@@ -289,7 +288,7 @@ The generated client module (`runtime-csr.generated.ts`) provides:
 - `useStencilClientSetup`
 - `GeneratedStencilCSRComponent` — the client-only rendering bridge created by `createStencilCSRComponent()`
 
-When a resolved hydrate import is also available, generation additionally emits `runtime-ssr.generated.ts` with a typed `renderToString` export that loads the resolved hydrate runtime through the same Vite-ignored dynamic import boundary used for SSR-safe demo integration.
+When a resolved hydrate import is also available, generation additionally emits `runtime-ssr.generated.ts` with a typed `renderToString` export that loads the resolved hydrate runtime through a direct dynamic import so SSR bundlers can include the hydrate runtime reliably.
 
 For `PACKAGE_NAME`, those runtime imports may come from package-aware defaults or explicit overrides. For `CEM`, they come from the explicit `adapterOptions.runtime` contract. This keeps generated runtime modules aligned with the same resolved runtime import contract already used for validation and SSR probing.
 

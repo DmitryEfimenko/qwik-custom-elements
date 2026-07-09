@@ -156,9 +156,9 @@ export function createStencilClientSetup(
   });
 
   const useStencilClientSetup = () => {
-    // Register for full page loads and also run immediately when mounted
-    // after the load event has already fired (client navigation/dev timing).
-    useOnDocument('load', runSetup$);
+    // Register for document ready-state transitions and also run immediately
+    // when mounted after loading has already progressed (navigation/dev timing).
+    useOnDocument('readystatechange', runSetup$);
 
     if (typeof document !== 'undefined' && document.readyState !== 'loading') {
       void executeStencilClientSetup(

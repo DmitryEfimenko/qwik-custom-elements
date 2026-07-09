@@ -1,4 +1,11 @@
-import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import {
+  mkdir,
+  mkdtemp,
+  readFile,
+  realpath,
+  rm,
+  writeFile,
+} from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -15,7 +22,9 @@ const validStencilAdapterOptions = {
 async function withTempDir(
   run: (tempDir: string) => Promise<void>,
 ): Promise<void> {
-  const tempDir = await mkdtemp(path.join(os.tmpdir(), 'qce-core-'));
+  const tempDir = await realpath(
+    await mkdtemp(path.join(os.tmpdir(), 'qce-core-')),
+  );
   try {
     await run(tempDir);
   } finally {
@@ -1079,13 +1088,10 @@ describe('generateFromConfig', () => {
 
       expect(runtimeWrite).toBeDefined();
       expect(runtimeWrite!.content).toContain(
-        "const hydrateModuleId = '@acme/stencil-lib/hydrate';",
-      );
-      expect(runtimeWrite!.content).toContain(
         'export const renderToString: StencilRenderToString = async (input, options) => {',
       );
       expect(runtimeWrite!.content).toContain(
-        '/* @vite-ignore */ hydrateModuleId',
+        "await import(\n    '@acme/stencil-lib/hydrate'",
       );
       expect(runtimeWrite!.content).toContain(
         'return runtimeRenderToString(input, options);',
@@ -1652,38 +1658,44 @@ describe('generateFromConfig', () => {
       });
     });
   });
-  it('rejects PACKAGE_NAME cemPath overrides that escape package root', async () => {
-    await withTempDir(async (tempDir) => {
-      const packageName = '@demo/components';
-      await createFixturePackage(tempDir, packageName);
+  it.each([
+    '../outside/custom-elements.json',
+    '..\\outside\\custom-elements.json',
+  ])(
+    'rejects PACKAGE_NAME cemPath override %s when it escapes package root',
+    async (cemPath) => {
+      await withTempDir(async (tempDir) => {
+        const packageName = '@demo/components';
+        await createFixturePackage(tempDir, packageName);
 
-      await writeFile(
-        path.join(tempDir, 'adapter-package-name-only.mjs'),
-        [
-          'export const metadata = {',
-          "  id: 'custom-adapter',",
-          "  supportedSourceTypes: ['PACKAGE_NAME'],",
-          '};',
-          '',
-        ].join('\n'),
-        'utf8',
-      );
+        await writeFile(
+          path.join(tempDir, 'adapter-package-name-only.mjs'),
+          [
+            'export const metadata = {',
+            "  id: 'custom-adapter',",
+            "  supportedSourceTypes: ['PACKAGE_NAME'],",
+            '};',
+            '',
+          ].join('\n'),
+          'utf8',
+        );
 
-      const config = createSingleProjectConfig(tempDir, true);
-      config.projects[0].adapterPackage = './adapter-package-name-only.mjs';
-      config.projects[0].source = {
-        type: 'PACKAGE_NAME',
-        packageName,
-        cemPath: '../outside/custom-elements.json',
-      };
+        const config = createSingleProjectConfig(tempDir, true);
+        config.projects[0].adapterPackage = './adapter-package-name-only.mjs';
+        config.projects[0].source = {
+          type: 'PACKAGE_NAME',
+          packageName,
+          cemPath,
+        };
 
-      await expect(
-        generateFromConfig(config, { cwd: tempDir }),
-      ).rejects.toMatchObject({
-        code: 'QCE_PACKAGE_NAME_CEM_PATH_OUTSIDE_PACKAGE',
+        await expect(
+          generateFromConfig(config, { cwd: tempDir }),
+        ).rejects.toMatchObject({
+          code: 'QCE_PACKAGE_NAME_CEM_PATH_OUTSIDE_PACKAGE',
+        });
       });
-    });
-  });
+    },
+  );
   it('fails with deterministic code when CEM shape is invalid', async () => {
     await withTempDir(async (tempDir) => {
       await writeFile(
@@ -1913,26 +1925,28 @@ describe('generateFromConfig', () => {
       });
     });
   });
-  it('rejects output paths that resolve outside the workspace root', async () => {
-    await withTempDir(async (tempDir) => {
-      await writeFile(
-        path.join(tempDir, 'custom-elements.json'),
-        JSON.stringify({
-          modules: [{ declarations: [{ tagName: 'app-root' }] }],
-        }),
-        'utf8',
-      );
-      const config = createSingleProjectConfig(tempDir, true);
-      config.projects[0].outDir = '../outside-generated';
-      await expect(
-        generateFromConfig(config, { cwd: tempDir }),
-      ).rejects.toMatchObject({
-        code: 'QCE_OUTPUT_OUTSIDE_WORKSPACE',
-        message:
-          'Project "demo" output path resolves outside workspace root: ../outside-generated',
+  it.each(['../outside-generated', '..\\outside-generated'])(
+    'rejects output path %s when it resolves outside the workspace root',
+    async (outDir) => {
+      await withTempDir(async (tempDir) => {
+        await writeFile(
+          path.join(tempDir, 'custom-elements.json'),
+          JSON.stringify({
+            modules: [{ declarations: [{ tagName: 'app-root' }] }],
+          }),
+          'utf8',
+        );
+        const config = createSingleProjectConfig(tempDir, true);
+        config.projects[0].outDir = outDir;
+        await expect(
+          generateFromConfig(config, { cwd: tempDir }),
+        ).rejects.toMatchObject({
+          code: 'QCE_OUTPUT_OUTSIDE_WORKSPACE',
+          message: `Project "demo" output path resolves outside workspace root: ${outDir}`,
+        });
       });
-    });
-  });
+    },
+  );
   it('fails when multiple projects resolve to the same output directory', async () => {
     await withTempDir(async (tempDir) => {
       await writeFile(

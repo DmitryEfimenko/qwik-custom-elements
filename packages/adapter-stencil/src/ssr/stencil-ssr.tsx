@@ -1,9 +1,6 @@
 import {
   $,
   component$,
-  isBrowser,
-  isServer,
-  type QRL,
   Slot,
   SSRRaw,
   SSRStream,
@@ -11,6 +8,7 @@ import {
   useOnDocument,
   useSignal,
   useTask$,
+  type QRL,
 } from '@builder.io/qwik';
 
 import { updateStencilElementProps } from './element-props-utils';
@@ -19,6 +17,16 @@ import {
   collectStencilSsrStyles,
   createStencilSsrStyleStore,
 } from './styles-core';
+
+export { updateStencilElementProps } from './element-props-utils';
+
+function isRuntimeBrowser(): boolean {
+  return typeof window !== 'undefined' && typeof document !== 'undefined';
+}
+
+function isRuntimeServer(): boolean {
+  return !isRuntimeBrowser();
+}
 
 const INLINE_EMITTED_KEY = '__stencil_ssr_inline_emitted__';
 const EVENT_QRL_IDS = new WeakMap<object, number>();
@@ -71,7 +79,7 @@ function getOrInitRequestInlineEmittedKeys(): Set<string> {
  * `<style>` HTML string, deduplicating across multiple renders in the same
  * request. Returns an empty string when there is nothing new to emit.
  */
-function buildInlineStylesHtml(
+export function buildInlineStylesHtml(
   renderResult: Awaited<ReturnType<StencilRenderToString>>,
   tagName?: string,
 ): string {
@@ -90,21 +98,24 @@ function buildInlineStylesHtml(
   return html;
 }
 
-const DEFAULT_SLOT_MARKER = '<!--SLOT-->';
+export const DEFAULT_SLOT_MARKER = '<!--SLOT-->';
+export const DEFAULT_NAMED_SLOT_PLACEHOLDER_TAG = 'span';
 
-function namedSlotMarker(name: string) {
+export function namedSlotMarker(name: string) {
   return `<!--SLOT:${name}-->`;
 }
 
-function getStencilElement(
+export function getStencilElement(
   wrapper: HTMLDivElement | undefined,
   tagName: string,
 ) {
   return wrapper?.querySelector<HTMLElement>(tagName);
 }
 
-function getWrapperElement(wrapperId: string): HTMLDivElement | undefined {
-  if (!isBrowser) return undefined;
+export function getWrapperElement(
+  wrapperId: string,
+): HTMLDivElement | undefined {
+  if (!isRuntimeBrowser()) return undefined;
   return (
     document.querySelector<HTMLDivElement>(
       `[data-stencil-wrapper-id="${wrapperId}"]`,
@@ -112,13 +123,15 @@ function getWrapperElement(wrapperId: string): HTMLDivElement | undefined {
   );
 }
 
-function getEventEntries(events: StencilSSRProps['events']) {
+export function getEventEntries(events: StencilSSRProps['events']) {
   return Object.entries(events ?? {}).filter(
     ([eventName, eventQrl]) => eventName.trim().length > 0 && Boolean(eventQrl),
   );
 }
 
-function getEventsDependencyKey(events: StencilSSRProps['events']): string {
+export function getEventsDependencyKey(
+  events: StencilSSRProps['events'],
+): string {
   return getEventEntries(events)
     .map(([eventName, eventQrl]) => {
       return `${eventName}:${getEventQrlId(eventQrl)}`;
@@ -128,10 +141,6 @@ function getEventsDependencyKey(events: StencilSSRProps['events']): string {
 }
 
 type EventQrlInternal = QRL<(...args: any[]) => void> & {
-  getFn?: (
-    args?: unknown[],
-    guard?: () => boolean,
-  ) => (...args: any[]) => Promise<unknown>;
   $setContainer$?: (containerEl: Element) => void;
 };
 
@@ -141,17 +150,29 @@ type EventQrlInternal = QRL<(...args: any[]) => void> & {
  * Each named slot gets a `<div slot="name"><!--SLOT:name--></div>` wrapper
  * so Stencil places the marker inside the correct slot outlet in its output.
  */
-function buildInputHtml(tagName: string, slots: string[]) {
+export function buildInputHtml(tagName: string, slots: string[]) {
+  return buildInputHtmlWithOptions(tagName, slots);
+}
+
+export function buildInputHtmlWithOptions(
+  tagName: string,
+  slots: string[],
+  options?: { useLegacyNamedSlotWrapper?: boolean },
+) {
+  const namedSlotTag = options?.useLegacyNamedSlotWrapper
+    ? 'div'
+    : DEFAULT_NAMED_SLOT_PLACEHOLDER_TAG;
+
   const namedSlotHtml = slots
     .map(
       (s) =>
-        `<div slot="${s}" style="display:contents">${namedSlotMarker(s)}</div>`,
+        `<${namedSlotTag} slot="${s}" style="display:contents">${namedSlotMarker(s)}</${namedSlotTag}>`,
     )
     .join('');
   return `<${tagName}>${DEFAULT_SLOT_MARKER}${namedSlotHtml}</${tagName}>`;
 }
 
-type SlotEntry = { marker: string; name?: string };
+export type SlotEntry = { marker: string; name?: string; position: number };
 
 /**
  * Locates all slot markers present in `html`, sorted by their position.
@@ -159,36 +180,50 @@ type SlotEntry = { marker: string; name?: string };
  * (Stencil may omit a slot outlet if it has no matching slot element).
  * Marker positions are pre-computed to avoid redundant string searches.
  */
-function collectSlotEntries(html: string, namedSlots: string[]): SlotEntry[] {
-  const candidates: SlotEntry[] = [
+export function collectSlotEntries(
+  html: string,
+  namedSlots: string[],
+): SlotEntry[] {
+  const candidates: Array<{ marker: string; name?: string }> = [
     { marker: DEFAULT_SLOT_MARKER, name: undefined },
     ...namedSlots.map((s) => ({ marker: namedSlotMarker(s), name: s })),
   ];
 
   // Pre-compute marker positions and filter to those present in HTML
-  const markerPositions = new Map<string, number>();
-  for (const candidate of candidates) {
-    const pos = html.indexOf(candidate.marker);
-    if (pos !== -1) {
-      markerPositions.set(candidate.marker, pos);
+  const entries: SlotEntry[] = [];
+  for (const { marker, name } of candidates) {
+    const position = html.indexOf(marker);
+    if (position !== -1) {
+      entries.push({ marker, name, position });
     }
   }
 
   // Filter candidates to present markers and sort by position
-  return candidates
-    .filter((c) => markerPositions.has(c.marker))
-    .sort(
-      (a, b) => markerPositions.get(a.marker)! - markerPositions.get(b.marker)!,
-    );
+  return entries.sort((a, b) => a.position - b.position);
+}
+
+export function stripSlotMarkersFromHtml(
+  html: string,
+  namedSlots: string[],
+): string {
+  let cleaned = html.replaceAll(DEFAULT_SLOT_MARKER, '');
+  for (const name of namedSlots) {
+    cleaned = cleaned.replaceAll(namedSlotMarker(name), '');
+  }
+  return cleaned;
+}
+
+function emitSsrRawChunk(html: string, namedSlots: string[]) {
+  const cleaned = stripSlotMarkersFromHtml(html, namedSlots);
+  if (cleaned.length === 0) {
+    return null;
+  }
+  return <SSRRaw data={cleaned} />;
 }
 
 /**
  * Creates a Qwik component that renders a Stencil component with SSR support.
  * Handles slot projection, prop synchronization, and style deduplication.
- *
- * @param stencilRenderToString$ - QRL reference to Stencil's renderToString function
- * @param options - Optional callbacks for SSR lifecycle events
- * @returns A Qwik component that can be used like any other Qwik component
  */
 export function createStencilSSRBridgeComponent(
   stencilRenderToString$: QRL<StencilRenderToString>,
@@ -206,6 +241,7 @@ export function createStencilSSRBridgeComponent(
       const clientReady = useSignal(false);
       const wrapperId = useId();
       const namedSlots = slots ?? [];
+      const ElementTag = tagName as any;
 
       useOnDocument(
         'qinit',
@@ -214,21 +250,21 @@ export function createStencilSSRBridgeComponent(
         }),
       );
 
-      // Keeps the Stencil element's props in sync with Qwik signals on the client.
-      // On the server, props are applied via `beforeHydrate` inside the SSRStream.
       useTask$(({ track }) => {
         const trackedProps = track(() => props);
-        if (!isBrowser) return;
+        if (!isRuntimeBrowser()) return;
         const wrapper = getWrapperElement(wrapperId) ?? wrapperRef.value;
-        const stencilEl = getStencilElement(wrapper, tagName);
-        updateStencilElementProps(stencilEl, trackedProps);
+        updateStencilElementProps(
+          getStencilElement(wrapper, tagName),
+          trackedProps,
+        );
       });
 
       useTask$(({ cleanup, track }) => {
         const ready = track(() => clientReady.value);
         const eventsDependencyKey = track(() => getEventsDependencyKey(events));
 
-        if (!isBrowser || !ready) return;
+        if (!isRuntimeBrowser() || !ready) return;
 
         const wrapper = getWrapperElement(wrapperId) ?? wrapperRef.value;
         const stencilEl = getStencilElement(wrapper, tagName);
@@ -262,7 +298,6 @@ export function createStencilSSRBridgeComponent(
             }
 
             const result = eventQrl(event, stencilEl);
-
             void Promise.resolve(result).catch((error) => {
               console.error(error);
             });
@@ -277,7 +312,7 @@ export function createStencilSSRBridgeComponent(
         }
       });
 
-      if (isServer) {
+      if (isRuntimeServer()) {
         return (
           <div
             ref={wrapperRef}
@@ -288,27 +323,27 @@ export function createStencilSSRBridgeComponent(
             <SSRStream>
               {async function* () {
                 const renderToString = await stencilRenderToString$.resolve();
-
                 const renderResult = await renderToString(
                   buildInputHtml(tagName, namedSlots),
                   {
                     prettyHtml: true,
                     removeScripts: false,
                     beforeHydrate: (root) => {
-                      const stencilElement = root.querySelector(tagName);
-                      updateStencilElementProps(stencilElement, props);
+                      updateStencilElementProps(
+                        root.querySelector(tagName),
+                        props,
+                      );
                     },
                   },
                 );
                 const html = renderResult.html ?? '';
+
                 if (options?.onSsrRenderResultQrl) {
                   const onSsrRenderResult =
                     await options.onSsrRenderResultQrl.resolve();
                   await onSsrRenderResult(renderResult);
                 }
 
-                // Inline-emit component styles, deduped per request so the same
-                // CSS is not repeated when the same component appears multiple times.
                 const inlineStylesHtml = buildInlineStylesHtml(
                   renderResult,
                   tagName,
@@ -317,25 +352,30 @@ export function createStencilSSRBridgeComponent(
                   yield <SSRRaw data={inlineStylesHtml} />;
                 }
 
-                // `fullDocument` option is unavailable in some Stencil versions,
-                // so extract the body content manually.
                 const bodyHtml =
                   html.match(/<body>([\s\S]*)<\/body>/)?.[1] || html;
-
                 const entries = collectSlotEntries(bodyHtml, namedSlots);
 
                 if (entries.length === 0) {
-                  // Component has no slots at all - emit the full HTML as-is.
-                  yield <SSRRaw data={bodyHtml} />;
+                  const chunk = emitSsrRawChunk(bodyHtml, namedSlots);
+                  if (chunk) {
+                    yield chunk;
+                  }
                   return;
                 }
 
-                // Walk through the body HTML, interleaving SSRRaw segments with
-                // Qwik <Slot /> / <Slot name="..." /> at each marker position.
                 let cursor = 0;
                 for (const entry of entries) {
-                  const markerIndex = bodyHtml.indexOf(entry.marker, cursor);
-                  yield <SSRRaw data={bodyHtml.slice(cursor, markerIndex)} />;
+                  const markerIndex = entry.position;
+                  if (markerIndex > cursor) {
+                    const chunk = emitSsrRawChunk(
+                      bodyHtml.slice(cursor, markerIndex),
+                      namedSlots,
+                    );
+                    if (chunk) {
+                      yield chunk;
+                    }
+                  }
                   if (entry.name) {
                     yield <Slot name={entry.name} />;
                   } else {
@@ -343,9 +383,14 @@ export function createStencilSSRBridgeComponent(
                   }
                   cursor = markerIndex + entry.marker.length;
                 }
-                // Emit any HTML that follows the last marker.
                 if (cursor < bodyHtml.length) {
-                  yield <SSRRaw data={bodyHtml.slice(cursor)} />;
+                  const chunk = emitSsrRawChunk(
+                    bodyHtml.slice(cursor),
+                    namedSlots,
+                  );
+                  if (chunk) {
+                    yield chunk;
+                  }
                 }
               }}
             </SSRStream>
@@ -353,8 +398,6 @@ export function createStencilSSRBridgeComponent(
         );
       }
 
-      // On the client, Stencil upgrades the custom element and handles
-      // rendering. Qwik projects default and named children via <Slot />.
       return (
         <div
           ref={wrapperRef}
@@ -362,10 +405,14 @@ export function createStencilSSRBridgeComponent(
           {...restProps}
           style={{ display: 'contents' }}
         >
-          <Slot />
-          {namedSlots.map((name) => (
-            <Slot name={name} key={name} />
-          ))}
+          <ElementTag>
+            <Slot />
+            {namedSlots.map((name) => (
+              <span key={name} slot={name} style={{ display: 'contents' }}>
+                <Slot name={name} />
+              </span>
+            ))}
+          </ElementTag>
         </div>
       );
     },

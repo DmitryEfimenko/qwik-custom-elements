@@ -195,6 +195,11 @@ async function generateProject(
     adapterModule,
   );
   const outDirPath = path.resolve(cwd, project.outDir);
+  const probeRuntimeImports = resolveProbeRuntimeImports(
+    runtimeImports,
+    outDirPath,
+    cwd,
+  );
   const componentDefinitions =
     await readComponentDefinitionsFromCem(sourcePath);
   const augmentedComponentDefinitions =
@@ -212,7 +217,7 @@ async function generateProject(
   const ssrProbe = await probeProjectSsrAvailability(
     project,
     adapterModule,
-    runtimeImports,
+    probeRuntimeImports,
   );
   const adapterPlannedWrites = await createAdapterPlannedWrites(
     project,
@@ -825,20 +830,20 @@ function resolvePackageNameOverrideCemPath(
   packageRoot: string,
 ): string {
   const cemPath = source.cemPath as string;
+  const normalizedCemPath = normalizeConfigPathForHost(cemPath);
 
-  if (path.isAbsolute(cemPath)) {
+  if (path.isAbsolute(normalizedCemPath)) {
     throw new GenerationError(
       'QCE_PACKAGE_NAME_CEM_PATH_ABSOLUTE',
       `Project "${projectId}" PACKAGE_NAME source.cemPath must be relative to package root; received absolute path "${cemPath}".`,
     );
   }
 
-  const resolvedCemPath = path.resolve(packageRoot, cemPath);
+  const resolvedCemPath = path.resolve(packageRoot, normalizedCemPath);
   const relativeToPackageRoot = path.relative(packageRoot, resolvedCemPath);
-  const resolvesOutsidePackageRoot =
-    relativeToPackageRoot === '..' ||
-    relativeToPackageRoot.startsWith(`..${path.sep}`) ||
-    path.isAbsolute(relativeToPackageRoot);
+  const resolvesOutsidePackageRoot = isRelativePathOutsideBase(
+    relativeToPackageRoot,
+  );
 
   if (resolvesOutsidePackageRoot) {
     throw new GenerationError(
@@ -923,7 +928,8 @@ function validateProjectOutputSafety(
   const outputDirOwners = new Map<string, string>();
 
   for (const project of projects) {
-    const resolvedOutDir = path.resolve(workspaceRoot, project.outDir);
+    const normalizedOutDir = normalizeConfigPathForHost(project.outDir);
+    const resolvedOutDir = path.resolve(workspaceRoot, normalizedOutDir);
 
     validateResolvedOutDirWithinWorkspace(
       project,
@@ -951,9 +957,7 @@ function validateResolvedOutDirWithinWorkspace(
   const relativeToWorkspace = path.relative(workspaceRoot, resolvedOutDir);
 
   const resolvesOutsideWorkspace =
-    relativeToWorkspace === '..' ||
-    relativeToWorkspace.startsWith(`..${path.sep}`) ||
-    path.isAbsolute(relativeToWorkspace);
+    isRelativePathOutsideBase(relativeToWorkspace);
 
   if (resolvesOutsideWorkspace) {
     throw new GenerationError(
@@ -961,6 +965,20 @@ function validateResolvedOutDirWithinWorkspace(
       `Project "${project.id}" output path resolves outside workspace root: ${project.outDir}`,
     );
   }
+}
+
+function normalizeConfigPathForHost(inputPath: string): string {
+  return inputPath.replaceAll('\\', '/');
+}
+
+function isRelativePathOutsideBase(relativePath: string): boolean {
+  return (
+    relativePath === '..' ||
+    relativePath.startsWith(`..${path.sep}`) ||
+    relativePath.startsWith('../') ||
+    relativePath.startsWith('..\\') ||
+    path.isAbsolute(relativePath)
+  );
 }
 
 function createPlannedWrites(

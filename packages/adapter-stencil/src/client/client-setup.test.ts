@@ -57,7 +57,7 @@ describe('createStencilClientSetup', () => {
     expect(defineCustomElements).toHaveBeenCalledTimes(1);
   });
 
-  it('registers load listener and executes setup once across repeated callbacks', async () => {
+  it('registers readystatechange listener and executes setup once across repeated callbacks', async () => {
     const { createStencilClientSetup } = await import('./client-setup');
 
     const defineCustomElements = vi.fn(async () => {});
@@ -69,19 +69,19 @@ describe('createStencilClientSetup', () => {
     expect(useOnDocumentMock).toHaveBeenCalledTimes(1);
     expect(useOnDocumentMock).toHaveBeenNthCalledWith(
       1,
-      'load',
+      'readystatechange',
       expect.any(Function),
     );
 
-    const loadQrl = useOnDocumentMock.mock.calls[0]?.[1] as
+    const readystatechangeQrl = useOnDocumentMock.mock.calls[0]?.[1] as
       | { resolve: () => Promise<() => Promise<void>> }
       | undefined;
-    const loadHandler = await loadQrl?.resolve();
+    const readystatechangeHandler = await readystatechangeQrl?.resolve();
 
-    expect(loadQrl?.resolve).toBeTypeOf('function');
+    expect(readystatechangeQrl?.resolve).toBeTypeOf('function');
 
-    await loadHandler?.();
-    await loadHandler?.();
+    await readystatechangeHandler?.();
+    await readystatechangeHandler?.();
 
     expect(defineCustomElements).toHaveBeenCalledTimes(1);
   });
@@ -100,13 +100,13 @@ describe('createStencilClientSetup', () => {
 
     useStencilClientSetup();
 
-    const loadQrl = useOnDocumentMock.mock.calls[0]?.[1] as
+    const readystatechangeQrl = useOnDocumentMock.mock.calls[0]?.[1] as
       | { resolve: () => Promise<() => Promise<void>> }
       | undefined;
-    const loadHandler = await loadQrl?.resolve();
+    const readystatechangeHandler = await readystatechangeQrl?.resolve();
 
-    await loadHandler?.();
-    await loadHandler?.();
+    await readystatechangeHandler?.();
+    await readystatechangeHandler?.();
 
     expect(defineCustomElementsQrl.resolve).toHaveBeenCalledTimes(1);
     expect(defineCustomElements).toHaveBeenCalledTimes(1);
@@ -119,11 +119,11 @@ describe('createStencilClientSetup', () => {
 
     useStencilClientSetup();
 
-    const loadQrl = useOnDocumentMock.mock.calls[0]?.[1] as
+    const readystatechangeQrl = useOnDocumentMock.mock.calls[0]?.[1] as
       | { resolve: () => Promise<() => Promise<void>> }
       | undefined;
-    const loadHandler = await loadQrl?.resolve();
+    const readystatechangeHandler = await readystatechangeQrl?.resolve();
 
-    await expect(loadHandler?.()).resolves.toBeUndefined();
+    await expect(readystatechangeHandler?.()).resolves.toBeUndefined();
   });
 });
