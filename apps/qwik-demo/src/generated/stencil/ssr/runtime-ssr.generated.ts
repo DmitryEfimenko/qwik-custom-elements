@@ -7,17 +7,15 @@ import {
   type StencilRenderToString,
 } from '@qwik-custom-elements/adapter-stencil/ssr';
 
-const hydrateModuleId = '@qwik-custom-elements/test-stencil-lib/hydrate';
-
 export const renderToString: StencilRenderToString = async (input, options) => {
   const { renderToString: runtimeRenderToString } = await import(
-    // Variable indirection + @vite-ignore: prevents Vite from bundling the Node.js-only hydrate module into the client bundle.
-    /* @vite-ignore */ hydrateModuleId
+    '@qwik-custom-elements/test-stencil-lib/hydrate'
   );
   return runtimeRenderToString(input, options);
 };
 
 export const generatedStencilRenderToStringQrl = $(renderToString);
+
 export const TestStencilLibSSRBridgeComponent = createStencilSSRBridgeComponent(
   generatedStencilRenderToStringQrl,
 );
