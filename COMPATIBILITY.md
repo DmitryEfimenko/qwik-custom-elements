@@ -14,6 +14,7 @@ For breaking changes in the 0.x series, update the table(s) below before merging
 
 | core  | @builder.io/qwik | Node.js | TypeScript |
 | ----- | ---------------- | ------- | ---------- |
+| 1.0.3 | 1.19.2           | 20.x    | 5.9.3      |
 | 1.0.2 | 1.19.2           | 20.x    | 5.9.3      |
 | 1.0.1 | 1.19.2           | 20.x    | 5.9.3      |
 | 1.0.0 | 1.19.2           | 20.x    | 5.9.3      |
@@ -30,6 +31,7 @@ For breaking changes in the 0.x series, update the table(s) below before merging
 
 | adapter-stencil | @builder.io/qwik | @builder.io/qwik-city | @stencil/core | Node.js | TypeScript |
 | --------------- | ---------------- | --------------------- | ------------- | ------- | ---------- |
+| 1.0.3           | 1.19.2           | 1.19.2                | 4.43.3        | 20.x    | 5.9.3      |
 | 1.0.2           | 1.19.2           | 1.19.2                | 4.43.3        | 20.x    | 5.9.3      |
 | 1.0.1           | 1.19.2           | 1.19.2                | 4.43.3        | 20.x    | 5.9.3      |
 | 1.0.0           | 1.19.2           | 1.19.2                | 4.43.3        | 20.x    | 5.9.3      |
