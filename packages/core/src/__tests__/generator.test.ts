@@ -1091,7 +1091,10 @@ describe('generateFromConfig', () => {
         'export const renderToString: StencilRenderToString = async (input, options) => {',
       );
       expect(runtimeWrite!.content).toContain(
-        "await import(\n    '@acme/stencil-lib/hydrate'",
+        'const hydrateRuntimeImport = ["@acme","stencil-lib","hydrate"].join(\'/\');',
+      );
+      expect(runtimeWrite!.content).toContain(
+        'await import(\n    /* @vite-ignore */\n    hydrateRuntimeImport',
       );
       expect(runtimeWrite!.content).toContain(
         'return runtimeRenderToString(input, options);',
