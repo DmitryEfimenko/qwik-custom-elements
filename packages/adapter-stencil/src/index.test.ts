@@ -380,7 +380,11 @@ describe('adapter-stencil metadata contract', () => {
     );
 
     expect(ssrRuntimeWrite).toBeDefined();
-    expect(ssrRuntimeWrite?.content).toContain('@acme/stencil-lib/hydrate');
+    expect(ssrRuntimeWrite?.content).toContain(
+      'const hydrateRuntimeImport = ["@acme","stencil-lib","hydrate"].join(\'/\');',
+    );
+    expect(ssrRuntimeWrite?.content).toContain('/* @vite-ignore */');
+    expect(ssrRuntimeWrite?.content).toContain('hydrateRuntimeImport');
     expect(ssrRuntimeWrite?.content).toContain('GeneratedStencilComponent');
   });
 

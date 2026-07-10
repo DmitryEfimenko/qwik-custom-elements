@@ -7,9 +7,12 @@ import {
   type StencilRenderToString,
 } from '@qwik-custom-elements/adapter-stencil/ssr';
 
+const hydrateRuntimeImport = ["@qwik-custom-elements","test-stencil-lib","hydrate"].join('/');
+
 export const renderToString: StencilRenderToString = async (input, options) => {
   const { renderToString: runtimeRenderToString } = await import(
-    '@qwik-custom-elements/test-stencil-lib/hydrate'
+    /* @vite-ignore */
+    hydrateRuntimeImport
   );
   return runtimeRenderToString(input, options);
 };
